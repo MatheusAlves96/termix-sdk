@@ -14,6 +14,7 @@
 import { Node, SyntaxKind, Type } from "ts-morph";
 import type {
   AuthInfo,
+  Confidence,
   HeaderParamInfo,
   JsonPrimitive,
   PathParamInfo,
@@ -656,6 +657,25 @@ function extractBodyFields(fnNode: Node): { name: string; default?: SchemaNode["
   return [...fields.values()];
 }
 
+/**
+ * E1 (docs/spec-generation-strategy-v2.md): when nothing else signals a field's type, the
+ * type of its own destructuring default (`{ enabled = false }`) is the code itself saying
+ * what the field is — no risk of false positive, just rarely present (9 fields at
+ * release-2.7.1-tag). Only called when `fieldTypeFromValidators` came up empty.
+ */
+function typeFromDefaultLiteral(def: SchemaNode["default"]): JsonPrimitive | "boolean" | undefined {
+  switch (typeof def) {
+    case "boolean":
+      return "boolean";
+    case "number":
+      return "number";
+    case "string":
+      return "string";
+    default:
+      return undefined;
+  }
+}
+
 function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[]): RequestBodyVariant[] {
   const fields = extractBodyFields(fnNode);
   if (fields.length === 0) return [];
@@ -663,10 +683,18 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[])
   const properties: Record<string, SchemaNode> = {};
   const required: string[] = [];
   for (const f of fields) {
-    const { type, required: req, enumValues } = fieldTypeFromValidators(f.name, fnText);
+    let { type, required: req, enumValues } = fieldTypeFromValidators(f.name, fnText);
+    let confidence: Confidence = type === "unknown" ? "unknown" : "inferred";
+    if (type === "unknown" && f.default !== undefined) {
+      const defaultType = typeFromDefaultLiteral(f.default);
+      if (defaultType) {
+        type = defaultType;
+        confidence = "inferred";
+      }
+    }
     properties[f.name] = {
       type,
-      confidence: type === "unknown" ? "unknown" : "inferred",
+      confidence,
       ...(f.default !== undefined ? { default: f.default } : {}),
       ...(enumValues && enumValues.length > 0 ? { enumValues } : {}),
     };
