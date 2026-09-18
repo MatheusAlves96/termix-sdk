@@ -10,6 +10,7 @@ import { extractDrizzleSchema } from "./drizzle.js";
 import { buildAnalysisContext, analyzeRoute } from "./handler-analysis.js";
 import { resolveRepositoryTables } from "./repository-tables.js";
 import { extractTypeInterfaces } from "./type-interfaces.js";
+import { enrichRequestBodiesFromFrontend } from "./body-types.js";
 import type { RouteAnalysis } from "./types.js";
 import { buildOpenApiDocument } from "./openapi.js";
 import { buildReport, lintOpenApi } from "./validate.js";
@@ -112,9 +113,6 @@ async function main(): Promise<void> {
       analyses.push(analysis);
     }
     console.error(`[spec-gen] Phases 2-4: analyzed ${analyses.length} routes (${opaqueCount} opaque handlers)`);
-    const analysesOutPath = join(outDir, "termix-analysis-ir.json");
-    writeFileSync(analysesOutPath, JSON.stringify(analyses, null, 2) + "\n", "utf8");
-    console.error(`[spec-gen] wrote ${analysesOutPath}`);
 
     const testExamples = extractTestExamples(project, clone.repoPath, ir);
     console.error(`[spec-gen] Phase 6: mined ${testExamples.length} example(s) from the test suite`);
@@ -127,6 +125,18 @@ async function main(): Promise<void> {
     const frontendOutPath = join(outDir, "termix-frontend-crosscheck.json");
     writeFileSync(frontendOutPath, JSON.stringify(frontendCrossChecks, null, 2) + "\n", "utf8");
     console.error(`[spec-gen] wrote ${frontendOutPath}`);
+
+    // E4 (docs/spec-generation-strategy-v2.md): mutates `analyses` in place, so it has to run
+    // after Phase 7 produces frontendCrossChecks (which is itself derived from `analyses`) —
+    // written to termix-analysis-ir.json below, once, already enriched.
+    const e4Stats = enrichRequestBodiesFromFrontend(ir, analyses, frontendCrossChecks);
+    console.error(
+      `[spec-gen] E4: ${e4Stats.wholeBodyRoutes} route(s) got a whole frontend-typed body, ` +
+        `${e4Stats.mergedFields} previously-unknown field(s) filled from the frontend`,
+    );
+    const analysesOutPath = join(outDir, "termix-analysis-ir.json");
+    writeFileSync(analysesOutPath, JSON.stringify(analyses, null, 2) + "\n", "utf8");
+    console.error(`[spec-gen] wrote ${analysesOutPath}`);
 
     const jsdocText = extractJsdocText(project);
     console.error(`[spec-gen] Phase 8: reused text from ${jsdocText.size} existing @openapi block(s)`);
