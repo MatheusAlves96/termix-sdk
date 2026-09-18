@@ -13,7 +13,7 @@ requires-python = ">=3.10"
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/MatheusAlves96/termix-sdk-python"
+Homepage = "https://github.com/MatheusAlves96/termix-sdk"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/termix_sdk"]
