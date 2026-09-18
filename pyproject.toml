@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "termix-sdk"
+version = "0.1.0"
+description = "Python client SDK for the Termix REST API"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Matheus Alves", email = "matheusalves965@gmail.com" }]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/MatheusAlves96/termix-sdk-python"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/termix_sdk"]
