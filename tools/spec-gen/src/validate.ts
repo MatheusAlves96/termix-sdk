@@ -22,6 +22,7 @@ import type {
   SchemaNode,
   TestExample,
 } from "./types.js";
+import { checkGoldenRoutes, snapshotGoldenRoutes, type GoldenSnapshot } from "./golden.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -67,6 +68,54 @@ function emptyConfidenceCounts(): Record<Confidence, number> {
   return { test: 0, "repository-type": 0, "handler-literal": 0, "frontend-type": 0, "matched-type": 0, inferred: 0, unknown: 0 };
 }
 
+/**
+ * The canonical "how much of the request body is really typed" metric (docs/
+ * spec-generation-strategy-v2.md, Passo 0). Counts top-level fields of the
+ * `application/json` variant only — nested fields and the multipart variant (which
+ * duplicates the JSON variant's own fields) are deliberately excluded so this number
+ * means the same thing on every run and matches what a consumer of the JSON body sees.
+ */
+export interface RequestBodyCompleteness {
+  /** POST/PUT/PATCH route registrations (excluding x-any-method-routes). */
+  totalBodyRoutes: number;
+  /** Has an `application/json` variant with >=1 field and none of them `unknown`. */
+  fullyTyped: number;
+  /** No field was found at all (`requestBody: []`) — includes routes with a real empty body. */
+  noFieldsFound: number;
+  /** Has a body, but no `application/json` variant (e.g. busboy-streamed uploads). */
+  nonJsonOnly: number;
+  /** Sum of `application/json` variant top-level fields with `x-confidence: unknown`. */
+  unknownFieldsTopLevel: number;
+}
+
+export function computeRequestBodyCompleteness(routesIr: RoutesIR, analyses: RouteAnalysis[]): RequestBodyCompleteness {
+  const analysisById = new Map(analyses.map((a) => [a.routeId, a]));
+  const out: RequestBodyCompleteness = { totalBodyRoutes: 0, fullyTyped: 0, noFieldsFound: 0, nonJsonOnly: 0, unknownFieldsTopLevel: 0 };
+  for (const r of routesIr.routes) {
+    if (r.anyMethod || !["POST", "PUT", "PATCH"].includes(r.method)) continue;
+    out.totalBodyRoutes++;
+    const analysis = analysisById.get(r.id);
+    if (!analysis || analysis.requestBody.length === 0) {
+      out.noFieldsFound++;
+      continue;
+    }
+    const jsonVariant = analysis.requestBody.find((v) => v.contentType === "application/json");
+    if (!jsonVariant) {
+      out.nonJsonOnly++;
+      continue;
+    }
+    const names = Object.keys(jsonVariant.schema.properties ?? {});
+    if (names.length === 0) {
+      out.noFieldsFound++;
+      continue;
+    }
+    const unknownNames = names.filter((n) => jsonVariant.schema.properties![n].confidence === "unknown");
+    out.unknownFieldsTopLevel += unknownNames.length;
+    if (unknownNames.length === 0) out.fullyTyped++;
+  }
+  return out;
+}
+
 export function buildReport(
   routesIr: RoutesIR,
   drizzleIr: DrizzleIR,
@@ -75,6 +124,7 @@ export function buildReport(
   frontendCrossChecks: FrontendCrossCheck[] = [],
   jsdocBlockCount = 0,
   officialDiff?: OfficialSpecDiff,
+  goldenBaseline?: GoldenSnapshot,
 ): string {
   const lines: string[] = [];
   const push = (s: string) => lines.push(s);
@@ -145,7 +195,18 @@ export function buildReport(
   push(`- Routes whose every response is \`x-confidence: unknown\`: **${unknownHeavyRoutes.length}**`);
   push("");
 
-  push("### Request body field confidence");
+  const completeness = computeRequestBodyCompleteness(routesIr, analyses);
+  push("### Request body completeness (docs/spec-generation-strategy-v2.md)");
+  push("");
+  push(
+    `- POST/PUT/PATCH routes: **${completeness.totalBodyRoutes}**, of which **${completeness.fullyTyped}** (${((100 * completeness.fullyTyped) / completeness.totalBodyRoutes).toFixed(0)}%) have an \`application/json\` body with every top-level field typed`,
+  );
+  push(`- Routes where no body field was found at all: **${completeness.noFieldsFound}**`);
+  if (completeness.nonJsonOnly > 0) push(`- Routes with a body but no \`application/json\` variant (e.g. streamed uploads): **${completeness.nonJsonOnly}**`);
+  push(`- Top-level \`application/json\` fields still \`unknown\`: **${completeness.unknownFieldsTopLevel}**`);
+  push("");
+
+  push("### Request body field confidence (all nodes, all content types — includes nested fields)");
   push("");
   push("| Confidence | Count |");
   push("|---|---|");
@@ -216,6 +277,29 @@ export function buildReport(
   push("## Existing @openapi text reuse (Phase 8)");
   push("");
   push(`- \`@openapi\` JSDoc blocks parsed: **${jsdocBlockCount}**. Their \`summary\`/\`description\`/\`tags\`/parameter descriptions are reused verbatim when present; \`requestBody\`/\`responses\` from them are never used as a schema source.`);
+  push("");
+
+  push("## Golden route regression check (docs/spec-generation-strategy-v2.md, Passo 0)");
+  push("");
+  if (!goldenBaseline) {
+    push("Baseline not loaded — see `tools/spec-gen/config/golden-baseline.json`.");
+  } else {
+    const currentSnapshot = snapshotGoldenRoutes(routesIr, analyses);
+    const violations = checkGoldenRoutes(goldenBaseline, currentSnapshot);
+    if (violations.length === 0) {
+      push(
+        "No regressions: every field that already had a concrete type from an explicit validator (or other pre-plan signal) still has that exact type.",
+      );
+    } else {
+      push(`**${violations.length} regression(s) found** — a field that had a concrete type before now has a different one or reverted to \`unknown\`:`);
+      push("");
+      for (const v of violations) {
+        push(
+          `- \`${v.route}\`.\`${v.field}\`: was \`${v.baselineType}\` (${v.baselineConfidence}), now \`${v.currentType ?? "unknown"}\` (${v.currentConfidence ?? "unknown"})`,
+        );
+      }
+    }
+  }
   push("");
 
   push("## Diff against the official spec (Phase 10, criterion 4)");

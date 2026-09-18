@@ -15,6 +15,7 @@ import { extractTestExamples } from "./tests-examples.js";
 import { extractFrontendCrossChecks } from "./frontend-client.js";
 import { extractJsdocText } from "./jsdoc-text.js";
 import { diffAgainstOfficial, generateOfficialSpec } from "./official-diff.js";
+import type { GoldenSnapshot } from "./golden.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -145,8 +146,12 @@ async function main(): Promise<void> {
     console.error(`[spec-gen] Phase 9: wrote ${openapiPath} (${Object.keys(openapi.paths).length} paths)`);
 
     const lintSummary = lintOpenApi(openapiPath);
+    const goldenBaselinePath = join(__dirname, "..", "config", "golden-baseline.json");
+    const goldenBaseline: GoldenSnapshot | undefined = existsSync(goldenBaselinePath)
+      ? JSON.parse(readFileSync(goldenBaselinePath, "utf8"))
+      : undefined;
     const report =
-      buildReport(ir, drizzleIr, analyses, testExamples, frontendCrossChecks, jsdocText.size, officialDiff) +
+      buildReport(ir, drizzleIr, analyses, testExamples, frontendCrossChecks, jsdocText.size, officialDiff, goldenBaseline) +
       "\n" +
       lintSummary;
     const reportPath = join(outDir, "report.md");
