@@ -35,6 +35,16 @@ export function loadFrontendProject(repoPath: string): Project {
       allowJs: false,
       strict: false,
       noImplicitAny: false,
+      // Mirrors tsconfig.app.json's alias for "@/..." imports (vite.config.ts resolve.alias
+      // agrees: "@/types" -> src/types, "@" -> src/ui). Without this, every cross-file
+      // `import { hostApi } from "@/main-axios"` in src/ui/api/*.ts fails to resolve, and
+      // symbol resolution back to main-axios.ts's instance declarations silently breaks.
+      baseUrl: repoPath.replace(/\\/g, "/"),
+      paths: {
+        "@/types": ["src/types/index.ts"],
+        "@/types/*": ["src/types/*"],
+        "@/*": ["src/ui/*"],
+      },
     },
     skipAddingFilesFromTsConfig: true,
   });

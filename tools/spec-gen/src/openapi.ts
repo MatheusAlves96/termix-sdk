@@ -6,12 +6,14 @@
 import type {
   ColumnSchema,
   DrizzleIR,
+  FrontendCrossCheck,
   RouteAnalysis,
   RouteRecord,
   RoutesIR,
   SchemaNode,
   ServiceInfo,
   TableSchema,
+  TestExample,
 } from "./types.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -127,13 +129,38 @@ const STATUS_DESCRIPTIONS: Record<number, string> = {
   503: "Service unavailable",
 };
 
+/** Turns an it() title into a short camelCase-ish key safe for an OpenAPI `examples` map. */
+function exampleKey(title: string, index: number): string {
+  const slug = title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 60);
+  return slug ? `test-${slug}` : `test-${index}`;
+}
+
 export function buildOpenApiDocument(
   routesIr: RoutesIR,
   drizzleIr: DrizzleIR,
   analyses: RouteAnalysis[],
+  testExamples: TestExample[] = [],
+  frontendCrossChecks: FrontendCrossCheck[] = [],
 ): JsonSchema {
   const analysisById = new Map(analyses.map((a) => [a.routeId, a]));
   const serviceByKey = new Map<string, ServiceInfo>(routesIr.services.map((s) => [s.key, s]));
+  const examplesByRoute = new Map<string, TestExample[]>();
+  for (const ex of testExamples) {
+    const list = examplesByRoute.get(ex.routeId) ?? [];
+    list.push(ex);
+    examplesByRoute.set(ex.routeId, list);
+  }
+  const frontendByRoute = new Map<string, FrontendCrossCheck[]>();
+  for (const fc of frontendCrossChecks) {
+    const list = frontendByRoute.get(fc.routeId) ?? [];
+    list.push(fc);
+    frontendByRoute.set(fc.routeId, list);
+  }
 
   const schemas: Record<string, JsonSchema> = {};
   for (const table of drizzleIr.tables) schemas[table.schemaName] = tableToJsonSchema(table);
@@ -175,11 +202,43 @@ export function buildOpenApiDocument(
       parameters.push({ name: h.name, in: "header", required: false, schema: { type: "string" }, ...(h.note ? { description: h.note } : {}) });
     }
 
+    const routeExamples = examplesByRoute.get(route.id) ?? [];
+    const requestExamples = routeExamples.filter((e) => e.request);
+    const jsonContentType = analysis?.requestBody.find((v) => v.contentType === "application/json")?.contentType;
+    const routeFrontendCalls = frontendByRoute.get(route.id) ?? [];
+    const frontendReturnType = routeFrontendCalls.find((fc) => fc.call.returnType && fc.call.returnType.type !== "unknown")?.call
+      .returnType;
+    const frontendBodyType = routeFrontendCalls.find(
+      (fc) => fc.call.bodyType?.type === "object" && Object.keys(fc.call.bodyType.properties ?? {}).length > 0,
+    )?.call.bodyType;
+
     const requestBody =
       analysis && analysis.requestBody.length > 0
         ? {
             content: Object.fromEntries(
-              analysis.requestBody.map((v) => [v.contentType, { schema: schemaNodeToJsonSchema(v.schema) }]),
+              analysis.requestBody.map((v) => {
+                // The backend sometimes spreads `...req.body` wholesale (e.g. preference
+                // endpoints) instead of destructuring named fields, leaving nothing for
+                // Phase 3 to find. When that happens and the frontend's own request type has
+                // real fields, use those — same fallback idea as the response side below.
+                const backendHasFields = Object.keys(v.schema.properties ?? {}).length > 0;
+                const effectiveBodySchema =
+                  v.contentType === "application/json" && !backendHasFields && frontendBodyType ? frontendBodyType : v.schema;
+                const entry: JsonSchema = { schema: schemaNodeToJsonSchema(effectiveBodySchema) };
+                if (v.contentType === jsonContentType && requestExamples.length > 0) {
+                  entry.examples = Object.fromEntries(
+                    requestExamples.map((e, i) => [
+                      exampleKey(e.itTitle, i),
+                      {
+                        summary: e.itTitle,
+                        description: `From \`${e.testFile}\` (${e.describeTitle})`,
+                        value: e.request?.body ?? e.request,
+                      },
+                    ]),
+                  );
+                }
+                return [v.contentType, entry];
+              }),
             ),
           }
         : undefined;
@@ -192,8 +251,32 @@ export function buildOpenApiDocument(
               const body: JsonSchema = {
                 description: r.description ?? STATUS_DESCRIPTIONS[r.status as number] ?? "Response",
               };
-              if (r.contentType && r.schema) {
-                body.content = { [r.contentType]: { schema: schemaNodeToJsonSchema(r.schema) } };
+              const statusExamples = routeExamples.filter(
+                (e) => e.response?.body !== undefined && String(e.response.status ?? "") === key,
+              );
+              // Phase 7: when the static handler analysis came up empty for a 2xx response,
+              // the frontend's own declared return type (e.g. `Promise<SSHHost>`) is a real,
+              // human-written fact about the same endpoint — better than nothing.
+              const isSuccess = typeof r.status === "number" && r.status >= 200 && r.status < 300;
+              const effectiveSchema =
+                isSuccess && (!r.schema || r.schema.confidence === "unknown") && frontendReturnType
+                  ? frontendReturnType
+                  : r.schema;
+              if (r.contentType && effectiveSchema) {
+                const content: JsonSchema = { schema: schemaNodeToJsonSchema(effectiveSchema) };
+                if (statusExamples.length > 0) {
+                  content.examples = Object.fromEntries(
+                    statusExamples.map((e, i) => [
+                      exampleKey(e.itTitle, i),
+                      {
+                        summary: e.itTitle,
+                        description: `From \`${e.testFile}\` (${e.describeTitle})${e.response?.partial ? " — partial match (toMatchObject), other fields may also be present" : ""}`,
+                        value: e.response?.body,
+                      },
+                    ]),
+                  );
+                }
+                body.content = { [r.contentType]: content };
               }
               if (r.headers && r.headers.length > 0) {
                 body.headers = Object.fromEntries(r.headers.map((h) => [h, { schema: { type: "string" } }]));
@@ -202,6 +285,27 @@ export function buildOpenApiDocument(
             }),
           )
         : { default: { description: "Response not analyzed" } };
+
+    // A test can confirm a status the static handler analysis never produced — e.g. it comes
+    // from a middleware, or a code path the AST walk didn't reach. The test is right; add it.
+    for (const e of routeExamples) {
+      if (e.response?.status === undefined) continue;
+      const key = String(e.response.status);
+      if (responses[key]) continue;
+      responses[key] = {
+        description: `${STATUS_DESCRIPTIONS[e.response.status] ?? "Response"} — only confirmed by \`${e.testFile}\`, not by static analysis`,
+        ...(e.response.body !== undefined
+          ? {
+              content: {
+                "application/json": {
+                  schema: { type: "object", "x-confidence": "test" },
+                  examples: { [exampleKey(e.itTitle, 0)]: { summary: e.itTitle, value: e.response.body } },
+                },
+              },
+            }
+          : {}),
+      };
+    }
 
     const security = analysis?.auth.required
       ? [{ bearerAuth: [] }, { apiKeyBearer: [] }, { cookieAuth: [] }]
@@ -221,6 +325,16 @@ export function buildOpenApiDocument(
       ...(analysis?.auth.requiresDataAccess ? { "x-requires-data-access": true } : {}),
       ...(route.sharedHandlerWith.length > 0 ? { "x-shared-handler-with": route.sharedHandlerWith } : {}),
       ...(analysis?.opaque ? { "x-confidence": "unknown", "x-note": "handler could not be statically resolved" } : {}),
+      ...(routeFrontendCalls.length > 0
+        ? {
+            "x-frontend-calls": routeFrontendCalls.map((fc) => ({
+              function: fc.call.functionName,
+              file: fc.call.file,
+              line: fc.call.line,
+              ...(fc.warnings.length > 0 ? { warnings: fc.warnings } : {}),
+            })),
+          }
+        : {}),
     };
   }
 

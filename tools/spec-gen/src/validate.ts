@@ -11,7 +11,16 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Confidence, DrizzleIR, RouteAnalysis, RoutesIR, SchemaNode } from "./types.js";
+import type {
+  Confidence,
+  DrizzleIR,
+  FrontendCrossCheck,
+  RouteAnalysis,
+  RouteRecord,
+  RoutesIR,
+  SchemaNode,
+  TestExample,
+} from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -57,7 +66,13 @@ function emptyConfidenceCounts(): Record<Confidence, number> {
   return { test: 0, "repository-type": 0, "handler-literal": 0, "frontend-type": 0, "matched-type": 0, inferred: 0, unknown: 0 };
 }
 
-export function buildReport(routesIr: RoutesIR, drizzleIr: DrizzleIR, analyses: RouteAnalysis[]): string {
+export function buildReport(
+  routesIr: RoutesIR,
+  drizzleIr: DrizzleIR,
+  analyses: RouteAnalysis[],
+  testExamples: TestExample[] = [],
+  frontendCrossChecks: FrontendCrossCheck[] = [],
+): string {
   const lines: string[] = [];
   const push = (s: string) => lines.push(s);
 
@@ -155,10 +170,49 @@ export function buildReport(routesIr: RoutesIR, drizzleIr: DrizzleIR, analyses: 
     push("");
   }
 
+  push("## Test suite examples (Phase 6)");
+  push("");
+  const routeById = new Map<string, RouteRecord>(routesIr.routes.map((r) => [r.id, r]));
+  const routesWithExamples = new Set(testExamples.map((e) => e.routeId));
+  const filesContributing = new Set(testExamples.map((e) => e.testFile));
+  push(`- Examples mined: **${testExamples.length}**, covering **${routesWithExamples.size}** route(s) from **${filesContributing.size}** test file(s).`);
+  const confirmedNewStatus = testExamples.filter((e) => {
+    if (e.response?.status === undefined) return false;
+    const a = analysisById.get(e.routeId);
+    return !!a && !a.responses.some((r) => r.status === e.response!.status);
+  });
+  if (confirmedNewStatus.length > 0) {
+    push(`- Statuses a test proved but static analysis missed: **${confirmedNewStatus.length}** (added to the OpenAPI output with \`x-confidence: test\`)`);
+    for (const e of confirmedNewStatus.slice(0, 20)) {
+      const r = routeById.get(e.routeId);
+      push(`  - ${r ? `${r.method} ${r.path}` : e.routeId} → ${e.response!.status}, from \`${e.testFile}\` ("${e.itTitle}")`);
+    }
+  }
+  push("");
+
+  push("## Frontend client cross-check (Phase 7)");
+  push("");
+  const frontendRoutesCovered = new Set(frontendCrossChecks.map((c) => c.routeId));
+  push(`- Frontend calls matched to a route: **${frontendCrossChecks.length}**, covering **${frontendRoutesCovered.size}** route(s).`);
+  const gapsFilledByFrontend = frontendCrossChecks.filter((c) =>
+    c.warnings.some((w) => w.includes("frontend return type is available as a fallback")),
+  );
+  if (gapsFilledByFrontend.length > 0) {
+    push(`- Responses where the frontend's return type filled a gap the backend analysis left \`unknown\`: **${gapsFilledByFrontend.length}**`);
+  }
+  const fieldWarnings = frontendCrossChecks.filter((c) => c.warnings.some((w) => w.includes("not seen in the backend")));
+  if (fieldWarnings.length > 0) {
+    push(`- Frontend/backend request-body field mismatches worth a look: **${fieldWarnings.length}**`);
+    for (const c of fieldWarnings.slice(0, 20)) {
+      const w = c.warnings.find((x) => x.includes("not seen in the backend"));
+      push(`  - ${c.call.method} ${c.call.path} (\`${c.call.file}:${c.call.line}\`, ${c.call.functionName}) — ${w}`);
+    }
+  }
+  push("");
+
   push("## Not yet implemented");
   push("");
   push("- Diff against the official Termix openapi.json (design doc Phase 10, criterion 4).");
-  push("- Phase 6 (cross-check against `tests/database/routes/*.test.ts` examples) and Phase 7 (cross-check against the frontend axios client) are not wired into this CLI run yet; `RouteAnalysis` and the routes IR carry enough (file/line, route ids) for both to be added without reworking earlier phases.");
   push("");
 
   return lines.join("\n");

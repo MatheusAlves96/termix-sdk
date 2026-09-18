@@ -10,7 +10,38 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "providerType": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "label": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "baseUrl": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "apiKey": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "defaultModel": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 201,
@@ -268,7 +299,34 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "providerType": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "baseUrl": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "apiKey": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "providerId": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -727,7 +785,38 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "conversationId": {
+              "type": "integer",
+              "confidence": "inferred"
+            },
+            "providerId": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "model": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "message": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "activeTab": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -5035,12 +5124,34 @@
         "schema": {
           "type": "object",
           "properties": {
+            "name": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "description": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "enabled": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "definition": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "concurrencyPolicy": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
             "channels": {
               "type": "unknown",
               "confidence": "unknown"
             }
           },
-          "required": [],
+          "required": [
+            "name"
+          ],
           "confidence": "inferred"
         }
       }
@@ -7882,7 +7993,44 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "username": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "password": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "key": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "keyPassword": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "certPublicKey": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 201,
@@ -8810,7 +8958,24 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "remotePath": {
+              "type": "string",
+              "confidence": "inferred"
+            }
+          },
+          "required": [
+            "remotePath"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -9126,7 +9291,26 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "package": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -9244,7 +9428,44 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "description": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "color": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "icon": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "tagRules": {
+              "type": "array",
+              "confidence": "inferred"
+            }
+          },
+          "required": [
+            "name",
+            "description",
+            "color",
+            "icon",
+            "tagRules"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -9318,7 +9539,41 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "description": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "color": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "icon": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "tagRules": {
+              "type": "array",
+              "confidence": "inferred"
+            }
+          },
+          "required": [
+            "name",
+            "tagRules"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -10093,7 +10348,28 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "inputValues": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [
+            "command"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -23882,6 +24158,10 @@
         "schema": {
           "type": "object",
           "properties": {
+            "folder": {
+              "type": "string",
+              "confidence": "inferred"
+            },
             "durationHours": {
               "type": "unknown",
               "confidence": "unknown"
@@ -23893,6 +24173,7 @@
             }
           },
           "required": [
+            "folder",
             "permissionLevel"
           ],
           "confidence": "inferred"
@@ -24375,7 +24656,26 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "permissionLevel": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "durationHours": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -40660,7 +40960,38 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "color": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "icon": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "payload": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [
+            "name",
+            "color",
+            "icon"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -40766,7 +41097,22 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "payload": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -40832,7 +41178,32 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "color": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "icon": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -40916,7 +41287,22 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "payload": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -41000,7 +41386,24 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "confidence": "inferred"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -60074,7 +60477,64 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "hostId": {
+              "type": "integer",
+              "confidence": "inferred"
+            },
+            "sessionId": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "tabInstanceId": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "protocol": {
+              "type": "string",
+              "confidence": "inferred",
+              "enumValues": [
+                "ssh",
+                "rdp",
+                "vnc",
+                "telnet"
+              ]
+            },
+            "shareType": {
+              "type": "string",
+              "confidence": "inferred",
+              "enumValues": [
+                "link",
+                "user"
+              ]
+            },
+            "targetUserId": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "permissionLevel": {
+              "type": "string",
+              "confidence": "inferred",
+              "enumValues": [
+                "read-only",
+                "read-write"
+              ]
+            },
+            "expiryHours": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,

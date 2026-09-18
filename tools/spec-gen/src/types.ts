@@ -190,3 +190,50 @@ export interface RouteAnalysis {
   opaque: boolean;
 }
 
+// ---- Phase 6: examples mined from the route test suite ----
+
+export interface TestExample {
+  routeId: string;
+  testFile: string;
+  /** "METHOD /express/path", from the enclosing describe() block's title */
+  describeTitle: string;
+  itTitle: string;
+  request?: {
+    body?: unknown;
+    params?: unknown;
+    query?: unknown;
+    headers?: unknown;
+  };
+  response?: {
+    status?: number;
+    body?: unknown;
+    /** true when the assertion was `toMatchObject` (a partial match), not `toEqual` */
+    partial?: boolean;
+  };
+}
+
+// ---- Phase 7: cross-check against the frontend HTTP client ----
+
+export interface FrontendCallInfo {
+  /** Exported function name in main-axios.ts / ui/api/*.ts */
+  functionName: string;
+  file: string;
+  line: number;
+  method: HttpMethod;
+  /** Path with `{param}` placeholders, normalized from template literals */
+  path: string;
+  /** Best-effort resolved service key (matched by axios instance -> baseURL -> port) */
+  service: string | null;
+  bodyType: SchemaNode | null;
+  returnType: SchemaNode | null;
+  /** Multipart/blob/other transport hints picked up from the axios call's config object */
+  transportNotes: string[];
+}
+
+export interface FrontendCrossCheck {
+  routeId: string;
+  call: FrontendCallInfo;
+  /** Warnings when the frontend's types disagree with what Phases 3/4 inferred */
+  warnings: string[];
+}
+

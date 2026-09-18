@@ -4,13 +4,15 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { cleanupClone, obtainTermixSource } from "./clone.js";
-import { loadBackendProject } from "./project.js";
+import { loadBackendProject, loadFrontendProject } from "./project.js";
 import { discoverRoutes } from "./routes.js";
 import { extractDrizzleSchema } from "./drizzle.js";
 import { buildAnalysisContext, analyzeRoute } from "./handler-analysis.js";
 import type { RouteAnalysis } from "./types.js";
 import { buildOpenApiDocument } from "./openapi.js";
 import { buildReport, lintOpenApi } from "./validate.js";
+import { extractTestExamples } from "./tests-examples.js";
+import { extractFrontendCrossChecks } from "./frontend-client.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -101,13 +103,26 @@ async function main(): Promise<void> {
     writeFileSync(analysesOutPath, JSON.stringify(analyses, null, 2) + "\n", "utf8");
     console.error(`[spec-gen] wrote ${analysesOutPath}`);
 
-    const openapi = buildOpenApiDocument(ir, drizzleIr, analyses);
+    const testExamples = extractTestExamples(project, clone.repoPath, ir);
+    console.error(`[spec-gen] Phase 6: mined ${testExamples.length} example(s) from the test suite`);
+    const testExamplesOutPath = join(outDir, "termix-test-examples.json");
+    writeFileSync(testExamplesOutPath, JSON.stringify(testExamples, null, 2) + "\n", "utf8");
+    console.error(`[spec-gen] wrote ${testExamplesOutPath}`);
+
+    const frontendProject = loadFrontendProject(clone.repoPath);
+    const frontendCrossChecks = extractFrontendCrossChecks(frontendProject, clone.repoPath, ir, analyses);
+    console.error(`[spec-gen] Phase 7: cross-checked ${frontendCrossChecks.length} frontend call(s) against routes`);
+    const frontendOutPath = join(outDir, "termix-frontend-crosscheck.json");
+    writeFileSync(frontendOutPath, JSON.stringify(frontendCrossChecks, null, 2) + "\n", "utf8");
+    console.error(`[spec-gen] wrote ${frontendOutPath}`);
+
+    const openapi = buildOpenApiDocument(ir, drizzleIr, analyses, testExamples, frontendCrossChecks);
     const openapiPath = join(outDir, "termix-openapi.json");
     writeFileSync(openapiPath, JSON.stringify(openapi, null, 2) + "\n", "utf8");
     console.error(`[spec-gen] Phase 9: wrote ${openapiPath} (${Object.keys(openapi.paths).length} paths)`);
 
     const lintSummary = lintOpenApi(openapiPath);
-    const report = buildReport(ir, drizzleIr, analyses) + "\n" + lintSummary;
+    const report = buildReport(ir, drizzleIr, analyses, testExamples, frontendCrossChecks) + "\n" + lintSummary;
     const reportPath = join(outDir, "report.md");
     writeFileSync(reportPath, report, "utf8");
     console.error(`[spec-gen] Phase 10: wrote ${reportPath}`);

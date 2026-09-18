@@ -1,6 +1,6 @@
 # termix-sdk spec-gen report
 
-Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac126ffe6a98`) on 2026-09-18T18:44:41.515Z.
+Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac126ffe6a98`) on 2026-09-18T20:30:22.164Z.
 
 ## Route counts
 
@@ -34,8 +34,8 @@ Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac12
 
 | Confidence | Count |
 |---|---|
-| inferred | 331 |
-| unknown | 930 |
+| inferred | 369 |
+| unknown | 969 |
 
 ### Response field confidence
 
@@ -50,15 +50,27 @@ Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac12
 
 - POST /database/export — `src/backend/database/database.ts:669`
 
+## Test suite examples (Phase 6)
+
+- Examples mined: **90**, covering **29** route(s) from **7** test file(s).
+
+## Frontend client cross-check (Phase 7)
+
+- Frontend calls matched to a route: **377**, covering **351** route(s).
+- Responses where the frontend's return type filled a gap the backend analysis left `unknown`: **6**
+- Frontend/backend request-body field mismatches worth a look: **3**
+  - PUT /host-sidebar/preferences (`src/ui/api/host-sidebar-preferences-api.ts:24`, saveHostSidebarPreferences) — frontend body type has 3 field(s) not seen in the backend's own destructuring: version, groupKey, openFolders
+  - PUT /user-preferences (`src/ui/api/open-tabs-api.ts:156`, saveUserPreferences) — frontend body type has 5 field(s) not seen in the backend's own destructuring: showHostTags, hostTrayOnClick, foldersCollapsed, compactHostView, statusColorScheme
+  - POST /ssh/tunnel/connect (`src/ui/api/tunnel-api.ts:171`, connectTunnel) — frontend body type has 28 field(s) not seen in the backend's own destructuring: scope, mode, tunnelType, bindHost, targetHost, hostName, sourceIP, sourceSSHPort
+
 ## Not yet implemented
 
 - Diff against the official Termix openapi.json (design doc Phase 10, criterion 4).
-- Phase 6 (cross-check against `tests/database/routes/*.test.ts` examples) and Phase 7 (cross-check against the frontend axios client) are not wired into this CLI run yet; `RouteAnalysis` and the routes IR carry enough (file/line, route ids) for both to be added without reworking earlier phases.
 
 ## OpenAPI lint (@redocly/cli)
 
 - Errors: **0**
-- Warnings: **680**
+- Warnings: **720**
 - Ignored: **0**
 
 Spec is structurally valid OpenAPI 3.1.

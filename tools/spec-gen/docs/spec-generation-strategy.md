@@ -333,6 +333,8 @@ termix-sdk/
 │   │   ├── drizzle.ts             # Phase 5
 │   │   ├── transformers.ts        # known-transformer schema builders (Phase 4, item 3)
 │   │   ├── handler-analysis.ts    # Phases 2-4, combined
+│   │   ├── tests-examples.ts      # Phase 6
+│   │   ├── frontend-client.ts     # Phase 7
 │   │   ├── openapi.ts             # Phase 9
 │   │   ├── validate.ts            # Phase 10 (report + @redocly/cli lint)
 │   │   └── types.ts               # shared IR types
@@ -340,11 +342,13 @@ termix-sdk/
 │       ├── transformers.json  # known-transformer names (Phase 4)
 │       └── services.json      # per-file port/name overrides, if needed
 ├── spec/
-│   ├── termix-routes-ir.json      # committed — Phase 1
-│   ├── termix-drizzle-ir.json     # committed — Phase 5
-│   ├── termix-analysis-ir.json    # committed — Phases 2-4
-│   ├── termix-openapi.json        # committed — Phase 9
-│   └── report.md                  # committed — Phase 10
+│   ├── termix-routes-ir.json           # committed — Phase 1
+│   ├── termix-drizzle-ir.json          # committed — Phase 5
+│   ├── termix-analysis-ir.json         # committed — Phases 2-4
+│   ├── termix-test-examples.json       # committed — Phase 6
+│   ├── termix-frontend-crosscheck.json # committed — Phase 7
+│   ├── termix-openapi.json             # committed — Phase 9
+│   └── report.md                       # committed — Phase 10
 ```
 
 Single command: `npm --prefix tools/spec-gen run generate -- --tag latest` (or `--tag release-2.7.1-tag`). Add `--repo <path>` to reuse an existing checkout instead of cloning (development only), and `--keep` to keep a freshly-cloned temp checkout around after the run instead of deleting it.
@@ -369,20 +373,22 @@ Single command: `npm --prefix tools/spec-gen run generate -- --tag latest` (or `
 - [x] Body per content type (JSON, multipart with `data` + file, octet-stream), with required flags derived from manual validation. Cross-checking against `src/types` enums (Phase 3, item 6) is not implemented yet.
 - [x] Every response per status code, with a schema derived from the repository type, the literal, or the transformer; downloads documented. SSE is detected but individual events are not expanded.
 - [x] `components.schemas` generated from the 72 Drizzle tables. Sanitized versions are covered for `Host` (via `transformHostResponse`/`stripSensitiveFields`); other transformers are left `x-confidence: inferred`, not expanded.
-- [ ] Examples from route tests (Phase 6); cross-confirmation with the frontend client (Phase 7).
+- [x] Examples from route tests (Phase 6, 90 examples); cross-confirmation with the frontend client (Phase 7, 377 matched calls covering 351 routes).
 - [x] `x-confidence` on every schema, gap report (`spec/report.md`). Diff against the official spec is not implemented yet.
 - [x] Spec valid under lint (`@redocly/cli`, 0 errors on the first full run), versioned in `spec/` with source tag and commit.
 
 ## Implementation status
 
-The generator is written and committed under `tools/spec-gen/` (Node + TypeScript + ts-morph, run with `npm --prefix tools/spec-gen run generate -- --tag <tag>`). Run from scratch (shallow clone + `npm ci --ignore-scripts` + the full pipeline) against `release-2.7.1-tag`: about 50 seconds end to end, `unresolved: 0`, 0 opaque handlers, 0 lint errors. Output in `spec/`: `termix-routes-ir.json` (Phase 1), `termix-drizzle-ir.json` (Phase 5), `termix-analysis-ir.json` (Phases 2-4), `termix-openapi.json` (Phase 9), `report.md` (Phase 10).
+The generator is written and committed under `tools/spec-gen/` (Node + TypeScript + ts-morph, run with `npm --prefix tools/spec-gen run generate -- --tag <tag>`). Run from scratch (shallow clone + `npm ci --ignore-scripts` + the full pipeline) against `release-2.7.1-tag`: about 50 seconds end to end, `unresolved: 0`, 0 opaque handlers, 0 lint errors. Output in `spec/`: `termix-routes-ir.json` (Phase 1), `termix-drizzle-ir.json` (Phase 5), `termix-analysis-ir.json` (Phases 2-4), `termix-test-examples.json` (Phase 6), `termix-frontend-crosscheck.json` (Phase 7), `termix-openapi.json` (Phase 9), `report.md` (Phase 10).
 
 Implemented and tested against the real tag:
 - **Phase 0** (`clone.ts`): resolves the latest release via the GitHub API, shallow-clones it, runs `npm ci --ignore-scripts`. Also accepts `--repo <path>` to reuse an existing checkout during development.
 - **Phase 1** (`routes.ts`): an origin-resolution graph (`express()`/`Router()`) built through TypeScript's own symbol resolution, following function parameters across files — including 2-level chains like `registerManagerRoutes` → `registerCronRoutes` — via `findReferencesAsNodes()`. This correctly disambiguates the confirmed name collision between the two different `registerTailscaleRoutes` functions in different files, because resolution follows the real imported binding at each call site, never the identifier's text.
 - **Phase 5** (`drizzle.ts`): all 72 tables, with a tie-break heuristic (shortest name) for tables that have multiple `*Record` aliases across different repositories (e.g. `hosts` has 5 aliases — `HostRecord`, `FleetMemberHostRecord`, etc. — and the heuristic correctly picks `HostRecord`).
 - **Phases 2-4** (`handler-analysis.ts`, combined into one module): auth (including a cross-file line-number comparison bug, found once real data was run through it, for routes registered via `registerXRoutes` outside the service's root file — now fixed), path/query/header parameters, request bodies (including the `let body; if (multipart) {...} else { body = req.body; }` idiom used by `POST /host/db/host`, only caught after extending alias detection past plain `const` initializers to plain assignment expressions), and responses (including `oneOf` for `/users/login`'s two 200 shapes, merging conditional/`||` branches instead of falling back to a generic union type, and a dedicated case for the `managerHandler()` wrapper that wraps 30 routes in `hosts/metrics/managers/*.ts` without ever exposing `res` to the per-route callback).
-- **Phase 9** (`openapi.ts`): emits a full OpenAPI 3.1 document.
-- **Phase 10** (`validate.ts`): a report with counts, confidence distribution, opaque handlers, routes with no success response, and a real `@redocly/cli lint` pass against the output.
+- **Phase 6** (`tests-examples.ts`): rather than reverse-engineering each hand-rolled `req`/`res` mock (which differs from file to file), extraction leans on a convention confirmed to hold across a good chunk of the suite: a `describe("METHOD /path", () => {...})` block's title *is* the route, Express syntax and all. From there, `expect(x.statusCode).toBe(N)` and `expect(x.jsonBody | x.body).toEqual(...)`/`.toMatchObject(...)` are read straight off their own call arguments — no need to know how `x` was built. Run against the real tag: **90 examples**, covering 29 routes across 7 test files. Examples land in `termix-openapi.json` as `examples` on `requestBody`/`responses`, and when a test confirms a status Phase 4 never found, it's added to the spec with `x-confidence: "test"` instead of being dropped.
+- **Phase 7** (`frontend-client.ts`): cross-checks every `xApi.get/post/put/patch/delete(path, body?, config?)` in `src/ui/main-axios.ts` and `src/ui/api/*.ts` against a route. The non-obvious part: the axios instances (`hostApi`, `sshHostApi`, ...) are `export let xApi: AxiosInstance;` with no initializer, assigned later via `xApi = createApiInstance(getApiUrl(prefix, PORT), "LABEL")` inside an init function — so resolving `sshHostApi.post(...)` back to a service means finding that assignment, not the declaration's own initializer. Two real bugs only surfaced once this ran against the actual tag: (1) `sshHostApi = hostApi;` is a bare alias to a *different* instance, not a `createApiInstance` call — needed fixed-point alias resolution; (2) the path prefix baked into the instance itself (`getApiUrl("/host", 30001)`) was never being prepended to each call's own literal path, so every route behind an instance with a non-empty prefix (`hostApi`/`sshHostApi`, `tunnelApi`, `fileManagerApi`, `dockerApi`, `homepageApi`) matched no route at all — fixing that alone took matched calls from 300 to 377. Run against the real tag: **377 calls matched, covering 351 of 491 routes** (71%). When Phase 4 found no response schema (`x-confidence: unknown`) but the frontend has a concrete return type (`Promise<SSHHost>`, etc.), that type — marked `x-confidence: "frontend-type"` — fills the gap; the same applies to the request body when the backend only does `...req.body` without destructuring anything by name. The cross-check also **found two real Phase 3 bugs** during development: `req.body ?? {}` (instead of plain `req.body`) wasn't recognized as a request body at all, silently dropping all 5 of `POST /automations`'s fields to zero; both are now fixed.
+- **Phase 9** (`openapi.ts`): emits a full OpenAPI 3.1 document, folding in Phase 6's examples and Phase 7's gap-filling.
+- **Phase 10** (`validate.ts`): a report with counts, confidence distribution, opaque handlers, routes with no success response, Phase 6/7 coverage, and a real `@redocly/cli lint` pass against the output.
 
-Not implemented yet: **Phase 6** (examples from the test suite), **Phase 7** (cross-check against the frontend client), **Phase 8** (reusing text from the existing `@openapi` comments — today `summary` is generated by a simple heuristic from the path/method), and the diff against the official spec (Phase 10, criterion 4). `RouteAnalysis` and the routes IR already carry enough (`file`/`line`/`routeId`) for these three phases to be added without reworking what exists.
+Not implemented yet: **Phase 8** (reusing text from the existing `@openapi` comments — today `summary` is generated by a simple heuristic from the path/method) and the diff against the official spec (Phase 10, criterion 4).

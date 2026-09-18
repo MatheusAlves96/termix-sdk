@@ -585,7 +585,20 @@ function extractBodyFields(fnNode: Node): { name: string; default?: SchemaNode["
   const fields = new Map<string, { name: string; default?: SchemaNode["default"] }>();
   const isReqBodyExpr = (n: Node): boolean => {
     let e = n;
-    while (Node.isAsExpression(e)) e = e.getExpression();
+    while (true) {
+      if (Node.isAsExpression(e)) {
+        e = e.getExpression();
+        continue;
+      }
+      // `req.body ?? {}` / `req.body || {}` — a defensive fallback, still req.body underneath.
+      // Confirmed real case: POST /automations destructures exactly this way and was silently
+      // dropping all 5 of its body fields before this was added.
+      if (Node.isBinaryExpression(e) && (e.getOperatorToken().getText() === "??" || e.getOperatorToken().getText() === "||")) {
+        e = e.getLeft();
+        continue;
+      }
+      break;
+    }
     return Node.isPropertyAccessExpression(e) && e.getExpression().getText() === "req" && e.getName() === "body";
   };
   const bodyAliases = new Set<string>();
