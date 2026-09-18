@@ -1,0 +1,16 @@
+{
+  "_comment": "Response transformers from src/backend/database/routes/host-normalizers.ts and friends. `transformHostResponse` and `stripSensitiveFields` are modeled precisely in src/transformers.ts (built from the live Drizzle `hosts` table, not hand-typed field lists, so they track schema changes automatically). Everything else here is only named so a response passed through it gets a clear x-confidence note instead of silently falling back to `unknown`.",
+  "expanded": ["transformHostResponse", "stripSensitiveFields"],
+  "opaque": [
+    "sanitizeHostForRecipient",
+    "serialize",
+    "toPublicSettings",
+    "formatCredentialOutput",
+    "serializeCrontab",
+    "serializeSyncReferences",
+    "sanitizeLayout",
+    "stripWritePayload",
+    "stripMarker",
+    "stripCommentMarkers"
+  ]
+}

@@ -1,0 +1,909 @@
+/**
+ * Phases 2-4, combined: for a single route's resolved handler function, derive
+ * auth requirements, path/query/header parameters, the request body schema(s),
+ * and every response the handler (or a helper it forwards `res` to) can emit.
+ *
+ * Kept as one module because all four facets are read off the same handler
+ * AST in one pass; splitting them into separate files (as the phase-numbered
+ * layout in docs/spec-generation-strategy.md suggests) would mean re-walking
+ * the same function body three or four times for no benefit.
+ *
+ * See tools/spec-gen/docs/spec-generation-strategy.md, Phases 2-4.
+ */
+
+import { Node, SyntaxKind, Type } from "ts-morph";
+import type {
+  AuthInfo,
+  HeaderParamInfo,
+  JsonPrimitive,
+  PathParamInfo,
+  QueryParamInfo,
+  RequestBodyVariant,
+  ResponseInfo,
+  RouteAnalysis,
+  RouteRecord,
+  SchemaNode,
+  ServiceInfo,
+  TableSchema,
+} from "./types.js";
+import { applyKnownTransformer } from "./transformers.js";
+
+export interface AnalysisContext {
+  recordSchemaNames: Set<string>;
+  hostsTable: TableSchema | undefined;
+  expandedTransformers: Set<string>;
+  opaqueTransformers: Set<string>;
+}
+
+export function buildAnalysisContext(
+  tables: TableSchema[],
+  transformerConfig: { expanded: string[]; opaque: string[] },
+): AnalysisContext {
+  return {
+    recordSchemaNames: new Set(tables.map((t) => t.schemaName)),
+    hostsTable: tables.find((t) => t.tsVarName === "hosts"),
+    expandedTransformers: new Set(transformerConfig.expanded),
+    opaqueTransformers: new Set(transformerConfig.opaque),
+  };
+}
+
+// ---- handler / callee resolution ----
+
+function resolveFunctionNode(nodeIn: Node, depth = 0): Node | null {
+  if (depth > 10) return null;
+  let node: Node = nodeIn;
+  while (Node.isParenthesizedExpression(node)) node = node.getExpression();
+  if (Node.isArrowFunction(node) || Node.isFunctionExpression(node) || Node.isFunctionDeclaration(node)) {
+    return node;
+  }
+  if (Node.isIdentifier(node)) {
+    const symbol = node.getSymbol();
+    if (!symbol) return null;
+    let resolved = symbol;
+    for (let i = 0; i < 10; i++) {
+      const aliased = resolved.getAliasedSymbol();
+      if (!aliased) break;
+      resolved = aliased;
+    }
+    for (const decl of resolved.getDeclarations()) {
+      if (Node.isFunctionDeclaration(decl)) return decl;
+      if (Node.isVariableDeclaration(decl)) {
+        const init = decl.getInitializer();
+        if (init) {
+          const r = resolveFunctionNode(init, depth + 1);
+          if (r) return r;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function getFunctionParams(fn: Node): { getName(): string }[] {
+  if (Node.isArrowFunction(fn) || Node.isFunctionExpression(fn) || Node.isFunctionDeclaration(fn)) {
+    return fn.getParameters();
+  }
+  return [];
+}
+
+// ---- response-chain walking ----
+
+interface ChainCall {
+  method: string;
+  args: Node[];
+}
+
+/** Peels a `.a(...).b(...).c(...)` chain into ordered calls, plus the root identifier's text. */
+function walkChain(exprIn: Node): { rootText: string; calls: ChainCall[] } | null {
+  const calls: ChainCall[] = [];
+  let cur: Node = exprIn;
+  while (Node.isCallExpression(cur)) {
+    const callee = cur.getExpression();
+    if (Node.isPropertyAccessExpression(callee)) {
+      calls.unshift({ method: callee.getName(), args: cur.getArguments() });
+      cur = callee.getExpression();
+      continue;
+    }
+    return null;
+  }
+  if (Node.isIdentifier(cur)) return { rootText: cur.getText(), calls };
+  return null;
+}
+
+const RESPONSE_TERMINAL_METHODS = new Set([
+  "json",
+  "send",
+  "sendStatus",
+  "redirect",
+  "sendFile",
+  "download",
+  "end",
+  "write",
+  "writeHead",
+]);
+const RESPONSE_IGNORED_METHODS = new Set([
+  "cookie",
+  "clearCookie",
+  "flushHeaders",
+  "setHeader",
+  "type",
+  "attachment",
+  "vary",
+  "append",
+  "location",
+  "status", // never terminal by itself; only meaningful chained before a terminal method
+]);
+
+interface RawResponseHit {
+  statusCode: number | "default";
+  finalMethod: string;
+  finalArgs: Node[];
+  writeHeadContentType: string | null;
+}
+
+/** Collects every `res.<...>` (or helper(res, ...) forwarded) terminal call in a function, up to depth 3. */
+function collectResponseHits(
+  fnNode: Node,
+  resParamName: string,
+  depth: number,
+  visited: Set<string>,
+  out: RawResponseHit[],
+): void {
+  if (depth > 3) return;
+  for (const call of fnNode.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    const parent = call.getParent();
+    const isChainLink = parent && Node.isPropertyAccessExpression(parent) && parent.getExpression() === call;
+    if (isChainLink) continue; // handled when we reach the outermost call of this chain
+
+    const chain = walkChain(call);
+    if (chain && chain.rootText === resParamName) {
+      const statusCall = chain.calls.find((c) => c.method === "status");
+      const writeHeadCall = chain.calls.find((c) => c.method === "writeHead");
+      let statusCode: number | "default" = 200;
+      if (statusCall && Node.isNumericLiteral(statusCall.args[0])) statusCode = Number(statusCall.args[0].getText());
+      else if (writeHeadCall && Node.isNumericLiteral(writeHeadCall.args[0])) {
+        statusCode = Number(writeHeadCall.args[0].getText());
+      }
+
+      const last = chain.calls[chain.calls.length - 1];
+      if (!last) continue;
+      if (last.method === "sendStatus" && Node.isNumericLiteral(last.args[0])) {
+        statusCode = Number(last.args[0].getText());
+      }
+      if (last.method === "redirect") {
+        if (last.args[0] && Node.isNumericLiteral(last.args[0])) statusCode = Number(last.args[0].getText());
+        else statusCode = 302;
+      }
+
+      let writeHeadContentType: string | null = null;
+      if (writeHeadCall) {
+        const headersArg = writeHeadCall.args.find((a) => Node.isObjectLiteralExpression(a));
+        if (headersArg && Node.isObjectLiteralExpression(headersArg)) {
+          for (const prop of headersArg.getProperties()) {
+            if (Node.isPropertyAssignment(prop) && prop.getName().toLowerCase() === '"content-type"'.replace(/"/g, "")) {
+              const init = prop.getInitializer();
+              if (init && (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init))) {
+                writeHeadContentType = init.getLiteralText();
+              }
+            }
+          }
+        }
+      }
+
+      if (RESPONSE_TERMINAL_METHODS.has(last.method)) {
+        out.push({ statusCode, finalMethod: last.method, finalArgs: last.args, writeHeadContentType });
+      } else if (!RESPONSE_IGNORED_METHODS.has(last.method)) {
+        // Unknown method on res/response-like object — record as an opaque response so it
+        // isn't silently dropped, but don't try to interpret its arguments.
+        out.push({ statusCode, finalMethod: last.method, finalArgs: [], writeHeadContentType });
+      }
+      continue;
+    }
+
+    // helper(res, ...) forwarding: recurse into the callee with the matching parameter name.
+    const callee = call.getExpression();
+    if (Node.isIdentifier(callee)) {
+      const args = call.getArguments();
+      const resArgIndex = args.findIndex((a) => Node.isIdentifier(a) && a.getText() === resParamName);
+      if (resArgIndex >= 0) {
+        const key = `${callee.getText()}@${call.getSourceFile().getFilePath()}:${call.getStart()}`;
+        if (visited.has(key)) continue;
+        visited.add(key);
+        const targetFn = resolveFunctionNode(callee);
+        if (targetFn) {
+          const params = getFunctionParams(targetFn);
+          const targetParamName = params[resArgIndex]?.getName() ?? resParamName;
+          collectResponseHits(targetFn, targetParamName, depth + 1, visited, out);
+        }
+      }
+    }
+  }
+}
+
+// ---- expression -> SchemaNode ----
+
+function getReturnExpression(body: Node): Node | null {
+  if (!Node.isBlock(body)) return body; // concise arrow body is itself the returned expression
+  for (const stmt of body.getStatements()) {
+    if (Node.isReturnStatement(stmt)) {
+      const expr = stmt.getExpression();
+      if (expr) return expr;
+    }
+  }
+  return null;
+}
+
+function schemaFromType(type: Type, ctx: AnalysisContext, depth: number): SchemaNode {
+  let t = type;
+  const aliasSymbol = t.getAliasSymbol() ?? t.getSymbol();
+  if (aliasSymbol?.getName() === "Promise") {
+    const args = t.getTypeArguments();
+    if (args[0]) return schemaFromType(args[0], ctx, depth);
+  }
+  if (t.isAny() || t.isUnknown()) return { type: "unknown", confidence: "unknown" };
+  if (t.isNull()) return { type: "null", nullable: true, confidence: "repository-type" };
+  if (t.isUndefined() || t.isVoid()) return { type: "unknown", confidence: "unknown" };
+  if (t.isBooleanLiteral() || t.isBoolean()) return { type: "boolean", confidence: "repository-type" };
+  if (t.isNumberLiteral() || t.isNumber()) return { type: "number", confidence: "repository-type" };
+  if (t.isStringLiteral() || t.isString()) return { type: "string", confidence: "repository-type" };
+
+  if (t.isUnion()) {
+    const variants = t.getUnionTypes();
+    const nullable = variants.some((v) => v.isUndefined() || v.isNull());
+    const rest = variants.filter((v) => !v.isUndefined() && !v.isNull());
+    if (rest.length === 1) {
+      const inner = schemaFromType(rest[0], ctx, depth);
+      return nullable ? { ...inner, nullable: true } : inner;
+    }
+    // All-string-literal union -> enum
+    if (rest.every((v) => v.isStringLiteral())) {
+      return {
+        type: "string",
+        enumValues: rest.map((v) => String(v.getLiteralValue())),
+        confidence: "repository-type",
+        ...(nullable ? { nullable: true } : {}),
+      };
+    }
+    return { type: "unknown", confidence: "inferred", note: "union type, not expanded" };
+  }
+
+  if (t.isArray()) {
+    return { type: "array", items: schemaFromType(t.getArrayElementTypeOrThrow(), ctx, depth + 1), confidence: "repository-type" };
+  }
+
+  const named = aliasSymbol?.getName();
+  if (named && ctx.recordSchemaNames.has(named)) {
+    return { ref: named, confidence: "repository-type" };
+  }
+
+  if (depth >= 3) return { type: "object", confidence: "inferred", note: "object type, depth limit reached" };
+
+  if (t.isObject()) {
+    const props = t.getProperties();
+    if (props.length === 0 || props.length > 80) return { type: "object", confidence: "unknown" };
+    const properties: Record<string, SchemaNode> = {};
+    const required: string[] = [];
+    for (const p of props) {
+      const decl = p.getValueDeclaration() ?? p.getDeclarations()[0];
+      if (!decl) continue;
+      const propType = p.getTypeAtLocation(decl);
+      properties[p.getName()] = schemaFromType(propType, ctx, depth + 1);
+      if (!p.isOptional()) required.push(p.getName());
+    }
+    return { type: "object", properties, required, confidence: "repository-type" };
+  }
+
+  return { type: "unknown", confidence: "unknown" };
+}
+
+function schemaFromExpression(exprIn: Node, ctx: AnalysisContext, depth: number): SchemaNode {
+  if (depth > 6) return { type: "unknown", confidence: "unknown" };
+  let expr: Node = exprIn;
+  while (Node.isParenthesizedExpression(expr)) expr = expr.getExpression();
+  if (Node.isAwaitExpression(expr)) return schemaFromExpression(expr.getExpression(), ctx, depth);
+  if (Node.isNonNullExpression(expr)) return schemaFromExpression(expr.getExpression(), ctx, depth);
+
+  if (expr.getKind() === SyntaxKind.TrueKeyword) return { const: true, type: "boolean", confidence: "handler-literal" };
+  if (expr.getKind() === SyntaxKind.FalseKeyword) return { const: false, type: "boolean", confidence: "handler-literal" };
+  if (expr.getKind() === SyntaxKind.NullKeyword) return { type: "null", nullable: true, confidence: "handler-literal" };
+  if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) {
+    return { const: expr.getLiteralText(), type: "string", confidence: "handler-literal" };
+  }
+  if (Node.isNumericLiteral(expr)) return { const: Number(expr.getText()), type: "number", confidence: "handler-literal" };
+
+  if (Node.isArrayLiteralExpression(expr)) {
+    const els = expr.getElements();
+    return {
+      type: "array",
+      items: els[0] ? schemaFromExpression(els[0], ctx, depth + 1) : { type: "unknown", confidence: "unknown" },
+      confidence: "handler-literal",
+    };
+  }
+
+  if (Node.isObjectLiteralExpression(expr)) {
+    const properties: Record<string, SchemaNode> = {};
+    const required: string[] = [];
+    let note: string | undefined;
+    for (const prop of expr.getProperties()) {
+      if (Node.isPropertyAssignment(prop)) {
+        const init = prop.getInitializer();
+        if (!init) continue;
+        properties[prop.getName()] = schemaFromExpression(init, ctx, depth + 1);
+        required.push(prop.getName());
+      } else if (Node.isShorthandPropertyAssignment(prop)) {
+        properties[prop.getName()] = schemaFromType(prop.getType(), ctx, depth + 1);
+        required.push(prop.getName());
+      } else if (Node.isSpreadAssignment(prop)) {
+        const spreadSchema = schemaFromExpression(prop.getExpression(), ctx, depth + 1);
+        if (spreadSchema.type === "object" && spreadSchema.properties) {
+          Object.assign(properties, spreadSchema.properties);
+          required.push(...(spreadSchema.required ?? []));
+        } else {
+          note = spreadSchema.note ?? "includes a spread that could not be expanded";
+        }
+      }
+    }
+    return { type: "object", properties, required, confidence: "handler-literal", ...(note ? { note } : {}) };
+  }
+
+  if (Node.isCallExpression(expr)) {
+    const callee = expr.getExpression();
+
+    if (Node.isIdentifier(callee)) {
+      const name = callee.getText();
+      if (ctx.expandedTransformers.has(name)) {
+        const built = applyKnownTransformer(name, ctx.hostsTable, undefined);
+        if (built) return built;
+      }
+      if (ctx.opaqueTransformers.has(name)) {
+        return { type: "object", confidence: "inferred", note: `passed through ${name}(); shape not expanded (see config/transformers.json)` };
+      }
+    }
+
+    if (Node.isPropertyAccessExpression(callee) && callee.getName() === "map") {
+      const arrayExpr = callee.getExpression();
+      const mapper = expr.getArguments()[0];
+      const baseSchema = schemaFromExpression(arrayExpr, ctx, depth + 1);
+      const baseItem = baseSchema.type === "array" ? baseSchema.items : undefined;
+      let itemSchema: SchemaNode = { type: "unknown", confidence: "unknown" };
+      if (mapper && (Node.isArrowFunction(mapper) || Node.isFunctionExpression(mapper))) {
+        const ret = getReturnExpression(mapper.getBody());
+        if (ret) itemSchema = schemaFromExpression(ret, ctx, depth + 1);
+      } else if (mapper && Node.isIdentifier(mapper) && ctx.expandedTransformers.has(mapper.getText())) {
+        const built = applyKnownTransformer(mapper.getText(), ctx.hostsTable, undefined);
+        itemSchema = built ?? baseItem ?? { type: "unknown", confidence: "unknown" };
+      }
+      return { type: "array", items: itemSchema, confidence: "inferred" };
+    }
+
+    return schemaFromType(expr.getType(), ctx, depth);
+  }
+
+  /** Merges two branches of a conditional/`||`/`??`: fields in only one branch become optional. */
+  function mergeBranches(a: SchemaNode, b: SchemaNode, note: string): SchemaNode | null {
+    if (a.type !== "object" && b.type !== "object") return null;
+    const properties = { ...(b.properties ?? {}), ...(a.properties ?? {}) };
+    const aReq = new Set(a.required ?? []);
+    const bReq = new Set(b.required ?? []);
+    const required = Object.keys(properties).filter((k) => aReq.has(k) && bReq.has(k));
+    return { type: "object", properties, required, confidence: "inferred", note };
+  }
+
+  if (Node.isConditionalExpression(expr)) {
+    // `cond ? {a} : {}` (e.g. the login route's conditional `token` field) — merge both
+    // branches instead of falling back to the union type, which loses object shape entirely.
+    const whenTrue = schemaFromExpression(expr.getWhenTrue(), ctx, depth + 1);
+    const whenFalse = schemaFromExpression(expr.getWhenFalse(), ctx, depth + 1);
+    const merged = mergeBranches(whenTrue, whenFalse, "merged from a conditional expression's two branches");
+    if (merged) return merged;
+    return schemaFromType(expr.getType(), ctx, depth);
+  }
+
+  if (Node.isBinaryExpression(expr)) {
+    const op = expr.getOperatorToken().getText();
+    if (op === "||" || op === "??") {
+      const left = schemaFromExpression(expr.getLeft(), ctx, depth + 1);
+      const right = schemaFromExpression(expr.getRight(), ctx, depth + 1);
+      const merged = mergeBranches(left, right, `merged from both sides of a \`${op}\` fallback`);
+      if (merged) return merged;
+    }
+    return schemaFromType(expr.getType(), ctx, depth);
+  }
+
+  if (Node.isIdentifier(expr)) {
+    // Prefer a local const's own initializer expression over its declared type — a type
+    // annotation (e.g. `Record<string, unknown>`) or a `.map()`/ternary/`||` chain often
+    // widens or blurs what the checker reports, losing shape our literal-aware walk can keep.
+    const symbol = expr.getSymbol();
+    if (symbol) {
+      for (const decl of symbol.getDeclarations()) {
+        if (Node.isVariableDeclaration(decl)) {
+          const init = decl.getInitializer();
+          if (init) return schemaFromExpression(init, ctx, depth + 1);
+        }
+      }
+    }
+    return schemaFromType(expr.getType(), ctx, depth);
+  }
+
+  if (
+    Node.isPropertyAccessExpression(expr) ||
+    Node.isElementAccessExpression(expr) ||
+    Node.isAsExpression(expr) ||
+    Node.isPrefixUnaryExpression(expr) // e.g. `!!userRecord.isAdmin` -> boolean, via the checker
+  ) {
+    return schemaFromType(expr.getType(), ctx, depth);
+  }
+
+  return { type: "unknown", confidence: "unknown" };
+}
+
+function responseHitToInfo(hit: RawResponseHit, ctx: AnalysisContext): ResponseInfo {
+  switch (hit.finalMethod) {
+    case "json":
+      return {
+        status: hit.statusCode,
+        contentType: "application/json",
+        schema: hit.finalArgs[0] ? schemaFromExpression(hit.finalArgs[0], ctx, 0) : { type: "null", confidence: "handler-literal" },
+      };
+    case "send": {
+      const arg = hit.finalArgs[0];
+      if (!arg) return { status: hit.statusCode, contentType: null };
+      if (Node.isStringLiteral(arg) || Node.isNoSubstitutionTemplateLiteral(arg) || Node.isTemplateExpression(arg)) {
+        return { status: hit.statusCode, contentType: "text/html", schema: { type: "string", confidence: "handler-literal" } };
+      }
+      return {
+        status: hit.statusCode,
+        contentType: "application/octet-stream",
+        schema: { type: "string", format: "binary", confidence: "inferred" },
+      };
+    }
+    case "sendStatus":
+      return { status: hit.statusCode, contentType: null };
+    case "redirect":
+      return { status: hit.statusCode, contentType: null, headers: ["Location"] };
+    case "sendFile":
+    case "download":
+      return {
+        status: 200,
+        contentType: "application/octet-stream",
+        schema: { type: "string", format: "binary", confidence: "inferred" },
+      };
+    case "writeHead":
+    case "write":
+    case "end": {
+      const isSse = hit.writeHeadContentType?.includes("event-stream") ?? false;
+      return {
+        status: hit.statusCode,
+        contentType: hit.writeHeadContentType ?? "application/octet-stream",
+        ...(isSse ? { description: "Server-Sent Events stream; individual event payloads are not modeled." } : {}),
+      };
+    }
+    default:
+      return {
+        status: hit.statusCode,
+        contentType: null,
+        description: `res.${hit.finalMethod}(...) — not modeled by the generator`,
+      };
+  }
+}
+
+function schemaKey(s: SchemaNode | undefined): string {
+  if (!s) return "";
+  // Cheap structural fingerprint: good enough to dedupe identical shapes without a full
+  // deep-equality pass, and stable regardless of property insertion order.
+  return JSON.stringify(s, Object.keys(s).sort());
+}
+
+/**
+ * Groups response hits by (status, contentType). Distinct schemas at the same key are kept
+ * as `oneOf` variants rather than one overwriting the other — e.g. `/users/login`'s 200
+ * response has two unrelated shapes (pending-TOTP vs. full login) depending on account state,
+ * and collapsing them to a single "winner" would silently document only one.
+ */
+function mergeResponses(hits: ResponseInfo[]): ResponseInfo[] {
+  const byKey = new Map<string, ResponseInfo & { variants: Map<string, SchemaNode> }>();
+  for (const r of hits) {
+    const key = `${r.status}:${r.contentType ?? ""}`;
+    let entry = byKey.get(key);
+    if (!entry) {
+      entry = { ...r, variants: new Map() };
+      byKey.set(key, entry);
+    }
+    if (r.schema) entry.variants.set(schemaKey(r.schema), r.schema);
+    if (r.headers) entry.headers = [...new Set([...(entry.headers ?? []), ...r.headers])];
+    if (r.description && !entry.description) entry.description = r.description;
+  }
+  const out: ResponseInfo[] = [];
+  for (const entry of byKey.values()) {
+    const variants = [...entry.variants.values()];
+    const { variants: _drop, ...rest } = entry;
+    void _drop;
+    if (variants.length <= 1) {
+      out.push({ ...rest, schema: variants[0] });
+    } else {
+      out.push({ ...rest, schema: { type: "unknown", confidence: "handler-literal", oneOf: variants } });
+    }
+  }
+  return out.sort((a, b) => {
+    const as = a.status === "default" ? 999 : a.status;
+    const bs = b.status === "default" ? 999 : b.status;
+    return as - bs;
+  });
+}
+
+// ---- request body ----
+
+/**
+ * Best-effort field typing from validator/coercion call sites, scanned as text over the
+ * handler's own source rather than full control-flow analysis (see Phase 3 in the design doc).
+ * Checked in priority order and the FIRST match wins — unlike a boolean-coercion (`!!x`)
+ * rule tried earlier, later/weaker signals must never overwrite an earlier explicit one
+ * (e.g. `isNonEmptyString(username)` must not be clobbered by an unrelated `!!username`
+ * inside the same function's logging call, which is a real, confirmed false positive).
+ */
+function fieldTypeFromValidators(fieldName: string, fnText: string): { type: SchemaNode["type"]; required: boolean; enumValues?: string[] } {
+  const esc = fieldName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  let required = false;
+  let type: SchemaNode["type"] = "unknown";
+
+  const enumMatch = new RegExp(`\\[([^\\]]*)\\]\\.includes\\(\\s*${esc}\\b`).exec(fnText);
+  const enumValues = enumMatch
+    ? enumMatch[1]
+        .split(",")
+        .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+        .filter(Boolean)
+    : undefined;
+
+  if (enumValues && enumValues.length > 0) {
+    type = "string";
+  } else if (new RegExp(`isNonEmptyString\\(\\s*${esc}\\b`).test(fnText)) {
+    type = "string";
+  } else if (
+    new RegExp(`typeof\\s+${esc}\\s*!==?\\s*["']number["']`).test(fnText) ||
+    new RegExp(`typeof\\s+${esc}\\s*===?\\s*["']number["']`).test(fnText)
+  ) {
+    type = "number";
+  } else if (new RegExp(`Array\\.isArray\\(\\s*${esc}\\b`).test(fnText)) {
+    type = "array";
+  } else if (new RegExp(`\\b(Number|parseInt)\\(\\s*${esc}\\b`).test(fnText)) {
+    type = "integer";
+  }
+
+  if (
+    new RegExp(`isNonEmptyString\\(\\s*${esc}\\b`).test(fnText) ||
+    new RegExp(`Array\\.isArray\\(\\s*${esc}\\b`).test(fnText) ||
+    new RegExp(`if\\s*\\(\\s*!${esc}\\s*\\)`).test(fnText)
+  ) {
+    required = true;
+  }
+
+  return { type, required, enumValues };
+}
+
+function extractBodyFields(fnNode: Node): { name: string; default?: SchemaNode["default"] }[] {
+  const fields = new Map<string, { name: string; default?: SchemaNode["default"] }>();
+  const isReqBodyExpr = (n: Node): boolean => {
+    let e = n;
+    while (Node.isAsExpression(e)) e = e.getExpression();
+    return Node.isPropertyAccessExpression(e) && e.getExpression().getText() === "req" && e.getName() === "body";
+  };
+  const bodyAliases = new Set<string>();
+
+  for (const varDecl of fnNode.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    const init = varDecl.getInitializer();
+    if (!init) continue;
+    const nameNode = varDecl.getNameNode();
+    if (isReqBodyExpr(init) && !Node.isObjectBindingPattern(nameNode)) {
+      bodyAliases.add(varDecl.getName());
+    }
+  }
+  // Also catch the common `let body: T; if (...) { body = req.body; } else { ... }` idiom,
+  // e.g. host.ts's create-host handler picks req.body vs. a multipart-parsed object this way —
+  // a plain assignment, not a VariableDeclaration initializer.
+  for (const bin of fnNode.getDescendantsOfKind(SyntaxKind.BinaryExpression)) {
+    if (bin.getOperatorToken().getText() !== "=") continue;
+    const left = bin.getLeft();
+    const right = bin.getRight();
+    if (Node.isIdentifier(left) && isReqBodyExpr(right)) bodyAliases.add(left.getText());
+  }
+
+  for (const varDecl of fnNode.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    const init = varDecl.getInitializer();
+    if (!init) continue;
+    const nameNode = varDecl.getNameNode();
+    if (!Node.isObjectBindingPattern(nameNode)) continue;
+    const initIsBody = isReqBodyExpr(init) || (Node.isIdentifier(init) && bodyAliases.has(init.getText()));
+    if (!initIsBody) continue;
+    for (const el of nameNode.getElements()) {
+      if (el.getKind() !== SyntaxKind.BindingElement) continue;
+      const propName = el.getPropertyNameNode()?.getText() ?? el.getName();
+      const defaultInit = el.getInitializer();
+      let def: SchemaNode["default"];
+      if (defaultInit) {
+        if (defaultInit.getKind() === SyntaxKind.TrueKeyword) def = true;
+        else if (defaultInit.getKind() === SyntaxKind.FalseKeyword) def = false;
+        else if (Node.isNumericLiteral(defaultInit)) def = Number(defaultInit.getText());
+        else if (Node.isStringLiteral(defaultInit)) def = defaultInit.getLiteralText();
+      }
+      fields.set(propName, { name: propName, default: def });
+    }
+  }
+
+  for (const pae of fnNode.getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)) {
+    const obj = pae.getExpression();
+    const isDirect = Node.isPropertyAccessExpression(obj) && obj.getExpression().getText() === "req" && obj.getName() === "body";
+    const isAliased = Node.isIdentifier(obj) && bodyAliases.has(obj.getText());
+    if (isDirect || isAliased) {
+      const name = pae.getName();
+      if (!fields.has(name)) fields.set(name, { name });
+    }
+  }
+
+  return [...fields.values()];
+}
+
+function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[]): RequestBodyVariant[] {
+  const fields = extractBodyFields(fnNode);
+  if (fields.length === 0) return [];
+
+  const properties: Record<string, SchemaNode> = {};
+  const required: string[] = [];
+  for (const f of fields) {
+    const { type, required: req, enumValues } = fieldTypeFromValidators(f.name, fnText);
+    properties[f.name] = {
+      type,
+      confidence: type === "unknown" ? "unknown" : "inferred",
+      ...(f.default !== undefined ? { default: f.default } : {}),
+      ...(enumValues && enumValues.length > 0 ? { enumValues } : {}),
+    };
+    if (req || f.default !== undefined) required.push(f.name);
+  }
+  const schema: SchemaNode = { type: "object", properties, required, confidence: "inferred" };
+
+  const uploadMiddleware = middlewares.find((m) => /^upload\.single\(/.test(m));
+  if (uploadMiddleware) {
+    const m = /^upload\.single\(\s*["']([^"']+)["']\s*\)/.exec(uploadMiddleware);
+    const fileField = m?.[1] ?? "file";
+    const multipartProps: Record<string, SchemaNode> = {
+      ...properties,
+      [fileField]: { type: "string", format: "binary", confidence: "inferred" },
+    };
+    return [
+      { contentType: "multipart/form-data", schema: { type: "object", properties: multipartProps, required, confidence: "inferred" } },
+      { contentType: "application/json", schema },
+    ];
+  }
+
+  if (/\bBusboy\(/.test(fnText) || /req\.pipe\(/.test(fnText)) {
+    return [{ contentType: "multipart/form-data", schema: { type: "object", confidence: "unknown", note: "parsed via busboy/stream; fields not enumerated" } }];
+  }
+
+  return [{ contentType: "application/json", schema }];
+}
+
+// ---- query / path / headers ----
+
+function analyzePathParams(routePath: string, fnText: string): PathParamInfo[] {
+  const names = [...routePath.matchAll(/:([A-Za-z_][A-Za-z0-9_]*)/g)].map((m) => m[1]);
+  return names.map((name) => {
+    const esc = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const numeric =
+      new RegExp(`\\b(Number|parseInt)\\(\\s*req\\.params\\.${esc}\\b`).test(fnText) ||
+      new RegExp(`\\b(Number|parseInt)\\(\\s*req\\.params\\[["']${esc}["']\\]`).test(fnText);
+    return { name, type: numeric ? "integer" : "string" };
+  });
+}
+
+function analyzeQueryParams(fnNode: Node, fnText: string): QueryParamInfo[] {
+  const names = new Map<string, { default?: string | number | boolean }>();
+
+  for (const varDecl of fnNode.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    const init = varDecl.getInitializer();
+    const nameNode = varDecl.getNameNode();
+    if (!init || !Node.isObjectBindingPattern(nameNode)) continue;
+    if (!(Node.isPropertyAccessExpression(init) && init.getExpression().getText() === "req" && init.getName() === "query")) continue;
+    for (const el of nameNode.getElements()) {
+      if (el.getKind() !== SyntaxKind.BindingElement) continue;
+      const propName = el.getPropertyNameNode()?.getText() ?? el.getName();
+      const defaultInit = el.getInitializer();
+      let def: string | number | boolean | undefined;
+      if (defaultInit) {
+        if (Node.isNumericLiteral(defaultInit)) def = Number(defaultInit.getText());
+        else if (Node.isStringLiteral(defaultInit)) def = defaultInit.getLiteralText();
+        else if (defaultInit.getKind() === SyntaxKind.TrueKeyword) def = true;
+        else if (defaultInit.getKind() === SyntaxKind.FalseKeyword) def = false;
+      }
+      names.set(propName, { default: def });
+    }
+  }
+
+  for (const pae of fnNode.getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)) {
+    const obj = pae.getExpression();
+    if (Node.isPropertyAccessExpression(obj) && obj.getExpression().getText() === "req" && obj.getName() === "query") {
+      if (!names.has(pae.getName())) names.set(pae.getName(), {});
+    }
+  }
+
+  return [...names.entries()].map(([name, info]) => {
+    const esc = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    let type: JsonPrimitive = "string";
+    if (new RegExp(`\\b(Number|parseInt)\\(\\s*req\\.query\\.${esc}\\b`).test(fnText)) type = "integer";
+    else if (new RegExp(`req\\.query\\.${esc}\\s*===?\\s*["']true["']`).test(fnText)) type = "boolean";
+    else if (typeof info.default === "number") type = "integer";
+    else if (typeof info.default === "boolean") type = "boolean";
+
+    const required = new RegExp(`if\\s*\\(\\s*!${esc}\\s*\\)`).test(fnText);
+    return { name, type, required: required && info.default === undefined, ...(info.default !== undefined ? { default: info.default } : {}) };
+  });
+}
+
+function analyzeHeaders(fnText: string): HeaderParamInfo[] {
+  const names = new Set<string>();
+  for (const m of fnText.matchAll(/req\.headers\[["']([^"']+)["']\]/g)) names.add(m[1]);
+  for (const m of fnText.matchAll(/req\.(?:get|header)\(["']([^"']+)["']\)/g)) names.add(m[1]);
+  return [...names].map((name) => ({ name }));
+}
+
+// ---- auth ----
+
+function analyzeAuth(route: RouteRecord, service: ServiceInfo | undefined): AuthInfo {
+  const mw = route.middlewares;
+  const hasJWT = mw.some((m) => m === "authenticateJWT" || m.startsWith("authenticateJWT("));
+  // route.line is only comparable to service.globalAuthLine when the route is registered
+  // directly in the service's own root file (e.g. metrics/index.ts's one pre-auth route,
+  // /internal/login-alert). Most routes on a global-auth service are reached through
+  // registerXRoutes() calls defined in a different file, where route.line is a line number
+  // in *that* file and comparing it to globalAuthLine (a line in the root file) is
+  // meaningless. In every confirmed case in this codebase the registerXRoutes(app, ...)
+  // call itself always happens after the auth middleware is installed, so routes reached
+  // that way default to being covered rather than being silently misjudged as public.
+  const globalCovers =
+    !!service?.globalAuth &&
+    service.globalAuthLine !== null &&
+    (route.file !== service.file || route.line > service.globalAuthLine);
+  const requiresAdmin = mw.some((m) => m === "requireAdmin" || m.startsWith("requireAdmin("));
+  const requiresDataAccess = mw.some((m) => m === "requireDataAccess" || m.startsWith("requireDataAccess("));
+  const required = hasJWT || globalCovers || requiresAdmin || requiresDataAccess;
+  return { required, requiresAdmin, requiresDataAccess, adminImpersonation: required };
+}
+
+// ---- managerHandler() wrapper (hosts/metrics/managers/route-helpers.ts) ----
+//
+// 30 of the host-metrics-manager routes (cron/firewall/health/logs/packages/processes/
+// services/ssl/tailscale/users/wireguard) register `managerHandler(runOnHost, level, op, fn)`
+// directly as the route handler, where `managerHandler` itself returns the real
+// `(req, res) => {...}` — so the per-route callback `fn` never sees `res` at all, and the
+// generic "resolve to a function, scan it for res.xxx()" path above can't find anything.
+// Modeled explicitly, the same way transformHostResponse/stripSensitiveFields are: read
+// once from route-helpers.ts (confirmed at release-2.7.1-tag), reapplied at every call site.
+
+function getManagerHandlerCallback(nodeIn: Node): Node | null {
+  let node: Node = nodeIn;
+  while (Node.isParenthesizedExpression(node)) node = node.getExpression();
+  if (!Node.isCallExpression(node)) return null;
+  const callee = node.getExpression();
+  if (!Node.isIdentifier(callee) || callee.getText() !== "managerHandler") return null;
+  const args = node.getArguments();
+  const fn = args[args.length - 1];
+  if (fn && (Node.isArrowFunction(fn) || Node.isFunctionExpression(fn))) return fn;
+  return null;
+}
+
+/** Return statements belonging to `fn` itself, not to any function nested inside it. */
+function collectOwnReturnExpressions(fn: Node): Node[] {
+  const body = Node.isArrowFunction(fn) || Node.isFunctionExpression(fn) ? fn.getBody() : fn;
+  if (!Node.isBlock(body)) return [body]; // concise arrow body is itself the returned expression
+  const out: Node[] = [];
+  for (const stmt of body.getDescendantsOfKind(SyntaxKind.ReturnStatement)) {
+    const owner = stmt.getFirstAncestor(
+      (a) => Node.isArrowFunction(a) || Node.isFunctionExpression(a) || Node.isFunctionDeclaration(a),
+    );
+    if (owner !== fn) continue;
+    const e = stmt.getExpression();
+    if (e) out.push(e);
+  }
+  return out;
+}
+
+function managerHandlerErrorResponses(): ResponseInfo[] {
+  const errorObj = (extra?: Record<string, SchemaNode>): SchemaNode => ({
+    type: "object",
+    properties: { error: { type: "string", confidence: "handler-literal" }, ...(extra ?? {}) },
+    required: ["error"],
+    confidence: "handler-literal",
+  });
+  return [
+    {
+      status: 400,
+      contentType: "application/json",
+      schema: errorObj(),
+      description: "ManagerInputError, from the managerHandler() wrapper",
+    },
+    {
+      status: 403,
+      contentType: "application/json",
+      schema: errorObj({ code: { type: "string", confidence: "handler-literal" } }),
+      description: "AccessDeniedError or ElevationError (code only on the latter), from the managerHandler() wrapper",
+    },
+    {
+      status: 500,
+      contentType: "application/json",
+      schema: errorObj(),
+      description: "Uncaught error, from the managerHandler() wrapper",
+    },
+  ];
+}
+
+// ---- top-level ----
+
+export function analyzeRoute(
+  route: RouteRecord,
+  handlerNode: Node,
+  service: ServiceInfo | undefined,
+  ctx: AnalysisContext,
+): RouteAnalysis {
+  const auth = analyzeAuth(route, service);
+
+  const managerCb = getManagerHandlerCallback(handlerNode);
+  if (managerCb) {
+    const fnText = managerCb.getText();
+    const successHits: ResponseInfo[] = collectOwnReturnExpressions(managerCb).map((r) => ({
+      status: 200,
+      contentType: "application/json",
+      schema: schemaFromExpression(r, ctx, 0),
+    }));
+    const responses = mergeResponses([...successHits, ...managerHandlerErrorResponses()]);
+    const pathParams = analyzePathParams(route.path, fnText).map((p) =>
+      p.name === "id" ? { ...p, type: "integer" as const } : p,
+    );
+    const requestBody = ["POST", "PUT", "PATCH"].includes(route.method)
+      ? analyzeRequestBody(managerCb, fnText, route.middlewares)
+      : [];
+    return {
+      routeId: route.id,
+      auth,
+      pathParams,
+      queryParams: analyzeQueryParams(managerCb, fnText),
+      headers: analyzeHeaders(fnText),
+      requestBody,
+      responses,
+      opaque: false,
+    };
+  }
+
+  const fn = resolveFunctionNode(handlerNode);
+
+  if (!fn) {
+    return {
+      routeId: route.id,
+      auth,
+      pathParams: analyzePathParams(route.path, ""),
+      queryParams: [],
+      headers: [],
+      requestBody: [],
+      responses: [],
+      opaque: true,
+    };
+  }
+
+  const fnText = fn.getText();
+  const responseParam = getFunctionParams(fn)[1]?.getName() ?? "res";
+
+  const hits: RawResponseHit[] = [];
+  collectResponseHits(fn, responseParam, 0, new Set(), hits);
+  const responses = mergeResponses(hits.map((h) => responseHitToInfo(h, ctx)));
+
+  const requestBody = ["POST", "PUT", "PATCH"].includes(route.method) ? analyzeRequestBody(fn, fnText, route.middlewares) : [];
+
+  return {
+    routeId: route.id,
+    auth,
+    pathParams: analyzePathParams(route.path, fnText),
+    queryParams: analyzeQueryParams(fn, fnText),
+    headers: analyzeHeaders(fnText),
+    requestBody,
+    responses,
+    opaque: false,
+  };
+}
