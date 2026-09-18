@@ -15,6 +15,7 @@ import type {
   TableSchema,
   TestExample,
 } from "./types.js";
+import { jsdocTextKey, type JsdocRouteText } from "./jsdoc-text.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type JsonSchema = Record<string, any>;
@@ -146,6 +147,7 @@ export function buildOpenApiDocument(
   analyses: RouteAnalysis[],
   testExamples: TestExample[] = [],
   frontendCrossChecks: FrontendCrossCheck[] = [],
+  jsdocText: Map<string, JsdocRouteText> = new Map(),
 ): JsonSchema {
   const analysisById = new Map(analyses.map((a) => [a.routeId, a]));
   const serviceByKey = new Map<string, ServiceInfo>(routesIr.services.map((s) => [s.key, s]));
@@ -188,18 +190,27 @@ export function buildOpenApiDocument(
     const service = serviceByKey.get(route.service);
     const pathKey = route.path.replace(/:([A-Za-z_][A-Za-z0-9_]*)/g, "{$1}");
     const pathItem = paths[pathKey] ?? (paths[pathKey] = {});
+    const jsdoc = jsdocText.get(jsdocTextKey(route.method, pathKey));
 
     const parameters: JsonSchema[] = [];
     for (const p of analysis?.pathParams ?? []) {
-      parameters.push({ name: p.name, in: "path", required: true, schema: { type: p.type } });
+      parameters.push({
+        name: p.name,
+        in: "path",
+        required: true,
+        schema: { type: p.type },
+        ...(jsdoc?.parameters?.[p.name] ? { description: jsdoc.parameters[p.name] } : {}),
+      });
     }
     for (const q of analysis?.queryParams ?? []) {
       const schema: JsonSchema = { type: q.type };
       if (q.default !== undefined) schema.default = q.default;
-      parameters.push({ name: q.name, in: "query", required: q.required, schema });
+      const description = jsdoc?.parameters?.[q.name] ?? undefined;
+      parameters.push({ name: q.name, in: "query", required: q.required, schema, ...(description ? { description } : {}) });
     }
     for (const h of analysis?.headers ?? []) {
-      parameters.push({ name: h.name, in: "header", required: false, schema: { type: "string" }, ...(h.note ? { description: h.note } : {}) });
+      const description = jsdoc?.parameters?.[h.name] ?? h.note;
+      parameters.push({ name: h.name, in: "header", required: false, schema: { type: "string" }, ...(description ? { description } : {}) });
     }
 
     const routeExamples = examplesByRoute.get(route.id) ?? [];
@@ -313,8 +324,9 @@ export function buildOpenApiDocument(
 
     pathItem[route.method.toLowerCase()] = {
       operationId: operationId(route),
-      summary: defaultSummary(route.method, route.path),
-      tags: [deriveTag(route.file)],
+      summary: jsdoc?.summary ?? defaultSummary(route.method, route.path),
+      ...(jsdoc?.description ? { description: jsdoc.description } : {}),
+      tags: jsdoc?.tags ?? [deriveTag(route.file)],
       ...(parameters.length > 0 ? { parameters } : {}),
       ...(requestBody ? { requestBody } : {}),
       responses,

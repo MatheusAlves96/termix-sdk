@@ -1,6 +1,6 @@
 # termix-sdk spec-gen report
 
-Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac126ffe6a98`) on 2026-09-18T20:30:22.164Z.
+Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac126ffe6a98`) on 2026-09-18T20:49:58.991Z.
 
 ## Route counts
 
@@ -62,6 +62,10 @@ Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac12
   - PUT /host-sidebar/preferences (`src/ui/api/host-sidebar-preferences-api.ts:24`, saveHostSidebarPreferences) — frontend body type has 3 field(s) not seen in the backend's own destructuring: version, groupKey, openFolders
   - PUT /user-preferences (`src/ui/api/open-tabs-api.ts:156`, saveUserPreferences) — frontend body type has 5 field(s) not seen in the backend's own destructuring: showHostTags, hostTrayOnClick, foldersCollapsed, compactHostView, statusColorScheme
   - POST /ssh/tunnel/connect (`src/ui/api/tunnel-api.ts:171`, connectTunnel) — frontend body type has 28 field(s) not seen in the backend's own destructuring: scope, mode, tunnelType, bindHost, targetHost, hostName, sourceIP, sourceSSHPort
+
+## Existing @openapi text reuse (Phase 8)
+
+- `@openapi` JSDoc blocks parsed: **425**. Their `summary`/`description`/`tags`/parameter descriptions are reused verbatim when present; `requestBody`/`responses` from them are never used as a schema source.
 
 ## Not yet implemented
 

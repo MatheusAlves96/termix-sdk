@@ -8,7 +8,7 @@
   "x-termix-source": {
     "tag": "release-2.7.1-tag",
     "commit": "76fd9eedbf0f7e853d5ffe40717cac126ffe6a98",
-    "generatedAt": "2026-09-18T20:30:22.164Z"
+    "generatedAt": "2026-09-18T20:49:58.991Z"
   },
   "servers": [
     {
@@ -48,9 +48,9 @@
     "/ai/providers": {
       "post": {
         "operationId": "database_post_ai_providers",
-        "summary": "Create ai providers",
+        "summary": "Add an AI provider",
         "tags": [
-          "Index"
+          "AI"
         ],
         "requestBody": {
           "content": {
@@ -176,9 +176,9 @@
       },
       "get": {
         "operationId": "database_get_ai_providers",
-        "summary": "Get ai providers",
+        "summary": "List the user's configured AI providers",
         "tags": [
-          "Index"
+          "AI"
         ],
         "responses": {
           "200": {
@@ -262,9 +262,9 @@
     "/ai/providers/{id}": {
       "patch": {
         "operationId": "database_patch_ai_providers_by-id",
-        "summary": "Update ai providers",
+        "summary": "Update an AI provider",
         "tags": [
-          "Index"
+          "AI"
         ],
         "parameters": [
           {
@@ -394,9 +394,9 @@
       },
       "delete": {
         "operationId": "database_delete_ai_providers_by-id",
-        "summary": "Delete ai providers",
+        "summary": "Delete an AI provider",
         "tags": [
-          "Index"
+          "AI"
         ],
         "parameters": [
           {
@@ -528,9 +528,10 @@
     "/ai/probe-models": {
       "post": {
         "operationId": "database_post_ai_probe-models",
-        "summary": "Create ai probe models",
+        "summary": "List models for a provider that has not been saved yet",
+        "description": "Lets the add-provider form fill its model picker before the provider exists, so nobody has to go and look up model names by hand.\n",
         "tags": [
-          "Index"
+          "AI"
         ],
         "requestBody": {
           "content": {
@@ -679,9 +680,9 @@
     "/ai/providers/{id}/models": {
       "get": {
         "operationId": "database_get_ai_providers_by-id_models",
-        "summary": "Get ai providers models",
+        "summary": "List models available from a provider",
         "tags": [
-          "Index"
+          "AI"
         ],
         "parameters": [
           {
@@ -815,9 +816,9 @@
     "/ai/conversations": {
       "get": {
         "operationId": "database_get_ai_conversations",
-        "summary": "Get ai conversations",
+        "summary": "List the user's AI conversations",
         "tags": [
-          "Index"
+          "AI"
         ],
         "responses": {
           "200": {
@@ -901,9 +902,9 @@
     "/ai/conversations/{id}": {
       "get": {
         "operationId": "database_get_ai_conversations_by-id",
-        "summary": "Get ai conversations",
+        "summary": "Get one conversation with its messages and proposals",
         "tags": [
-          "Index"
+          "AI"
         ],
         "parameters": [
           {
@@ -1053,9 +1054,9 @@
       },
       "delete": {
         "operationId": "database_delete_ai_conversations_by-id",
-        "summary": "Delete ai conversations",
+        "summary": "Delete a conversation",
         "tags": [
-          "Index"
+          "AI"
         ],
         "parameters": [
           {
@@ -1187,9 +1188,10 @@
     "/ai/chat/stream": {
       "post": {
         "operationId": "database_post_ai_chat_stream",
-        "summary": "Create ai chat stream",
+        "summary": "Send a message and stream the assistant's reply",
+        "description": "Server-sent events. Emits token, tool_call, tool_result, proposal, done and error frames.\n",
         "tags": [
-          "Index"
+          "AI"
         ],
         "requestBody": {
           "content": {
@@ -1314,9 +1316,10 @@
     "/ai/status": {
       "get": {
         "operationId": "database_get_ai_status",
-        "summary": "Get ai status",
+        "summary": "Whether the AI assistant is available to this user",
+        "description": "Deliberately not behind the AI gate: the frontend calls this to decide whether to render any AI surface at all, and needs a plain answer rather than a 403 when the feature is off.\n",
         "tags": [
-          "Index"
+          "AI"
         ],
         "responses": {
           "200": {
@@ -1404,9 +1407,10 @@
     "/ai/proposals/{id}/apply": {
       "post": {
         "operationId": "database_post_ai_proposals_by-id_apply",
-        "summary": "Create ai proposals apply",
+        "summary": "Apply a pending proposal",
+        "description": "Re-validates the stored payload and dispatches it through the same repository logic a manual action uses.\n",
         "tags": [
-          "Index"
+          "AI"
         ],
         "parameters": [
           {
@@ -1520,9 +1524,9 @@
     "/ai/proposals/{id}/reject": {
       "post": {
         "operationId": "database_post_ai_proposals_by-id_reject",
-        "summary": "Create ai proposals reject",
+        "summary": "Reject a pending proposal",
         "tags": [
-          "Index"
+          "AI"
         ],
         "parameters": [
           {
@@ -1654,7 +1658,8 @@
     "/database/import": {
       "post": {
         "operationId": "database_post_database_import",
-        "summary": "Create database import",
+        "summary": "Import user data",
+        "description": "Imports user data from a SQLite database file.",
         "tags": [
           "Database"
         ],
@@ -1879,7 +1884,8 @@
     "/database/export/preview": {
       "post": {
         "operationId": "database_post_database_export_preview",
-        "summary": "Create database export preview",
+        "summary": "Preview user data export",
+        "description": "Generates a preview of the user data export, including statistics about the data.",
         "tags": [
           "Database"
         ],
@@ -2050,7 +2056,8 @@
     "/database/restore": {
       "post": {
         "operationId": "database_post_database_restore",
-        "summary": "Create database restore",
+        "summary": "Restore database from backup",
+        "description": "Restores the database from an encrypted backup file.",
         "tags": [
           "Database"
         ],
@@ -2184,6 +2191,7 @@
       "get": {
         "operationId": "database_get_database_migration_status",
         "summary": "Get database migration status",
+        "description": "Returns the status of the database migration.",
         "tags": [
           "Database"
         ],
@@ -2323,6 +2331,7 @@
       "get": {
         "operationId": "database_get_database_migration_history",
         "summary": "Get database migration history",
+        "description": "Returns the history of database migrations.",
         "tags": [
           "Database"
         ],
@@ -2437,9 +2446,10 @@
     "/health": {
       "get": {
         "operationId": "database_get_health",
-        "summary": "Get health",
+        "summary": "Health check",
+        "description": "Returns the health status of the server.",
         "tags": [
-          "Database"
+          "General"
         ],
         "responses": {
           "200": {
@@ -2487,9 +2497,10 @@
     "/version": {
       "get": {
         "operationId": "database_get_version",
-        "summary": "Get version",
+        "summary": "Get version information",
+        "description": "Returns the local and remote version of the application.",
         "tags": [
-          "Database"
+          "General"
         ],
         "parameters": [
           {
@@ -2660,9 +2671,10 @@
     "/releases/rss": {
       "get": {
         "operationId": "database_get_releases_rss",
-        "summary": "Get releases rss",
+        "summary": "Get releases in RSS format",
+        "description": "Returns the latest releases from the GitHub repository in an RSS-like JSON format.",
         "tags": [
-          "Database"
+          "General"
         ],
         "parameters": [
           {
@@ -2671,7 +2683,8 @@
             "required": false,
             "schema": {
               "type": "integer"
-            }
+            },
+            "description": "The page number of the releases to fetch."
           },
           {
             "name": "per_page",
@@ -2679,7 +2692,8 @@
             "required": false,
             "schema": {
               "type": "integer"
-            }
+            },
+            "description": "The number of releases to fetch per page."
           }
         ],
         "responses": {
@@ -2875,8 +2889,9 @@
       "get": {
         "operationId": "database_get_encryption_status",
         "summary": "Get encryption status",
+        "description": "Returns the security status of the application.",
         "tags": [
-          "Database"
+          "Encryption"
         ],
         "responses": {
           "200": {
@@ -2997,9 +3012,10 @@
     "/encryption/initialize": {
       "post": {
         "operationId": "database_post_encryption_initialize",
-        "summary": "Create encryption initialize",
+        "summary": "Initialize security system",
+        "description": "Initializes the security system for the application.",
         "tags": [
-          "Database"
+          "Encryption"
         ],
         "responses": {
           "200": {
@@ -3090,9 +3106,10 @@
     "/encryption/regenerate": {
       "post": {
         "operationId": "database_post_encryption_regenerate",
-        "summary": "Create encryption regenerate",
+        "summary": "Regenerate JWT secret",
+        "description": "Regenerates the system JWT secret. This will invalidate all existing JWT tokens.",
         "tags": [
-          "Database"
+          "Encryption"
         ],
         "responses": {
           "200": {
@@ -3183,9 +3200,10 @@
     "/encryption/regenerate-jwt": {
       "post": {
         "operationId": "database_post_encryption_regenerate-jwt",
-        "summary": "Create encryption regenerate jwt",
+        "summary": "Regenerate JWT secret",
+        "description": "Regenerates the JWT secret. This will invalidate all existing JWT tokens.",
         "tags": [
-          "Database"
+          "Encryption"
         ],
         "responses": {
           "200": {
@@ -3270,7 +3288,8 @@
     "/database/export": {
       "post": {
         "operationId": "database_post_database_export",
-        "summary": "Create database export",
+        "summary": "Export user data",
+        "description": "Exports the user's data as a SQLite database file.",
         "tags": [
           "Database"
         ],
@@ -3370,9 +3389,10 @@
     "/users/acme-ssl-settings": {
       "get": {
         "operationId": "database_get_users_acme-ssl-settings",
-        "summary": "Get users acme ssl settings",
+        "summary": "Get ACME SSL settings",
+        "description": "Returns current ACME/Let's Encrypt configuration and certificate status.",
         "tags": [
-          "Acme Ssl"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -3494,9 +3514,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_acme-ssl-settings",
-        "summary": "Update users acme ssl settings",
+        "summary": "Update ACME SSL settings (admin only)",
+        "description": "Saves ACME/Let's Encrypt configuration.",
         "tags": [
-          "Acme Ssl"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -3668,9 +3689,10 @@
     "/users/acme-ssl-request": {
       "post": {
         "operationId": "database_post_users_acme-ssl-request",
-        "summary": "Create users acme ssl request",
+        "summary": "Request or renew Let's Encrypt certificate (admin only)",
+        "description": "Triggers certbot to issue or renew a certificate using the configured challenge method.",
         "tags": [
-          "Acme Ssl"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -3845,9 +3867,10 @@
     "/users/manual-ssl-upload": {
       "post": {
         "operationId": "database_post_users_manual-ssl-upload",
-        "summary": "Create users manual ssl upload",
+        "summary": "Upload a manual/custom SSL certificate and key (admin only)",
+        "description": "Validates and installs a user-supplied PEM certificate and private key as the active Termix SSL certificate.",
         "tags": [
-          "Acme Ssl"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -4040,9 +4063,9 @@
     "/notification-channels/{id}": {
       "put": {
         "operationId": "database_put_notification-channels_by-id",
-        "summary": "Replace notification channels",
+        "summary": "Update a notification channel",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "parameters": [
           {
@@ -4233,9 +4256,9 @@
       },
       "delete": {
         "operationId": "database_delete_notification-channels_by-id",
-        "summary": "Delete notification channels",
+        "summary": "Delete a notification channel",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "parameters": [
           {
@@ -4314,9 +4337,9 @@
     "/notification-channels/{id}/test": {
       "post": {
         "operationId": "database_post_notification-channels_by-id_test",
-        "summary": "Create notification channels test",
+        "summary": "Send a test notification",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "parameters": [
           {
@@ -4446,9 +4469,9 @@
     "/alert-rules": {
       "get": {
         "operationId": "database_get_alert-rules",
-        "summary": "Get alert rules",
+        "summary": "List alert rules for the current user",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "responses": {
           "200": {
@@ -4577,9 +4600,9 @@
       },
       "post": {
         "operationId": "database_post_alert-rules",
-        "summary": "Create alert rules",
+        "summary": "Create an alert rule",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "requestBody": {
           "content": {
@@ -4764,9 +4787,9 @@
     "/alert-rules/{id}": {
       "put": {
         "operationId": "database_put_alert-rules_by-id",
-        "summary": "Replace alert rules",
+        "summary": "Update an alert rule",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "parameters": [
           {
@@ -4979,9 +5002,9 @@
       },
       "delete": {
         "operationId": "database_delete_alert-rules_by-id",
-        "summary": "Delete alert rules",
+        "summary": "Delete an alert rule",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "parameters": [
           {
@@ -5060,9 +5083,9 @@
     "/notification-channels": {
       "get": {
         "operationId": "database_get_notification-channels",
-        "summary": "Get notification channels",
+        "summary": "List notification channels for the current user",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "responses": {
           "200": {
@@ -5162,9 +5185,9 @@
       },
       "post": {
         "operationId": "database_post_notification-channels",
-        "summary": "Create notification channels",
+        "summary": "Create a notification channel",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "requestBody": {
           "content": {
@@ -5307,9 +5330,9 @@
     "/alert-firings": {
       "get": {
         "operationId": "database_get_alert-firings",
-        "summary": "Get alert firings",
+        "summary": "List alert firings for the current user",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "parameters": [
           {
@@ -5476,9 +5499,9 @@
     "/alert-firings/{id}/acknowledge": {
       "post": {
         "operationId": "database_post_alert-firings_by-id_acknowledge",
-        "summary": "Create alert firings acknowledge",
+        "summary": "Acknowledge an alert firing",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "parameters": [
           {
@@ -5536,9 +5559,9 @@
     "/alert-firings/acknowledge-all": {
       "post": {
         "operationId": "database_post_alert-firings_acknowledge-all",
-        "summary": "Create alert firings acknowledge all",
+        "summary": "Acknowledge all alert firings for the current user",
         "tags": [
-          "Alert Rules"
+          "Alerts"
         ],
         "responses": {
           "200": {
@@ -5586,7 +5609,8 @@
     "/alerts": {
       "get": {
         "operationId": "database_get_alerts",
-        "summary": "Get alerts",
+        "summary": "Get active alerts",
+        "description": "Fetches active alerts for the authenticated user, excluding those that have been dismissed.",
         "tags": [
           "Alerts"
         ],
@@ -5681,7 +5705,8 @@
     "/alerts/dismiss": {
       "post": {
         "operationId": "database_post_alerts_dismiss",
-        "summary": "Create alerts dismiss",
+        "summary": "Dismiss an alert",
+        "description": "Marks an alert as dismissed for the authenticated user.",
         "tags": [
           "Alerts"
         ],
@@ -5820,7 +5845,8 @@
       },
       "delete": {
         "operationId": "database_delete_alerts_dismiss",
-        "summary": "Delete alerts dismiss",
+        "summary": "Undismiss an alert",
+        "description": "Removes an alert from the dismissed list for the authenticated user.",
         "tags": [
           "Alerts"
         ],
@@ -5936,7 +5962,8 @@
     "/alerts/dismissed": {
       "get": {
         "operationId": "database_get_alerts_dismissed",
-        "summary": "Get alerts dismissed",
+        "summary": "Get dismissed alerts",
+        "description": "Fetches a list of alerts that have been dismissed by the authenticated user.",
         "tags": [
           "Alerts"
         ],
@@ -6019,9 +6046,10 @@
     "/audit-logs/actions": {
       "get": {
         "operationId": "database_get_audit-logs_actions",
-        "summary": "Get audit logs actions",
+        "summary": "List distinct audit log action types",
+        "description": "Returns all distinct action values in the audit log for filter dropdowns. Admin only.",
         "tags": [
-          "Audit Log"
+          "Audit"
         ],
         "responses": {
           "200": {
@@ -6124,9 +6152,10 @@
     "/audit-logs/export": {
       "get": {
         "operationId": "database_get_audit-logs_export",
-        "summary": "Get audit logs export",
+        "summary": "Export audit logs",
+        "description": "Streams the full filtered result set as CSV or NDJSON. Accepts the same filters as GET /audit-logs. Admin only. The export is itself audited.",
         "tags": [
-          "Audit Log"
+          "Audit"
         ],
         "parameters": [
           {
@@ -6211,9 +6240,10 @@
     "/audit-logs": {
       "get": {
         "operationId": "database_get_audit-logs",
-        "summary": "Get audit logs",
+        "summary": "List audit logs",
+        "description": "Returns paginated, filterable audit log entries. Admin only.",
         "tags": [
-          "Audit Log"
+          "Audit"
         ],
         "parameters": [
           {
@@ -6343,7 +6373,8 @@
     "/automations": {
       "get": {
         "operationId": "database_get_automations",
-        "summary": "Get automations",
+        "summary": "List the current user's automations",
+        "description": "Returns every automation the caller owns, with its parsed definition and linked notification channels.",
         "tags": [
           "Automations"
         ],
@@ -6416,7 +6447,8 @@
       },
       "post": {
         "operationId": "database_post_automations",
-        "summary": "Create automations",
+        "summary": "Create an automation",
+        "description": "Validates the trigger and every step before storing the definition. A schedule trigger also registers its next due time.",
         "tags": [
           "Automations"
         ],
@@ -6649,7 +6681,7 @@
     "/automations/{id}": {
       "get": {
         "operationId": "database_get_automations_by-id",
-        "summary": "Get automations",
+        "summary": "Fetch a single automation",
         "tags": [
           "Automations"
         ],
@@ -6765,7 +6797,7 @@
       },
       "put": {
         "operationId": "database_put_automations_by-id",
-        "summary": "Replace automations",
+        "summary": "Update an automation",
         "tags": [
           "Automations"
         ],
@@ -6917,7 +6949,7 @@
       },
       "delete": {
         "operationId": "database_delete_automations_by-id",
-        "summary": "Delete automations",
+        "summary": "Delete an automation",
         "tags": [
           "Automations"
         ],
@@ -7051,7 +7083,8 @@
     "/automations/{id}/run": {
       "post": {
         "operationId": "database_post_automations_by-id_run",
-        "summary": "Create automations run",
+        "summary": "Run an automation now",
+        "description": "Runs immediately, as the automation's owner. Pass dryRun to record what each step would do without touching anything outside Termix.",
         "tags": [
           "Automations"
         ],
@@ -7413,7 +7446,7 @@
     "/automations/runs/{runId}/steps": {
       "get": {
         "operationId": "database_get_automations_runs_by-runId_steps",
-        "summary": "Get automations runs steps",
+        "summary": "Step-by-step results for a run",
         "tags": [
           "Automations"
         ],
@@ -7600,7 +7633,8 @@
     "/automations/webhook/{token}": {
       "post": {
         "operationId": "database_post_automations_webhook_by-token",
-        "summary": "Create automations webhook",
+        "summary": "Trigger an automation from an external system",
+        "description": "Unauthenticated by design; the 32-byte token in the path is the credential and is compared against a stored hash in constant time.",
         "tags": [
           "Automations"
         ],
@@ -7707,9 +7741,10 @@
     "/c2s-tunnel-presets": {
       "post": {
         "operationId": "database_post_c2s-tunnel-presets",
-        "summary": "Create c2s tunnel presets",
+        "summary": "Create a client tunnel preset",
+        "description": "Saves a named client-to-server tunnel configuration for the authenticated user.",
         "tags": [
-          "C2s Tunnel Presets"
+          "Tunnel Presets"
         ],
         "requestBody": {
           "content": {
@@ -7954,9 +7989,10 @@
       },
       "get": {
         "operationId": "database_get_c2s-tunnel-presets",
-        "summary": "Get c2s tunnel presets",
+        "summary": "List client tunnel presets",
+        "description": "Returns the authenticated user's saved client-to-server tunnel presets.",
         "tags": [
-          "C2s Tunnel Presets"
+          "Tunnel Presets"
         ],
         "responses": {
           "200": {
@@ -8050,9 +8086,10 @@
     "/c2s-tunnel-presets/{id}": {
       "put": {
         "operationId": "database_put_c2s-tunnel-presets_by-id",
-        "summary": "Replace c2s tunnel presets",
+        "summary": "Update a client tunnel preset",
+        "description": "Updates the name or config of one of the authenticated user's tunnel presets.",
         "tags": [
-          "C2s Tunnel Presets"
+          "Tunnel Presets"
         ],
         "parameters": [
           {
@@ -8328,9 +8365,10 @@
       },
       "delete": {
         "operationId": "database_delete_c2s-tunnel-presets_by-id",
-        "summary": "Delete c2s tunnel presets",
+        "summary": "Delete a client tunnel preset",
+        "description": "Deletes one of the authenticated user's tunnel presets.",
         "tags": [
-          "C2s Tunnel Presets"
+          "Tunnel Presets"
         ],
         "parameters": [
           {
@@ -8462,9 +8500,10 @@
     "/credentials/reorder": {
       "put": {
         "operationId": "database_put_credentials_reorder",
-        "summary": "Replace credentials reorder",
+        "summary": "Reorder credentials",
+        "description": "Sets a manual sortOrder for multiple credentials within the same folder, used by drag-to-reorder in the sidebar's manual sort mode.",
         "tags": [
-          "Credential Bulk"
+          "Credentials"
         ],
         "requestBody": {
           "content": {
@@ -8583,9 +8622,10 @@
     "/credentials/{id}/deploy-to-host": {
       "post": {
         "operationId": "database_post_credentials_by-id_deploy-to-host",
-        "summary": "Create credentials deploy to host",
+        "summary": "Deploy SSH key to a host",
+        "description": "Deploys an SSH public key to a target host's authorized_keys file.",
         "tags": [
-          "Credential Deploy"
+          "Credentials"
         ],
         "parameters": [
           {
@@ -8780,9 +8820,10 @@
     "/credentials/detect-public-key-type": {
       "post": {
         "operationId": "database_post_credentials_detect-public-key-type",
-        "summary": "Create credentials detect public key type",
+        "summary": "Detect SSH public key type",
+        "description": "Detects the type of an SSH public key.",
         "tags": [
-          "Credential Key"
+          "Credentials"
         ],
         "requestBody": {
           "content": {
@@ -8910,9 +8951,10 @@
     "/credentials/validate-key-pair": {
       "post": {
         "operationId": "database_post_credentials_validate-key-pair",
-        "summary": "Create credentials validate key pair",
+        "summary": "Validate SSH key pair",
+        "description": "Validates if a given SSH private key and public key match.",
         "tags": [
-          "Credential Key"
+          "Credentials"
         ],
         "requestBody": {
           "content": {
@@ -9051,9 +9093,10 @@
     "/credentials/generate-key-pair": {
       "post": {
         "operationId": "database_post_credentials_generate-key-pair",
-        "summary": "Create credentials generate key pair",
+        "summary": "Generate new SSH key pair",
+        "description": "Generates a new SSH key pair.",
         "tags": [
-          "Credential Key"
+          "Credentials"
         ],
         "requestBody": {
           "content": {
@@ -9197,9 +9240,10 @@
     "/credentials/generate-public-key": {
       "post": {
         "operationId": "database_post_credentials_generate-public-key",
-        "summary": "Create credentials generate public key",
+        "summary": "Generate public key from private key",
+        "description": "Generates a public key from a given private key.",
         "tags": [
-          "Credential Key"
+          "Credentials"
         ],
         "requestBody": {
           "content": {
@@ -9401,9 +9445,10 @@
     "/credentials/detect-key-type": {
       "post": {
         "operationId": "database_post_credentials_detect-key-type",
-        "summary": "Create credentials detect key type",
+        "summary": "Detect SSH key type",
+        "description": "Detects the type of an SSH private key.",
         "tags": [
-          "Credential Key"
+          "Credentials"
         ],
         "requestBody": {
           "content": {
@@ -9539,9 +9584,10 @@
     "/credential-sidebar/preferences": {
       "get": {
         "operationId": "database_get_credential-sidebar_preferences",
-        "summary": "Get credential sidebar preferences",
+        "summary": "Get the credential sidebar preferences for the current user",
+        "description": "Returns the current user's saved credential sidebar preferences (sort, filters, open folders, display settings). Unlike /host-sidebar/preferences, there is no legacy-column migration to perform here — credentials never had exploded preference columns on userPreferences — so a first-time GET simply returns the defaults without writing a row; a row is only created once the user actually changes something via PUT.",
         "tags": [
-          "Credential Sidebar Preferences"
+          "Credential Sidebar"
         ],
         "responses": {
           "200": {
@@ -9727,9 +9773,10 @@
       },
       "put": {
         "operationId": "database_put_credential-sidebar_preferences",
-        "summary": "Replace credential sidebar preferences",
+        "summary": "Update the credential sidebar preferences for the current user",
+        "description": "Persists the current user's credential sidebar preferences (sort, filters, open folders, display settings) as a single JSON document.",
         "tags": [
-          "Credential Sidebar Preferences"
+          "Credential Sidebar"
         ],
         "requestBody": {
           "content": {
@@ -9891,7 +9938,8 @@
     "/credentials/folders/rename": {
       "put": {
         "operationId": "database_put_credentials_folders_rename",
-        "summary": "Replace credentials folders rename",
+        "summary": "Rename a credential folder",
+        "description": "Renames a credential folder for the authenticated user.",
         "tags": [
           "Credentials"
         ],
@@ -10023,7 +10071,8 @@
     "/credentials": {
       "get": {
         "operationId": "database_get_credentials",
-        "summary": "Get credentials",
+        "summary": "Get all credentials",
+        "description": "Retrieves all SSH credentials for the authenticated user.",
         "tags": [
           "Credentials"
         ],
@@ -10124,7 +10173,8 @@
       },
       "post": {
         "operationId": "database_post_credentials",
-        "summary": "Create credentials",
+        "summary": "Create a new credential",
+        "description": "Creates a new SSH credential for the authenticated user.",
         "tags": [
           "Credentials"
         ],
@@ -10278,7 +10328,8 @@
     "/credentials/folders": {
       "get": {
         "operationId": "database_get_credentials_folders",
-        "summary": "Get credentials folders",
+        "summary": "Get credential folders",
+        "description": "Retrieves all unique credential folders for the authenticated user.",
         "tags": [
           "Credentials"
         ],
@@ -10375,7 +10426,8 @@
     "/credentials/{id}": {
       "get": {
         "operationId": "database_get_credentials_by-id",
-        "summary": "Get credentials",
+        "summary": "Get a specific credential",
+        "description": "Retrieves a specific credential by its ID, including secrets.",
         "tags": [
           "Credentials"
         ],
@@ -10502,7 +10554,8 @@
       },
       "put": {
         "operationId": "database_put_credentials_by-id",
-        "summary": "Replace credentials",
+        "summary": "Update a credential",
+        "description": "Updates a specific credential by its ID.",
         "tags": [
           "Credentials"
         ],
@@ -10673,7 +10726,8 @@
       },
       "delete": {
         "operationId": "database_delete_credentials_by-id",
-        "summary": "Delete credentials",
+        "summary": "Delete a credential",
+        "description": "Deletes a specific credential by its ID.",
         "tags": [
           "Credentials"
         ],
@@ -10811,7 +10865,8 @@
     "/credentials/{id}/duplicate": {
       "post": {
         "operationId": "database_post_credentials_by-id_duplicate",
-        "summary": "Create credentials duplicate",
+        "summary": "Duplicate a credential",
+        "description": "Creates a new credential from an existing one, optionally overriding fields (e.g. password), leaving the original credential untouched.",
         "tags": [
           "Credentials"
         ],
@@ -10968,7 +11023,8 @@
     "/credentials/{id}/apply-to-host/{hostId}": {
       "post": {
         "operationId": "database_post_credentials_by-id_apply-to-host_by-hostId",
-        "summary": "Create credentials apply to host",
+        "summary": "Apply a credential to a host",
+        "description": "Applies a credential to an SSH host for quick application.",
         "tags": [
           "Credentials"
         ],
@@ -11101,7 +11157,8 @@
     "/credentials/{id}/hosts": {
       "get": {
         "operationId": "database_get_credentials_by-id_hosts",
-        "summary": "Get credentials hosts",
+        "summary": "Get hosts using a credential",
+        "description": "Retrieves a list of hosts that are using a specific credential.",
         "tags": [
           "Credentials"
         ],
@@ -11206,9 +11263,10 @@
     "/service-links/{id}": {
       "delete": {
         "operationId": "dashboard_delete_service-links_by-id",
-        "summary": "Delete service links",
+        "summary": "Delete service link",
+        "description": "Deletes a dashboard service link by ID.",
         "tags": [
-          "Dashboard Service Links"
+          "Dashboard"
         ],
         "parameters": [
           {
@@ -11337,9 +11395,10 @@
       },
       "put": {
         "operationId": "dashboard_put_service-links_by-id",
-        "summary": "Replace service links",
+        "summary": "Update service link",
+        "description": "Updates label or url of a dashboard service link.",
         "tags": [
-          "Dashboard Service Links"
+          "Dashboard"
         ],
         "parameters": [
           {
@@ -11486,8 +11545,9 @@
       "get": {
         "operationId": "dashboard_get_service-links",
         "summary": "Get service links",
+        "description": "Returns all dashboard service links for the authenticated user.",
         "tags": [
-          "Dashboard Service Links"
+          "Dashboard"
         ],
         "responses": {
           "200": {
@@ -11559,9 +11619,10 @@
       },
       "post": {
         "operationId": "dashboard_post_service-links",
-        "summary": "Create service links",
+        "summary": "Create service link",
+        "description": "Creates a new dashboard service link for the authenticated user.",
         "tags": [
-          "Dashboard Service Links"
+          "Dashboard"
         ],
         "requestBody": {
           "content": {
@@ -11676,9 +11737,10 @@
     "/fleets/{id}/transfer/pull": {
       "post": {
         "operationId": "database_post_fleets_by-id_transfer_pull",
-        "summary": "Create fleets transfer pull",
+        "summary": "Pull the same remote path from every host in a fleet",
+        "description": "Fans out concurrently to every effective member host the caller has edit-level access to, reads remotePath via SFTP from each, and returns a single zip archive with one entry per successful host (<hostName>/<filename>). Single file only (v1).",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -11820,9 +11882,10 @@
     "/fleets/{id}/inventory": {
       "get": {
         "operationId": "database_get_fleets_by-id_inventory",
-        "summary": "Get fleets inventory",
+        "summary": "Read the last-known inventory snapshot for a fleet's members",
+        "description": "No live connection - reads back whatever the most recent POST refresh stored. Latest-only per host, no history.",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -11967,9 +12030,10 @@
       },
       "post": {
         "operationId": "database_post_fleets_by-id_inventory",
-        "summary": "Create fleets inventory",
+        "summary": "Refresh the inventory snapshot for every host in a fleet",
+        "description": "Connects to every effective member host the caller has view-level access to, collects OS/kernel/arch/hostname/uptime, and overwrites the stored latest-only snapshot per host.",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -12131,9 +12195,10 @@
     "/fleets/{id}/packages": {
       "post": {
         "operationId": "database_post_fleets_by-id_packages",
-        "summary": "Create fleets packages",
+        "summary": "Run a package action across every host in a fleet",
+        "description": "Auto-detects each host's package manager (apt/dnf/yum/pacman) and runs install/remove/upgrade-all, elevating with the host's stored sudo password. Requires manage-level access per host.",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -12337,9 +12402,9 @@
     "/fleets": {
       "post": {
         "operationId": "database_post_fleets",
-        "summary": "Create fleets",
+        "summary": "Create a fleet",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "requestBody": {
           "content": {
@@ -12476,9 +12541,9 @@
       },
       "get": {
         "operationId": "database_get_fleets",
-        "summary": "Get fleets",
+        "summary": "List the current user's fleets",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "responses": {
           "200": {
@@ -12565,9 +12630,9 @@
     "/fleets/{id}": {
       "patch": {
         "operationId": "database_patch_fleets_by-id",
-        "summary": "Update fleets",
+        "summary": "Update a fleet",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -12729,9 +12794,9 @@
       },
       "delete": {
         "operationId": "database_delete_fleets_by-id",
-        "summary": "Delete fleets",
+        "summary": "Delete a fleet",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -12863,9 +12928,10 @@
     "/fleets/{id}/members": {
       "get": {
         "operationId": "database_get_fleets_by-id_members",
-        "summary": "Get fleets members",
+        "summary": "List the resolved effective members of a fleet",
+        "description": "Returns the union of statically-added hosts and hosts matched by the fleet's tag rules, each annotated with the caller's permission level on that host.",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -13033,9 +13099,9 @@
       },
       "post": {
         "operationId": "database_post_fleets_by-id_members",
-        "summary": "Create fleets members",
+        "summary": "Add a host to a fleet's static membership",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -13191,9 +13257,10 @@
     "/fleets/{id}/members/{hostId}": {
       "delete": {
         "operationId": "database_delete_fleets_by-id_members_by-hostId",
-        "summary": "Delete fleets members",
+        "summary": "Remove a host from a fleet's static membership",
+        "description": "Only removes the static membership row - a host still matched by the fleet's tag rules remains an effective member.",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -13333,9 +13400,10 @@
     "/fleets/{id}/share": {
       "post": {
         "operationId": "database_post_fleets_by-id_share",
-        "summary": "Create fleets share",
+        "summary": "Share a fleet's current member hosts with users or roles",
+        "description": "Snapshot at share time - grants hostAccess for every current member host to each target. Hosts added to the fleet later are not automatically shared; re-run this route to extend sharing to new members.",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -13559,9 +13627,10 @@
     "/fleets/{id}/execute": {
       "post": {
         "operationId": "database_post_fleets_by-id_execute",
-        "summary": "Create fleets execute",
+        "summary": "Run a command across every host in a fleet",
+        "description": "Fans out concurrently to every effective member host the caller has edit-level access to. $HOST/$USER/$PORT/$NAME/$INPUT_n substitution is applied per host, same grammar as snippet execution. One host failing does not stop the others.",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -13773,9 +13842,10 @@
     "/fleets/{id}/transfer/push": {
       "post": {
         "operationId": "database_post_fleets_by-id_transfer_push",
-        "summary": "Create fleets transfer push",
+        "summary": "Push an uploaded file to the same remote path on every host in a fleet",
+        "description": "Fans out concurrently to every effective member host the caller has edit-level access to. Single file only (v1) - the file is buffered once server-side and written to each host via SFTP.",
         "tags": [
-          "Fleet"
+          "Fleets"
         ],
         "parameters": [
           {
@@ -13976,9 +14046,10 @@
     "/homepage/favicon": {
       "get": {
         "operationId": "homepage_get_homepage_favicon",
-        "summary": "Get homepage favicon",
+        "summary": "Proxy favicon fetch",
+        "description": "Fetches and caches a site favicon server-side to avoid CORS issues.",
         "tags": [
-          "Homepage Favicon"
+          "Homepage"
         ],
         "parameters": [
           {
@@ -14072,9 +14143,10 @@
     "/homepage/items/{id}": {
       "put": {
         "operationId": "homepage_put_homepage_items_by-id",
-        "summary": "Replace homepage items",
+        "summary": "Update homepage item",
+        "description": "Updates a homepage widget item.",
         "tags": [
-          "Homepage Items"
+          "Homepage"
         ],
         "parameters": [
           {
@@ -14213,9 +14285,10 @@
       },
       "delete": {
         "operationId": "homepage_delete_homepage_items_by-id",
-        "summary": "Delete homepage items",
+        "summary": "Delete homepage item",
+        "description": "Deletes a homepage widget item and cascades deletion to children if a folder.",
         "tags": [
-          "Homepage Items"
+          "Homepage"
         ],
         "parameters": [
           {
@@ -14347,8 +14420,9 @@
       "get": {
         "operationId": "homepage_get_homepage_items",
         "summary": "Get homepage items",
+        "description": "Returns all homepage widget items for the authenticated user.",
         "tags": [
-          "Homepage Items"
+          "Homepage"
         ],
         "responses": {
           "200": {
@@ -14420,9 +14494,10 @@
       },
       "post": {
         "operationId": "homepage_post_homepage_items",
-        "summary": "Create homepage items",
+        "summary": "Create homepage item",
+        "description": "Creates a new homepage widget item for the authenticated user.",
         "tags": [
-          "Homepage Items"
+          "Homepage"
         ],
         "requestBody": {
           "content": {
@@ -14535,8 +14610,9 @@
       "get": {
         "operationId": "homepage_get_homepage_layout",
         "summary": "Get homepage layout",
+        "description": "Returns the homepage canvas layout (widget positions, pan, zoom) for the authenticated user.",
         "tags": [
-          "Homepage Layout"
+          "Homepage"
         ],
         "responses": {
           "200": {
@@ -14620,9 +14696,10 @@
       },
       "put": {
         "operationId": "homepage_put_homepage_layout",
-        "summary": "Replace homepage layout",
+        "summary": "Save homepage layout",
+        "description": "Saves or updates the homepage canvas layout for the authenticated user.",
         "tags": [
-          "Homepage Layout"
+          "Homepage"
         ],
         "responses": {
           "200": {
@@ -14699,9 +14776,9 @@
     "/homepage/ping": {
       "get": {
         "operationId": "homepage_get_homepage_ping",
-        "summary": "Get homepage ping",
+        "summary": "Check the HTTP reachability and latency of a URL",
         "tags": [
-          "Homepage Ping"
+          "Homepage"
         ],
         "parameters": [
           {
@@ -14849,9 +14926,9 @@
     "/homepage/proxy": {
       "get": {
         "operationId": "homepage_get_homepage_proxy",
-        "summary": "Get homepage proxy",
+        "summary": "Proxy a JSON API URL and return the parsed response",
         "tags": [
-          "Homepage Proxy"
+          "Homepage"
         ],
         "parameters": [
           {
@@ -14951,9 +15028,9 @@
     "/homepage/rss": {
       "get": {
         "operationId": "homepage_get_homepage_rss",
-        "summary": "Get homepage rss",
+        "summary": "Proxy and parse an RSS/Atom feed",
         "tags": [
-          "Homepage Rss"
+          "Homepage"
         ],
         "parameters": [
           {
@@ -15082,9 +15159,10 @@
     "/host/autostart/disable": {
       "delete": {
         "operationId": "database_delete_host_autostart_disable",
-        "summary": "Delete host autostart disable",
+        "summary": "Disable autostart for SSH configuration",
+        "description": "Disables autostart for a specific SSH configuration.",
         "tags": [
-          "Host Autostart"
+          "SSH"
         ],
         "responses": {
           "200": {
@@ -15189,9 +15267,10 @@
     "/host/autostart/status": {
       "get": {
         "operationId": "database_get_host_autostart_status",
-        "summary": "Get host autostart status",
+        "summary": "Get autostart status",
+        "description": "Retrieves the autostart status for the user's SSH configurations.",
         "tags": [
-          "Host Autostart"
+          "SSH"
         ],
         "responses": {
           "200": {
@@ -15307,9 +15386,10 @@
     "/host/autostart/enable": {
       "post": {
         "operationId": "database_post_host_autostart_enable",
-        "summary": "Create host autostart enable",
+        "summary": "Enable autostart for SSH configuration",
+        "description": "Enables autostart for a specific SSH configuration.",
         "tags": [
-          "Host Autostart"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -15611,9 +15691,10 @@
     "/host/reorder": {
       "put": {
         "operationId": "database_put_host_reorder",
-        "summary": "Replace host reorder",
+        "summary": "Reorder hosts",
+        "description": "Sets a manual sortOrder for multiple hosts within the same folder, used by drag-to-reorder in the sidebar's manual sort mode.",
         "tags": [
-          "Host Bulk"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -15732,9 +15813,10 @@
     "/host/bulk-import": {
       "post": {
         "operationId": "database_post_host_bulk-import",
-        "summary": "Create host bulk import",
+        "summary": "Bulk import SSH hosts",
+        "description": "Bulk imports multiple SSH hosts.",
         "tags": [
-          "Host Bulk"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -15861,9 +15943,10 @@
     "/host/ssh-config-import": {
       "post": {
         "operationId": "database_post_host_ssh-config-import",
-        "summary": "Create host ssh config import",
+        "summary": "Import hosts from an OpenSSH config file",
+        "description": "Parses an OpenSSH ~/.ssh/config file and imports the defined hosts.",
         "tags": [
-          "Host Bulk"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -15991,9 +16074,10 @@
     "/host/command-history/{hostId}": {
       "get": {
         "operationId": "database_get_host_command-history_by-hostId",
-        "summary": "Get host command history",
+        "summary": "Get command history",
+        "description": "Retrieves the command history for a specific host.",
         "tags": [
-          "Host Command History"
+          "SSH"
         ],
         "parameters": [
           {
@@ -16090,9 +16174,10 @@
     "/host/command-history": {
       "delete": {
         "operationId": "database_delete_host_command-history",
-        "summary": "Delete host command history",
+        "summary": "Delete command from history",
+        "description": "Deletes a specific command from the history of a host.",
         "tags": [
-          "Host Command History"
+          "SSH"
         ],
         "responses": {
           "200": {
@@ -16185,9 +16270,10 @@
     "/host/file_manager/recent": {
       "delete": {
         "operationId": "database_delete_host_file_manager_recent",
-        "summary": "Delete host file manager recent",
+        "summary": "Remove recent file",
+        "description": "Removes a file from the list of recent files for a host.",
         "tags": [
-          "Host File Manager Bookmark"
+          "SSH"
         ],
         "responses": {
           "200": {
@@ -16290,9 +16376,10 @@
       },
       "get": {
         "operationId": "database_get_host_file_manager_recent",
-        "summary": "Get host file manager recent",
+        "summary": "Get recent files",
+        "description": "Retrieves a list of recent files for a specific host.",
         "tags": [
-          "Host File Manager Bookmark"
+          "SSH"
         ],
         "parameters": [
           {
@@ -16395,9 +16482,10 @@
       },
       "post": {
         "operationId": "database_post_host_file_manager_recent",
-        "summary": "Create host file manager recent",
+        "summary": "Add recent file",
+        "description": "Adds a file to the list of recent files for a host.",
         "tags": [
-          "Host File Manager Bookmark"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -16523,9 +16611,10 @@
     "/host/file_manager/pinned": {
       "get": {
         "operationId": "database_get_host_file_manager_pinned",
-        "summary": "Get host file manager pinned",
+        "summary": "Get pinned files",
+        "description": "Retrieves a list of pinned files for a specific host.",
         "tags": [
-          "Host File Manager Bookmark"
+          "SSH"
         ],
         "parameters": [
           {
@@ -16628,9 +16717,10 @@
       },
       "post": {
         "operationId": "database_post_host_file_manager_pinned",
-        "summary": "Create host file manager pinned",
+        "summary": "Add pinned file",
+        "description": "Adds a file to the list of pinned files for a host.",
         "tags": [
-          "Host File Manager Bookmark"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -16775,9 +16865,10 @@
       },
       "delete": {
         "operationId": "database_delete_host_file_manager_pinned",
-        "summary": "Delete host file manager pinned",
+        "summary": "Remove pinned file",
+        "description": "Removes a file from the list of pinned files for a host.",
         "tags": [
-          "Host File Manager Bookmark"
+          "SSH"
         ],
         "responses": {
           "200": {
@@ -16882,9 +16973,10 @@
     "/host/file_manager/shortcuts": {
       "get": {
         "operationId": "database_get_host_file_manager_shortcuts",
-        "summary": "Get host file manager shortcuts",
+        "summary": "Get shortcuts",
+        "description": "Retrieves a list of shortcuts for a specific host.",
         "tags": [
-          "Host File Manager Bookmark"
+          "SSH"
         ],
         "parameters": [
           {
@@ -16987,9 +17079,10 @@
       },
       "post": {
         "operationId": "database_post_host_file_manager_shortcuts",
-        "summary": "Create host file manager shortcuts",
+        "summary": "Add shortcut",
+        "description": "Adds a shortcut for a specific host.",
         "tags": [
-          "Host File Manager Bookmark"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -17134,9 +17227,10 @@
       },
       "delete": {
         "operationId": "database_delete_host_file_manager_shortcuts",
-        "summary": "Delete host file manager shortcuts",
+        "summary": "Remove shortcut",
+        "description": "Removes a shortcut for a specific host.",
         "tags": [
-          "Host File Manager Bookmark"
+          "SSH"
         ],
         "responses": {
           "200": {
@@ -17241,9 +17335,10 @@
     "/host/folders": {
       "get": {
         "operationId": "database_get_host_folders",
-        "summary": "Get host folders",
+        "summary": "Get all folders",
+        "description": "Retrieves all folders for the authenticated user.",
         "tags": [
-          "Host Folder"
+          "SSH"
         ],
         "responses": {
           "200": {
@@ -17338,9 +17433,10 @@
     "/host/folders/metadata": {
       "put": {
         "operationId": "database_put_host_folders_metadata",
-        "summary": "Replace host folders metadata",
+        "summary": "Update folder metadata",
+        "description": "Updates the metadata (color, icon, assigned credential) of a folder.",
         "tags": [
-          "Host Folder"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -17486,9 +17582,10 @@
     "/host/folders/reorder": {
       "put": {
         "operationId": "database_put_host_folders_reorder",
-        "summary": "Replace host folders reorder",
+        "summary": "Reorder folders",
+        "description": "Sets a manual sortOrder for multiple sibling folders, used by drag-to-reorder in the sidebar's manual sort mode. Folders with no existing metadata row are created.",
         "tags": [
-          "Host Folder"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -17607,9 +17704,10 @@
     "/host/folders/{name}/hosts": {
       "delete": {
         "operationId": "database_delete_host_folders_by-name_hosts",
-        "summary": "Delete host folders hosts",
+        "summary": "Delete all hosts in folder",
+        "description": "Deletes all SSH hosts within a specific folder.",
         "tags": [
-          "Host Folder"
+          "SSH"
         ],
         "parameters": [
           {
@@ -17724,9 +17822,10 @@
     "/host/folders/rename": {
       "put": {
         "operationId": "database_put_host_folders_rename",
-        "summary": "Replace host folders rename",
+        "summary": "Rename folder",
+        "description": "Renames a folder for SSH hosts and credentials.",
         "tags": [
-          "Host Folder"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -17873,9 +17972,10 @@
     "/host/db/host/internal/all": {
       "get": {
         "operationId": "database_get_host_db_host_internal_all",
-        "summary": "Get host db host internal all",
+        "summary": "Get all internal SSH host data",
+        "description": "Returns all internal SSH host data. Requires internal auth token.",
         "tags": [
-          "Host Internal"
+          "SSH"
         ],
         "parameters": [
           {
@@ -18075,9 +18175,10 @@
     "/host/db/host/internal": {
       "get": {
         "operationId": "database_get_host_db_host_internal",
-        "summary": "Get host db host internal",
+        "summary": "Get internal SSH host data",
+        "description": "Returns internal SSH host data for autostart tunnels. Requires internal auth token.",
         "tags": [
-          "Host Internal"
+          "SSH"
         ],
         "parameters": [
           {
@@ -18279,9 +18380,10 @@
     "/host/db/proxy/test": {
       "post": {
         "operationId": "database_post_host_db_proxy_test",
-        "summary": "Create host db proxy test",
+        "summary": "Test proxy connectivity",
+        "description": "Tests connectivity through a proxy configuration to a target host.",
         "tags": [
-          "Host Network"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -18524,9 +18626,9 @@
     "/host/opkssh-callback": {
       "get": {
         "operationId": "database_get_host_opkssh-callback",
-        "summary": "Get host opkssh callback",
+        "summary": "Static OAuth callback from OIDC provider for OPKSSH authentication",
         "tags": [
-          "Host Opkssh"
+          "SSH"
         ],
         "parameters": [
           {
@@ -18610,9 +18712,10 @@
     "/host-sidebar/preferences": {
       "put": {
         "operationId": "database_put_host-sidebar_preferences",
-        "summary": "Replace host sidebar preferences",
+        "summary": "Update the host sidebar preferences for the current user",
+        "description": "Persists the current user's sidebar preferences (sort, group, filters, open folders, display settings) as a single JSON document.",
         "tags": [
-          "Host Sidebar Preferences"
+          "Host Sidebar"
         ],
         "requestBody": {
           "content": {
@@ -18787,9 +18890,10 @@
       },
       "get": {
         "operationId": "database_get_host-sidebar_preferences",
-        "summary": "Get host sidebar preferences",
+        "summary": "Get the host sidebar preferences for the current user",
+        "description": "Returns the current user's saved sidebar preferences (sort, group, filters, open folders, display settings). On first access, seeds the preferences from the legacy per-column user-preferences fields (showHostTags, hostTrayOnClick, compactHostView, statusColorScheme) so existing settings are not lost.",
         "tags": [
-          "Host Sidebar Preferences"
+          "Host Sidebar"
         ],
         "responses": {
           "200": {
@@ -18915,9 +19019,10 @@
     "/host/db/host": {
       "post": {
         "operationId": "database_post_host_db_host",
-        "summary": "Create host db host",
+        "summary": "Create SSH host",
+        "description": "Creates a new SSH host configuration.",
         "tags": [
-          "Host"
+          "SSH"
         ],
         "parameters": [
           {
@@ -20254,9 +20359,10 @@
       },
       "get": {
         "operationId": "database_get_host_db_host",
-        "summary": "Get host db host",
+        "summary": "Get all SSH hosts",
+        "description": "Retrieves all SSH hosts for the authenticated user.",
         "tags": [
-          "Host"
+          "SSH"
         ],
         "responses": {
           "200": {
@@ -20913,9 +21019,10 @@
     "/host/enroll": {
       "post": {
         "operationId": "database_post_host_enroll",
-        "summary": "Create host enroll",
+        "summary": "Enroll a host with an API key",
+        "description": "Creates a host owned by the user assigned to the API key. The user's encrypted data must be unlocked by an active sign-in.",
         "tags": [
-          "Host"
+          "Host Enrollment"
         ],
         "parameters": [
           {
@@ -22232,9 +22339,10 @@
     "/host/db/host/{id}": {
       "get": {
         "operationId": "database_get_host_db_host_by-id",
-        "summary": "Get host db host",
+        "summary": "Get SSH host by ID",
+        "description": "Retrieves a specific SSH host by its ID.",
         "tags": [
-          "Host"
+          "SSH"
         ],
         "parameters": [
           {
@@ -23014,9 +23122,10 @@
       },
       "delete": {
         "operationId": "database_delete_host_db_host_by-id",
-        "summary": "Delete host db host",
+        "summary": "Delete SSH host",
+        "description": "Deletes an SSH host by its ID.",
         "tags": [
-          "Host"
+          "SSH"
         ],
         "parameters": [
           {
@@ -23151,9 +23260,10 @@
       },
       "put": {
         "operationId": "database_put_host_db_host_by-id",
-        "summary": "Replace host db host",
+        "summary": "Update SSH host",
+        "description": "Updates an existing SSH host configuration.",
         "tags": [
-          "Host"
+          "SSH"
         ],
         "parameters": [
           {
@@ -24539,9 +24649,10 @@
     "/host/db/host/{id}/password": {
       "get": {
         "operationId": "database_get_host_db_host_by-id_password",
-        "summary": "Get host db host password",
+        "summary": "Get host password for clipboard copy",
+        "description": "Returns the password for a specific host. Used by the copy-password feature.",
         "tags": [
-          "Host"
+          "SSH"
         ],
         "parameters": [
           {
@@ -24672,9 +24783,10 @@
     "/host/db/host/{id}/export": {
       "get": {
         "operationId": "database_get_host_db_host_by-id_export",
-        "summary": "Get host db host export",
+        "summary": "Export SSH host",
+        "description": "Exports a specific SSH host with decrypted credentials.",
         "tags": [
-          "Host"
+          "SSH"
         ],
         "parameters": [
           {
@@ -25044,9 +25156,10 @@
     "/host/db/hosts/export": {
       "get": {
         "operationId": "database_get_host_db_hosts_export",
-        "summary": "Get host db hosts export",
+        "summary": "Export all SSH hosts",
+        "description": "Exports all SSH hosts for the current user. By default credentials are decrypted and embedded. With `share=1`, secrets are omitted and credential-authenticated hosts instead reference a scrubbed `credentials` array by alias, suitable for handing off to another user.",
         "tags": [
-          "Host"
+          "SSH"
         ],
         "parameters": [
           {
@@ -25055,7 +25168,8 @@
             "required": false,
             "schema": {
               "type": "boolean"
-            }
+            },
+            "description": "Set to \"1\" to export without embedded secrets."
           }
         ],
         "responses": {
@@ -25664,9 +25778,10 @@
     "/host/quick-connect": {
       "post": {
         "operationId": "database_post_host_quick-connect",
-        "summary": "Create host quick connect",
+        "summary": "Create a temporary SSH connection without saving to database",
+        "description": "Returns a temporary host configuration for immediate use",
         "tags": [
-          "Host"
+          "SSH"
         ],
         "requestBody": {
           "content": {
@@ -26032,9 +26147,10 @@
     "/users/ldap/login": {
       "post": {
         "operationId": "database_post_users_ldap_login",
-        "summary": "Create users ldap login",
+        "summary": "LDAP login",
+        "description": "Authenticates a user against an LDAP server.",
         "tags": [
-          "Ldap Auth"
+          "SSO"
         ],
         "requestBody": {
           "content": {
@@ -26217,7 +26333,8 @@
     "/network-topology": {
       "post": {
         "operationId": "database_post_network-topology",
-        "summary": "Create network topology",
+        "summary": "Save network topology for authenticated user",
+        "description": "Saves or updates the network topology graph. Uses upsert logic - creates new record if none exists, updates existing record otherwise.",
         "tags": [
           "Network Topology"
         ],
@@ -26354,7 +26471,8 @@
       },
       "get": {
         "operationId": "database_get_network-topology",
-        "summary": "Get network topology",
+        "summary": "Get network topology for authenticated user",
+        "description": "Retrieves the saved network topology graph (nodes and edges) for the current user. Returns null if no topology exists.",
         "tags": [
           "Network Topology"
         ],
@@ -26452,7 +26570,7 @@
     "/open-tabs": {
       "post": {
         "operationId": "database_post_open-tabs",
-        "summary": "Create open tabs",
+        "summary": "Upsert a single open tab for the current user",
         "tags": [
           "Open Tabs"
         ],
@@ -26582,7 +26700,7 @@
       },
       "put": {
         "operationId": "database_put_open-tabs",
-        "summary": "Replace open tabs",
+        "summary": "Bulk replace all open tabs for the current user",
         "tags": [
           "Open Tabs"
         ],
@@ -26702,7 +26820,7 @@
       },
       "get": {
         "operationId": "database_get_open-tabs",
-        "summary": "Get open tabs",
+        "summary": "Get all open tabs for the current user",
         "tags": [
           "Open Tabs"
         ],
@@ -26786,7 +26904,7 @@
     "/open-tabs/{id}": {
       "patch": {
         "operationId": "database_patch_open-tabs_by-id",
-        "summary": "Update open tabs",
+        "summary": "Update a single open tab",
         "tags": [
           "Open Tabs"
         ],
@@ -26896,7 +27014,7 @@
       },
       "delete": {
         "operationId": "database_delete_open-tabs_by-id",
-        "summary": "Delete open tabs",
+        "summary": "Delete a single open tab",
         "tags": [
           "Open Tabs"
         ],
@@ -26987,7 +27105,8 @@
     "/open-tabs/active-sessions": {
       "get": {
         "operationId": "database_get_open-tabs_active-sessions",
-        "summary": "Get open tabs active sessions",
+        "summary": "Get all active backend sessions for the current user",
+        "description": "Returns live terminal sessions from the session manager, both sessions the caller owns and SSH sessions shared to the caller by another user (via an in-app session share). Used by the Active Connections panel and tab restore logic.\n",
         "tags": [
           "Open Tabs"
         ],
@@ -27174,7 +27293,8 @@
     "/proxmox/discover": {
       "post": {
         "operationId": "database_post_proxmox_discover",
-        "summary": "Create proxmox discover",
+        "summary": "Discover Proxmox guests on a node",
+        "description": "Connects to an existing SSH host (a Proxmox node) using its stored credentials, runs pvesh to enumerate all guests (VMs and LXC containers) in the cluster, and returns them ready to be imported as Termix hosts. No separate Proxmox API token is required.\n",
         "tags": [
           "Proxmox"
         ],
@@ -27500,9 +27620,10 @@
     "/rbac/roles/{id}": {
       "put": {
         "operationId": "database_put_rbac_roles_by-id",
-        "summary": "Replace rbac roles",
+        "summary": "Update a role",
+        "description": "Updates a role by its ID.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -27691,9 +27812,10 @@
       },
       "delete": {
         "operationId": "database_delete_rbac_roles_by-id",
-        "summary": "Delete rbac roles",
+        "summary": "Delete a role",
+        "description": "Deletes a role by its ID.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -27851,9 +27973,10 @@
     "/rbac/permissions/catalog": {
       "get": {
         "operationId": "database_get_rbac_permissions_catalog",
-        "summary": "Get rbac permissions catalog",
+        "summary": "Get the role permissions catalog",
+        "description": "Returns the grouped catalog of role permission strings used by the role permissions editor.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "responses": {
           "200": {
@@ -27932,9 +28055,10 @@
     "/rbac/users/{userId}/roles": {
       "post": {
         "operationId": "database_post_rbac_users_by-userId_roles",
-        "summary": "Create rbac users roles",
+        "summary": "Assign a role to a user",
+        "description": "Assigns a role to a user.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -28127,9 +28251,10 @@
       },
       "get": {
         "operationId": "database_get_rbac_users_by-userId_roles",
-        "summary": "Get rbac users roles",
+        "summary": "Get user's roles",
+        "description": "Retrieves a list of roles for a specific user.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -28243,9 +28368,10 @@
     "/rbac/users/{userId}/roles/{roleId}": {
       "delete": {
         "operationId": "database_delete_rbac_users_by-userId_roles_by-roleId",
-        "summary": "Delete rbac users roles",
+        "summary": "Remove a role from a user",
+        "description": "Removes a role from a user.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -28411,9 +28537,10 @@
     "/rbac/snippet/{id}/share": {
       "post": {
         "operationId": "database_post_rbac_snippet_by-id_share",
-        "summary": "Create rbac snippet share",
+        "summary": "Share a snippet",
+        "description": "Shares a snippet with a user or role.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -28610,9 +28737,10 @@
     "/rbac/host/{id}/share": {
       "post": {
         "operationId": "database_post_rbac_host_by-id_share",
-        "summary": "Create rbac host share",
+        "summary": "Share a host",
+        "description": "Shares a host with one or more users and/or roles at a permission level (connect, view, edit, manage). SSH authentication remains private to the owner; recipients may select one of their own saved SSH credentials.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -29175,9 +29303,10 @@
     "/rbac/snippet/{id}/access/{accessId}": {
       "delete": {
         "operationId": "database_delete_rbac_snippet_by-id_access_by-accessId",
-        "summary": "Delete rbac snippet access",
+        "summary": "Revoke snippet access",
+        "description": "Revokes a user's or role's access to a snippet.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -29322,9 +29451,10 @@
     "/rbac/snippet/{id}/access": {
       "get": {
         "operationId": "database_get_rbac_snippet_by-id_access",
-        "summary": "Get rbac snippet access",
+        "summary": "Get snippet access list",
+        "description": "Retrieves the list of users and roles with access to a snippet.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -29526,9 +29656,10 @@
     "/rbac/shared-snippets": {
       "get": {
         "operationId": "database_get_rbac_shared-snippets",
-        "summary": "Get rbac shared snippets",
+        "summary": "Get shared snippets",
+        "description": "Retrieves snippets shared with the current user.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "responses": {
           "200": {
@@ -29654,9 +29785,10 @@
     "/rbac/host-access/{hostId}/auth/{protocol}": {
       "put": {
         "operationId": "database_put_rbac_host-access_by-hostId_auth_by-protocol",
-        "summary": "Replace rbac host access auth",
+        "summary": "Set personal authentication for a shared host protocol",
+        "description": "Selects one of the authenticated recipient's own credentials, or clears the selection with null. Only SSH is currently supported.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -29821,9 +29953,9 @@
       },
       "get": {
         "operationId": "database_get_rbac_host-access_by-hostId_auth_by-protocol",
-        "summary": "Get rbac host access auth",
+        "summary": "Get the current recipient's shared-host protocol authentication override",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -29970,9 +30102,10 @@
     "/rbac/folder/share": {
       "post": {
         "operationId": "database_post_rbac_folder_share",
-        "summary": "Create rbac folder share",
+        "summary": "Share all hosts in a folder",
+        "description": "Shares every host within a folder (and its subfolders) with one or more users and/or roles at a permission level. Only hosts owned by the caller are shared; skips hosts the caller may not share.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "requestBody": {
           "content": {
@@ -30490,9 +30623,10 @@
     "/rbac/host/{id}/access/{accessId}": {
       "patch": {
         "operationId": "database_patch_rbac_host_by-id_access_by-accessId",
-        "summary": "Update rbac host access",
+        "summary": "Update a host access grant",
+        "description": "Changes the permission level and/or expiry of an existing host access grant. Allowed for the host owner or recipients holding the manage level.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -30985,9 +31119,10 @@
       },
       "delete": {
         "operationId": "database_delete_rbac_host_by-id_access_by-accessId",
-        "summary": "Delete rbac host access",
+        "summary": "Revoke host access",
+        "description": "Revokes a user's or role's access to a host.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -31125,9 +31260,10 @@
     "/rbac/host/{id}/access": {
       "get": {
         "operationId": "database_get_rbac_host_by-id_access",
-        "summary": "Get rbac host access",
+        "summary": "Get host access list",
+        "description": "Retrieves the list of users and roles that have access to a host.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "parameters": [
           {
@@ -31327,9 +31463,10 @@
     "/rbac/shared-hosts": {
       "get": {
         "operationId": "database_get_rbac_shared-hosts",
-        "summary": "Get rbac shared hosts",
+        "summary": "Get shared hosts",
+        "description": "Retrieves the list of hosts that have been shared with the authenticated user.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "responses": {
           "200": {
@@ -31463,9 +31600,10 @@
     "/rbac/roles": {
       "get": {
         "operationId": "database_get_rbac_roles",
-        "summary": "Get rbac roles",
+        "summary": "Get all roles",
+        "description": "Retrieves a list of all roles.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "responses": {
           "200": {
@@ -31585,9 +31723,10 @@
       },
       "post": {
         "operationId": "database_post_rbac_roles",
-        "summary": "Create rbac roles",
+        "summary": "Create a new role",
+        "description": "Creates a new role.",
         "tags": [
-          "Rbac"
+          "RBAC"
         ],
         "requestBody": {
           "content": {
@@ -31746,9 +31885,10 @@
     "/session_logs": {
       "get": {
         "operationId": "database_get_session_logs",
-        "summary": "Get session logs",
+        "summary": "List session logs",
+        "description": "Returns all terminal session recordings for the authenticated user.",
         "tags": [
-          "Session Log"
+          "Session Logs"
         ],
         "responses": {
           "200": {
@@ -32027,9 +32167,10 @@
     "/session_logs/{id}": {
       "get": {
         "operationId": "database_get_session_logs_by-id",
-        "summary": "Get session logs",
+        "summary": "Get session log metadata",
+        "description": "Returns metadata for a single session recording.",
         "tags": [
-          "Session Log"
+          "Session Logs"
         ],
         "parameters": [
           {
@@ -32151,9 +32292,10 @@
       },
       "delete": {
         "operationId": "database_delete_session_logs_by-id",
-        "summary": "Delete session logs",
+        "summary": "Delete session log",
+        "description": "Deletes a session recording and its log file.",
         "tags": [
-          "Session Log"
+          "Session Logs"
         ],
         "parameters": [
           {
@@ -32284,9 +32426,10 @@
     "/session_logs/{id}/content": {
       "get": {
         "operationId": "database_get_session_logs_by-id_content",
-        "summary": "Get session logs content",
+        "summary": "Get session log content",
+        "description": "Returns the raw text content of a session log file.",
         "tags": [
-          "Session Log"
+          "Session Logs"
         ],
         "parameters": [
           {
@@ -32434,7 +32577,8 @@
     "/snippets/{id}": {
       "get": {
         "operationId": "database_get_snippets_by-id",
-        "summary": "Get snippets",
+        "summary": "Get a specific snippet",
+        "description": "Retrieves a specific snippet by its ID.",
         "tags": [
           "Snippets"
         ],
@@ -32548,7 +32692,8 @@
       },
       "put": {
         "operationId": "database_put_snippets_by-id",
-        "summary": "Replace snippets",
+        "summary": "Update a snippet",
+        "description": "Updates a specific snippet by its ID.",
         "tags": [
           "Snippets"
         ],
@@ -32675,7 +32820,8 @@
       },
       "delete": {
         "operationId": "database_delete_snippets_by-id",
-        "summary": "Delete snippets",
+        "summary": "Delete a snippet",
+        "description": "Deletes a specific snippet by its ID.",
         "tags": [
           "Snippets"
         ],
@@ -32813,7 +32959,8 @@
     "/snippets": {
       "post": {
         "operationId": "database_post_snippets",
-        "summary": "Create snippets",
+        "summary": "Create a new snippet",
+        "description": "Creates a new snippet for the authenticated user.",
         "tags": [
           "Snippets"
         ],
@@ -32948,7 +33095,8 @@
       },
       "get": {
         "operationId": "database_get_snippets",
-        "summary": "Get snippets",
+        "summary": "Get all snippets",
+        "description": "Retrieves all snippets for the authenticated user.",
         "tags": [
           "Snippets"
         ],
@@ -33050,7 +33198,8 @@
     "/snippets/folders": {
       "post": {
         "operationId": "database_post_snippets_folders",
-        "summary": "Create snippets folders",
+        "summary": "Create a new snippet folder",
+        "description": "Creates a new snippet folder for the authenticated user.",
         "tags": [
           "Snippets"
         ],
@@ -33187,7 +33336,8 @@
       },
       "get": {
         "operationId": "database_get_snippets_folders",
-        "summary": "Get snippets folders",
+        "summary": "Get all snippet folders",
+        "description": "Retrieves all snippet folders for the authenticated user.",
         "tags": [
           "Snippets"
         ],
@@ -33285,7 +33435,8 @@
     "/snippets/folders/{name}/metadata": {
       "put": {
         "operationId": "database_put_snippets_folders_by-name_metadata",
-        "summary": "Replace snippets folders metadata",
+        "summary": "Update snippet folder metadata",
+        "description": "Updates the metadata (color, icon) of a snippet folder.",
         "tags": [
           "Snippets"
         ],
@@ -33427,7 +33578,8 @@
     "/snippets/folders/rename": {
       "put": {
         "operationId": "database_put_snippets_folders_rename",
-        "summary": "Replace snippets folders rename",
+        "summary": "Rename a snippet folder",
+        "description": "Renames a snippet folder for the authenticated user.",
         "tags": [
           "Snippets"
         ],
@@ -33605,7 +33757,8 @@
     "/snippets/folders/{name}": {
       "delete": {
         "operationId": "database_delete_snippets_folders_by-name",
-        "summary": "Delete snippets folders",
+        "summary": "Delete a snippet folder",
+        "description": "Deletes a snippet folder and moves its snippets to the root.",
         "tags": [
           "Snippets"
         ],
@@ -33717,7 +33870,8 @@
     "/snippets/reorder": {
       "put": {
         "operationId": "database_put_snippets_reorder",
-        "summary": "Replace snippets reorder",
+        "summary": "Reorder snippets",
+        "description": "Bulk updates the order and folder of snippets. Accepts `snippets` and the legacy `updates` payload key.",
         "tags": [
           "Snippets"
         ],
@@ -33824,7 +33978,8 @@
     "/snippets/execute": {
       "post": {
         "operationId": "database_post_snippets_execute",
-        "summary": "Create snippets execute",
+        "summary": "Execute a snippet on a host",
+        "description": "Executes a snippet on a specified host.",
         "tags": [
           "Snippets"
         ],
@@ -33981,7 +34136,8 @@
     "/snippets/export": {
       "get": {
         "operationId": "database_get_snippets_export",
-        "summary": "Get snippets export",
+        "summary": "Export all snippets and folders as JSON",
+        "description": "Returns all snippets and snippet folders for the authenticated user as a JSON export.",
         "tags": [
           "Snippets"
         ],
@@ -34149,7 +34305,8 @@
     "/snippets/bulk-import": {
       "post": {
         "operationId": "database_post_snippets_bulk-import",
-        "summary": "Create snippets bulk import",
+        "summary": "Bulk import snippets and folders from JSON",
+        "description": "Imports snippets and folders. Existing folders are skipped; existing snippets (matched by name+folder) can be skipped or overwritten.",
         "tags": [
           "Snippets"
         ],
@@ -34312,9 +34469,10 @@
     "/users/sso-providers": {
       "get": {
         "operationId": "database_get_users_sso-providers",
-        "summary": "Get users sso providers",
+        "summary": "List enabled SSO providers (public)",
+        "description": "Returns public info for all enabled SSO providers for the login page.",
         "tags": [
-          "Sso Provider"
+          "SSO"
         ],
         "responses": {
           "200": {
@@ -34417,9 +34575,10 @@
       },
       "post": {
         "operationId": "database_post_users_sso-providers",
-        "summary": "Create users sso providers",
+        "summary": "Create SSO provider",
+        "description": "Creates a new SSO provider configuration.",
         "tags": [
-          "Sso Provider"
+          "SSO"
         ],
         "requestBody": {
           "content": {
@@ -34571,9 +34730,10 @@
     "/users/sso-providers/admin": {
       "get": {
         "operationId": "database_get_users_sso-providers_admin",
-        "summary": "Get users sso providers admin",
+        "summary": "List all SSO providers (admin)",
+        "description": "Returns full SSO provider list with decrypted configs for the admin panel.",
         "tags": [
-          "Sso Provider"
+          "SSO"
         ],
         "responses": {
           "200": {
@@ -34657,9 +34817,10 @@
     "/users/sso-providers/{id}": {
       "put": {
         "operationId": "database_put_users_sso-providers_by-id",
-        "summary": "Replace users sso providers",
+        "summary": "Update SSO provider",
+        "description": "Updates an existing SSO provider configuration.",
         "tags": [
-          "Sso Provider"
+          "SSO"
         ],
         "parameters": [
           {
@@ -34836,9 +34997,10 @@
       },
       "delete": {
         "operationId": "database_delete_users_sso-providers_by-id",
-        "summary": "Delete users sso providers",
+        "summary": "Delete SSO provider",
+        "description": "Deletes an SSO provider. Blocked if users are associated.",
         "tags": [
-          "Sso Provider"
+          "SSO"
         ],
         "parameters": [
           {
@@ -34989,7 +35151,8 @@
     "/sync/{entityType}": {
       "get": {
         "operationId": "database_get_sync_by-entityType",
-        "summary": "Get sync",
+        "summary": "Pull synced rows for an entity type",
+        "description": "Returns rows owned by the authenticated user whose updatedAt is newer than `since` (or all rows if omitted). Used by the desktop app's remote sync engine to reconcile the embedded backend against a connected remote server.",
         "tags": [
           "Sync"
         ],
@@ -35104,7 +35267,8 @@
       },
       "post": {
         "operationId": "database_post_sync_by-entityType",
-        "summary": "Create sync",
+        "summary": "Upsert a synced row by syncId",
+        "description": "Creates or updates a row by its syncId. Used by the desktop app's remote sync engine to push local-only or newer rows to the other side of a sync pair.",
         "tags": [
           "Sync"
         ],
@@ -35228,7 +35392,8 @@
     "/sync/tombstones": {
       "post": {
         "operationId": "database_post_sync_tombstones",
-        "summary": "Create sync tombstones",
+        "summary": "Report a deletion from the other side of a sync pair",
+        "description": "Applies a remote deletion locally (if the row still exists) and records the tombstone so future pulls stay consistent.",
         "tags": [
           "Sync"
         ],
@@ -35341,7 +35506,8 @@
     "/sync/{entityType}/tombstones": {
       "get": {
         "operationId": "database_get_sync_by-entityType_tombstones",
-        "summary": "Get sync tombstones",
+        "summary": "Pull deletion tombstones for an entity type",
+        "description": "Returns tombstones recorded since `since` so the other side of a sync pair can apply the same deletions.",
         "tags": [
           "Sync"
         ],
@@ -35458,7 +35624,8 @@
     "/tailscale/devices": {
       "get": {
         "operationId": "database_get_tailscale_devices",
-        "summary": "Get tailscale devices",
+        "summary": "List Tailscale devices",
+        "description": "Returns the list of devices in the configured tailnet using the stored API key.",
         "tags": [
           "Tailscale"
         ],
@@ -35933,7 +36100,8 @@
     "/terminal/command_history": {
       "post": {
         "operationId": "database_post_terminal_command_history",
-        "summary": "Create terminal command history",
+        "summary": "Save command to history",
+        "description": "Saves a command to the command history for a specific host.",
         "tags": [
           "Terminal"
         ],
@@ -36088,7 +36256,8 @@
     "/terminal/command_history/{hostId}": {
       "get": {
         "operationId": "database_get_terminal_command_history_by-hostId",
-        "summary": "Get terminal command history",
+        "summary": "Get command history",
+        "description": "Retrieves the command history for a specific host.",
         "tags": [
           "Terminal"
         ],
@@ -36192,7 +36361,8 @@
       },
       "delete": {
         "operationId": "database_delete_terminal_command_history_by-hostId",
-        "summary": "Delete terminal command history",
+        "summary": "Clear command history",
+        "description": "Clears the entire command history for a specific host.",
         "tags": [
           "Terminal"
         ],
@@ -36304,7 +36474,8 @@
     "/terminal/command_history/delete": {
       "post": {
         "operationId": "database_post_terminal_command_history_delete",
-        "summary": "Create terminal command history delete",
+        "summary": "Delete a specific command from history",
+        "description": "Deletes a specific command from the history of a host.",
         "tags": [
           "Terminal"
         ],
@@ -36429,7 +36600,8 @@
     "/terminal/session_settings": {
       "get": {
         "operationId": "database_get_terminal_session_settings",
-        "summary": "Get terminal session settings",
+        "summary": "Get session persistence settings",
+        "description": "Returns the session timeout and persistence enabled flag.",
         "tags": [
           "Terminal"
         ],
@@ -36504,7 +36676,8 @@
       },
       "post": {
         "operationId": "database_post_terminal_session_settings",
-        "summary": "Create terminal session settings",
+        "summary": "Update session persistence settings",
+        "description": "Saves session timeout and persistence enabled flag.",
         "tags": [
           "Terminal"
         ],
@@ -36617,9 +36790,9 @@
     "/termix-id/ca": {
       "get": {
         "operationId": "database_get_termix-id_ca",
-        "summary": "Get termix id ca",
+        "summary": "Get current user's certificate authority",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "responses": {
           "200": {
@@ -36713,9 +36886,9 @@
       },
       "post": {
         "operationId": "database_post_termix-id_ca",
-        "summary": "Create termix id ca",
+        "summary": "Create a certificate authority",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "requestBody": {
           "content": {
@@ -36858,9 +37031,9 @@
       },
       "delete": {
         "operationId": "database_delete_termix-id_ca",
-        "summary": "Delete termix id ca",
+        "summary": "Delete the certificate authority",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "responses": {
           "200": {
@@ -36960,9 +37133,9 @@
     "/termix-id/ca/rotate": {
       "post": {
         "operationId": "database_post_termix-id_ca_rotate",
-        "summary": "Create termix id ca rotate",
+        "summary": "Rotate the certificate authority (revokes all issued certificates)",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "requestBody": {
           "content": {
@@ -37086,9 +37259,9 @@
     "/termix-id/keys/{id}/certificate": {
       "post": {
         "operationId": "database_post_termix-id_keys_by-id_certificate",
-        "summary": "Create termix id keys certificate",
+        "summary": "Issue an SSH certificate for a key (ed25519 only)",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "parameters": [
           {
@@ -37256,9 +37429,9 @@
     "/termix-id/linked-credentials": {
       "get": {
         "operationId": "database_get_termix-id_linked-credentials",
-        "summary": "Get termix id linked credentials",
+        "summary": "Get credential IDs that have at least one enabled published Termix ID key",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "responses": {
           "200": {
@@ -37545,9 +37718,9 @@
     "/termix-id/me": {
       "get": {
         "operationId": "database_get_termix-id_me",
-        "summary": "Get termix id me",
+        "summary": "Get current user's Termix ID and keys",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "responses": {
           "200": {
@@ -37644,9 +37817,9 @@
     "/termix-id/check/{handle}": {
       "get": {
         "operationId": "database_get_termix-id_check_by-handle",
-        "summary": "Get termix id check",
+        "summary": "Check if a handle is available",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "parameters": [
           {
@@ -37740,9 +37913,9 @@
     "/termix-id": {
       "post": {
         "operationId": "database_post_termix-id",
-        "summary": "Create termix id",
+        "summary": "Create a Termix ID",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "requestBody": {
           "content": {
@@ -37869,9 +38042,9 @@
       },
       "put": {
         "operationId": "database_put_termix-id",
-        "summary": "Replace termix id",
+        "summary": "Update Termix ID handle or description",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "requestBody": {
           "content": {
@@ -38020,9 +38193,9 @@
       },
       "delete": {
         "operationId": "database_delete_termix-id",
-        "summary": "Delete termix id",
+        "summary": "Delete Termix ID and all associated keys",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "responses": {
           "200": {
@@ -38122,9 +38295,9 @@
     "/termix-id/keys": {
       "post": {
         "operationId": "database_post_termix-id_keys",
-        "summary": "Create termix id keys",
+        "summary": "Publish a public key",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "requestBody": {
           "content": {
@@ -38279,9 +38452,9 @@
     "/termix-id/keys/generate": {
       "post": {
         "operationId": "database_post_termix-id_keys_generate",
-        "summary": "Create termix id keys generate",
+        "summary": "Generate a new key pair and publish the public key",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "requestBody": {
           "content": {
@@ -38421,9 +38594,9 @@
     "/termix-id/keys/{id}": {
       "patch": {
         "operationId": "database_patch_termix-id_keys_by-id",
-        "summary": "Update termix id keys",
+        "summary": "Update key metadata (enabled state or label)",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "parameters": [
           {
@@ -38561,9 +38734,9 @@
       },
       "delete": {
         "operationId": "database_delete_termix-id_keys_by-id",
-        "summary": "Delete termix id keys",
+        "summary": "Revoke and delete a published key",
         "tags": [
-          "Termix Id"
+          "Termix ID"
         ],
         "parameters": [
           {
@@ -39023,9 +39196,10 @@
     "/ui-preferences": {
       "put": {
         "operationId": "database_put_ui-preferences",
-        "summary": "Replace ui preferences",
+        "summary": "Update the UI complexity preferences for the current user",
+        "description": "Persists the current user's interface preset, per-area overrides and onboarding state as a single JSON document. Overrides are merged two levels deep, so a request only has to send the keys it changes. A null at a key clears that single override; a null at an area clears every override for that area; a null at overrides clears all of them.",
         "tags": [
-          "Ui Preferences"
+          "UI Preferences"
         ],
         "requestBody": {
           "content": {
@@ -39178,9 +39352,10 @@
       },
       "get": {
         "operationId": "database_get_ui-preferences",
-        "summary": "Get ui preferences",
+        "summary": "Get the UI complexity preferences for the current user",
+        "description": "Returns the current user's interface preset (simple, balanced, advanced or custom), their per-area overrides, and their onboarding state. A first-time GET returns defaults without writing a row; a row is only created once the user actually changes something via PUT. Users who registered before this feature existed are returned an already-completed onboarding state so they are never shown the first-run flow.",
         "tags": [
-          "Ui Preferences"
+          "UI Preferences"
         ],
         "responses": {
           "200": {
@@ -39308,9 +39483,10 @@
     "/users/make-admin": {
       "post": {
         "operationId": "database_post_users_make-admin",
-        "summary": "Create users make admin",
+        "summary": "Make user admin",
+        "description": "Grants admin privileges to a user.",
         "tags": [
-          "User Admin"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -39472,9 +39648,10 @@
     "/users/remove-admin": {
       "post": {
         "operationId": "database_post_users_remove-admin",
-        "summary": "Create users remove admin",
+        "summary": "Remove admin status",
+        "description": "Revokes admin privileges from a user.",
         "tags": [
-          "User Admin"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -39636,9 +39813,10 @@
     "/users/admin-create": {
       "post": {
         "operationId": "database_post_users_admin-create",
-        "summary": "Create users admin create",
+        "summary": "Admin create user",
+        "description": "Allows an admin to create a new user regardless of whether public registration is enabled.",
         "tags": [
-          "User Admin"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -39823,9 +40001,10 @@
     "/users/admin/reset-password": {
       "post": {
         "operationId": "database_post_users_admin_reset-password",
-        "summary": "Create users admin reset password",
+        "summary": "Reset a user's password (admin only)",
+        "description": "Resets another user's password. Data is preserved for users whose encryption key has been migrated to the system wrap. Users who never logged in since the encryption upgrade require confirmDataWipe, which deletes their encrypted data.\n",
         "tags": [
-          "User Admin"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -40029,9 +40208,10 @@
     "/users/admin/totp/disable": {
       "post": {
         "operationId": "database_post_users_admin_totp_disable",
-        "summary": "Create users admin totp disable",
+        "summary": "Disable a user's TOTP (admin only)",
+        "description": "Clears another user's TOTP secret, enabled flag and backup codes so they can log in without 2FA.",
         "tags": [
-          "User Admin"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -40218,9 +40398,10 @@
     "/users/list": {
       "get": {
         "operationId": "database_get_users_list",
-        "summary": "Get users list",
+        "summary": "List users",
+        "description": "Retrieves users in the system. Without `limit` the full list is returned, which is what the sharing pickers rely on. Pass `limit` (and optionally `offset`/`search`) to page through large directories.\n",
         "tags": [
-          "User Admin"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -40345,9 +40526,10 @@
     "/users/admin/export/{userId}": {
       "get": {
         "operationId": "database_get_users_admin_export_by-userId",
-        "summary": "Get users admin export",
+        "summary": "Export a user's data (admin only)",
+        "description": "Downloads a JSON export of another user's data (hosts, credentials, file manager bookmarks). Secrets are decrypted server-side, so handle the file carefully.",
         "tags": [
-          "User Admin"
+          "Users"
         ],
         "parameters": [
           {
@@ -40587,9 +40769,10 @@
     "/users/api-keys": {
       "get": {
         "operationId": "database_get_users_api-keys",
-        "summary": "Get users api keys",
+        "summary": "List all API keys (admin only)",
+        "description": "Returns all API keys with associated usernames. Token hashes are never returned.",
         "tags": [
-          "User Api Key"
+          "API Keys"
         ],
         "responses": {
           "200": {
@@ -40671,9 +40854,10 @@
       },
       "post": {
         "operationId": "database_post_users_api-keys",
-        "summary": "Create users api keys",
+        "summary": "Create an API key (admin only)",
+        "description": "Creates a new API key scoped to a specific user. The full token is returned only once.",
         "tags": [
-          "User Api Key"
+          "API Keys"
         ],
         "requestBody": {
           "content": {
@@ -40850,9 +41034,10 @@
     "/users/api-keys/{keyId}": {
       "delete": {
         "operationId": "database_delete_users_api-keys_by-keyId",
-        "summary": "Delete users api keys",
+        "summary": "Delete an API key (admin only)",
+        "description": "Permanently deletes an API key. It can no longer be used to authenticate.",
         "tags": [
-          "User Api Key"
+          "API Keys"
         ],
         "parameters": [
           {
@@ -40861,7 +41046,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The ID of the API key to delete."
           }
         ],
         "responses": {
@@ -40963,9 +41149,10 @@
     "/users/data-status": {
       "get": {
         "operationId": "database_get_users_data-status",
-        "summary": "Get users data status",
+        "summary": "Check user data unlock status",
+        "description": "Checks if user data is currently unlocked.",
         "tags": [
-          "User Data Access"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -41045,9 +41232,10 @@
     "/users/unlock-data": {
       "post": {
         "operationId": "database_post_users_unlock-data",
-        "summary": "Create users unlock data",
+        "summary": "Unlock user data",
+        "description": "Re-authenticates user with password to unlock encrypted data.",
         "tags": [
-          "User Data Access"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -41192,9 +41380,10 @@
     "/users/terminal-image-storage-settings": {
       "get": {
         "operationId": "database_get_users_terminal-image-storage-settings",
-        "summary": "Get users terminal image storage settings",
+        "summary": "Get terminal image storage settings (admin only)",
+        "description": "Returns the effective terminal image storage settings. The backend-internal localDir is never exposed; only the agent-visible hostPath is returned.",
         "tags": [
-          "User Image Storage"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -41277,9 +41466,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_terminal-image-storage-settings",
-        "summary": "Update users terminal image storage settings",
+        "summary": "Update terminal image storage settings (admin only)",
+        "description": "Persists a partial update. Accepts only mode (auto, local, remote-sftp), localDir, hostPath, ttlMs, maxCount and maxBytes; invalid values are rejected with a 400.",
         "tags": [
-          "User Image Storage"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -41439,9 +41629,10 @@
     "/users/terminal-image-storage-settings/test": {
       "post": {
         "operationId": "database_post_users_terminal-image-storage-settings_test",
-        "summary": "Create users terminal image storage settings test",
+        "summary": "Test image storage visibility (admin only)",
+        "description": "Reports which storage mode an upload would take for one of the caller's already-connected terminal sessions. Uses the bounded local-mapping probe only; it never opens new connections.",
         "tags": [
-          "User Image Storage"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -41642,9 +41833,10 @@
     "/users/unlink-oidc-from-password": {
       "post": {
         "operationId": "database_post_users_unlink-oidc-from-password",
-        "summary": "Create users unlink oidc from password",
+        "summary": "Unlink OIDC from password account",
+        "description": "Removes OIDC authentication from a dual-auth account (admin only).",
         "tags": [
-          "User Oidc Account"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -41813,9 +42005,10 @@
     "/users/link-oidc-to-password": {
       "post": {
         "operationId": "database_post_users_link-oidc-to-password",
-        "summary": "Create users link oidc to password",
+        "summary": "Link OIDC user to password account",
+        "description": "Merges an OIDC-only account into a password-based account (admin only).",
         "tags": [
-          "User Oidc Account"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -41990,9 +42183,10 @@
     "/users/initiate-reset": {
       "post": {
         "operationId": "database_post_users_initiate-reset",
-        "summary": "Create users initiate reset",
+        "summary": "Initiate password reset",
+        "description": "Initiates the password reset process for a user.",
         "tags": [
-          "User Password Reset"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -42122,9 +42316,10 @@
     "/users/verify-reset-code": {
       "post": {
         "operationId": "database_post_users_verify-reset-code",
-        "summary": "Create users verify reset code",
+        "summary": "Verify reset code",
+        "description": "Verifies the password reset code.",
         "tags": [
-          "User Password Reset"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -42297,9 +42492,10 @@
     "/users/complete-reset": {
       "post": {
         "operationId": "database_post_users_complete-reset",
-        "summary": "Create users complete reset",
+        "summary": "Complete password reset",
+        "description": "Completes the password reset process with a new password.",
         "tags": [
-          "User Password Reset"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -42474,7 +42670,8 @@
     "/user-preferences": {
       "get": {
         "operationId": "database_get_user-preferences",
-        "summary": "Get user preferences",
+        "summary": "Get preferences for the current user",
+        "description": "showHostTags, hostTrayOnClick, compactHostView, statusColorScheme and foldersCollapsed are legacy fields, kept here read-only for backward compatibility. The authoritative copy is GET /host-sidebar/preferences.",
         "tags": [
           "User Preferences"
         ],
@@ -42677,7 +42874,8 @@
       },
       "put": {
         "operationId": "database_put_user-preferences",
-        "summary": "Replace user preferences",
+        "summary": "Update preferences for the current user",
+        "description": "showHostTags, hostTrayOnClick, compactHostView, statusColorScheme and foldersCollapsed are no longer accepted here -- they moved to PUT /host-sidebar/preferences as part of the sidebar redesign.",
         "tags": [
           "User Preferences"
         ],
@@ -42862,9 +43060,10 @@
     "/users/sessions/{sessionId}": {
       "delete": {
         "operationId": "database_delete_users_sessions_by-sessionId",
-        "summary": "Delete users sessions",
+        "summary": "Revoke a specific session",
+        "description": "Revokes a specific session by ID.",
         "tags": [
-          "User Session"
+          "Users"
         ],
         "parameters": [
           {
@@ -42873,7 +43072,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The session ID to revoke"
           }
         ],
         "responses": {
@@ -43022,9 +43222,10 @@
     "/users/sessions/revoke-all": {
       "post": {
         "operationId": "database_post_users_sessions_revoke-all",
-        "summary": "Create users sessions revoke all",
+        "summary": "Revoke all sessions for a user",
+        "description": "Revokes all sessions with option to exclude current session.",
         "tags": [
-          "User Session"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -43166,9 +43367,10 @@
     "/users/sessions": {
       "get": {
         "operationId": "database_get_users_sessions",
-        "summary": "Get users sessions",
+        "summary": "Get sessions",
+        "description": "Retrieves all sessions for authenticated user (or all sessions for admins).",
         "tags": [
-          "User Session"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -43312,9 +43514,10 @@
     "/users/host-defaults": {
       "patch": {
         "operationId": "database_patch_users_host-defaults",
-        "summary": "Update users host defaults",
+        "summary": "Update host creation defaults (admin only)",
+        "description": "Sets global default settings applied when a new host is created.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -43467,9 +43670,10 @@
       },
       "get": {
         "operationId": "database_get_users_host-defaults",
-        "summary": "Get users host defaults",
+        "summary": "Get host creation defaults",
+        "description": "Returns the global default settings applied when creating a new host.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -43540,9 +43744,10 @@
     "/users/guacamole-settings": {
       "patch": {
         "operationId": "database_patch_users_guacamole-settings",
-        "summary": "Update users guacamole settings",
+        "summary": "Update Guacamole settings",
+        "description": "Admin-only. Updates guacd enabled status and/or host:port URL.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -43662,9 +43867,10 @@
       },
       "get": {
         "operationId": "database_get_users_guacamole-settings",
-        "summary": "Get users guacamole settings",
+        "summary": "Get Guacamole settings",
+        "description": "Returns current guacd enabled status and host:port URL. No authentication required.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -43747,9 +43953,10 @@
     "/users/log-level": {
       "get": {
         "operationId": "database_get_users_log-level",
-        "summary": "Get users log level",
+        "summary": "Get log level setting",
+        "description": "Returns the configured log verbosity level.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -43825,9 +44032,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_log-level",
-        "summary": "Update users log level",
+        "summary": "Update log level setting (admin only)",
+        "description": "Sets the log verbosity level.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -43962,9 +44170,10 @@
     "/users/session-timeout": {
       "get": {
         "operationId": "database_get_users_session-timeout",
-        "summary": "Get users session timeout",
+        "summary": "Get session timeout setting",
+        "description": "Returns the configured session timeout in hours.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -44040,9 +44249,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_session-timeout",
-        "summary": "Update users session timeout",
+        "summary": "Update session timeout setting (admin only)",
+        "description": "Sets the session timeout in hours.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -44178,9 +44388,10 @@
     "/users/tailscale-settings": {
       "get": {
         "operationId": "database_get_users_tailscale-settings",
-        "summary": "Get users tailscale settings",
+        "summary": "Get Tailscale settings",
+        "description": "Returns whether a Tailscale API key is configured (value is masked).",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -44266,9 +44477,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_tailscale-settings",
-        "summary": "Update users tailscale settings",
+        "summary": "Update Tailscale settings (admin only)",
+        "description": "Saves or clears the Tailscale API key used for device discovery.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -44406,9 +44618,10 @@
     "/users/command-history-enabled": {
       "get": {
         "operationId": "database_get_users_command-history-enabled",
-        "summary": "Get users command history enabled",
+        "summary": "Get command history enabled setting",
+        "description": "Returns whether command history recording is globally enabled.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -44484,9 +44697,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_command-history-enabled",
-        "summary": "Update users command history enabled",
+        "summary": "Update command history enabled setting (admin only)",
+        "description": "Globally enables or disables command history recording for all hosts.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -44621,9 +44835,10 @@
     "/users/analytics-enabled": {
       "get": {
         "operationId": "database_get_users_analytics-enabled",
-        "summary": "Get users analytics enabled",
+        "summary": "Get analytics enabled setting",
+        "description": "Returns whether anonymous usage telemetry is enabled, and whether the value is locked by the ENABLE_TELEMETRY environment variable.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -44705,9 +44920,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_analytics-enabled",
-        "summary": "Update users analytics enabled",
+        "summary": "Update analytics enabled setting (admin only)",
+        "description": "Enables or disables the daily anonymous usage telemetry heartbeat.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -44863,9 +45079,10 @@
     "/users/session-sharing-enabled": {
       "get": {
         "operationId": "database_get_users_session-sharing-enabled",
-        "summary": "Get users session sharing enabled",
+        "summary": "Get session sharing globally enabled setting",
+        "description": "Returns whether live session sharing (terminal/RDP/VNC/Telnet share links and in-app joins) is allowed instance-wide. Overrides every per-host toggle when false.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -44941,9 +45158,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_session-sharing-enabled",
-        "summary": "Update users session sharing enabled",
+        "summary": "Update session sharing globally enabled setting (admin only)",
+        "description": "Enables or disables live session sharing instance-wide, overriding every per-host allowSessionSharing toggle.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -45078,9 +45296,9 @@
     "/users/ai-enabled": {
       "get": {
         "operationId": "database_get_users_ai-enabled",
-        "summary": "Get users ai enabled",
+        "summary": "Get whether the AI assistant is enabled instance-wide",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -45156,9 +45374,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_ai-enabled",
-        "summary": "Update users ai enabled",
+        "summary": "Update the instance-wide AI assistant setting (admin only)",
+        "description": "Turning this off hides and blocks the assistant for every user, whatever their own preference says.",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -45293,9 +45512,9 @@
     "/users/ai-private-endpoints": {
       "get": {
         "operationId": "database_get_users_ai-private-endpoints",
-        "summary": "Get users ai private endpoints",
+        "summary": "Get the allowlist of private AI endpoint hosts",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -45375,9 +45594,10 @@
       },
       "patch": {
         "operationId": "database_patch_users_ai-private-endpoints",
-        "summary": "Update users ai private endpoints",
+        "summary": "Replace the allowlist of private AI endpoint hosts (admin only)",
+        "description": "Providers on private or loopback addresses, such as a self-hosted Ollama, are refused unless their host appears here. Without this an ordinary user could point a provider at an internal service and use the server as a probe of its own network.\n",
         "tags": [
-          "User Settings"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -45518,9 +45738,10 @@
     "/users/totp/setup": {
       "post": {
         "operationId": "database_post_users_totp_setup",
-        "summary": "Create users totp setup",
+        "summary": "Setup TOTP",
+        "description": "Initiates TOTP setup by generating a secret and QR code.",
         "tags": [
-          "User Totp"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -45645,9 +45866,10 @@
     "/users/totp/enable": {
       "post": {
         "operationId": "database_post_users_totp_enable",
-        "summary": "Create users totp enable",
+        "summary": "Enable TOTP",
+        "description": "Enables TOTP after verifying the initial code.",
         "tags": [
-          "User Totp"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -45837,9 +46059,10 @@
     "/users/totp/disable": {
       "post": {
         "operationId": "database_post_users_totp_disable",
-        "summary": "Create users totp disable",
+        "summary": "Disable TOTP",
+        "description": "Disables TOTP for a user.",
         "tags": [
-          "User Totp"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -45999,9 +46222,10 @@
     "/users/totp/backup-codes": {
       "post": {
         "operationId": "database_post_users_totp_backup-codes",
-        "summary": "Create users totp backup codes",
+        "summary": "Generate new backup codes",
+        "description": "Generates new TOTP backup codes.",
         "tags": [
-          "User Totp"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -46164,9 +46388,10 @@
     "/users/totp/verify-login": {
       "post": {
         "operationId": "database_post_users_totp_verify-login",
-        "summary": "Create users totp verify login",
+        "summary": "Verify TOTP during login",
+        "description": "Verifies the TOTP code during login.",
         "tags": [
-          "User Totp"
+          "Users"
         ],
         "requestBody": {
           "content": {
@@ -46422,9 +46647,10 @@
     "/users/webauthn/credentials": {
       "get": {
         "operationId": "database_get_users_webauthn_credentials",
-        "summary": "Get users webauthn credentials",
+        "summary": "List passkeys",
+        "description": "Lists the authenticated user's registered passkeys.",
         "tags": [
-          "User Webauthn"
+          "WebAuthn"
         ],
         "responses": {
           "200": {
@@ -46563,9 +46789,10 @@
     "/users/webauthn/register/options": {
       "post": {
         "operationId": "database_post_users_webauthn_register_options",
-        "summary": "Create users webauthn register options",
+        "summary": "Start passkey registration",
+        "description": "Generates WebAuthn registration options for the authenticated user.",
         "tags": [
-          "User Webauthn"
+          "WebAuthn"
         ],
         "requestBody": {
           "content": {
@@ -46856,9 +47083,10 @@
     "/users/webauthn/register/verify": {
       "post": {
         "operationId": "database_post_users_webauthn_register_verify",
-        "summary": "Create users webauthn register verify",
+        "summary": "Finish passkey registration",
+        "description": "Verifies the WebAuthn registration response and stores the passkey.",
         "tags": [
-          "User Webauthn"
+          "WebAuthn"
         ],
         "requestBody": {
           "content": {
@@ -46979,9 +47207,10 @@
     "/users/webauthn/authenticate/options": {
       "post": {
         "operationId": "database_post_users_webauthn_authenticate_options",
-        "summary": "Create users webauthn authenticate options",
+        "summary": "Start passkey login",
+        "description": "Generates WebAuthn authentication options, optionally scoped to a username.",
         "tags": [
-          "User Webauthn"
+          "WebAuthn"
         ],
         "requestBody": {
           "content": {
@@ -47142,9 +47371,10 @@
     "/users/webauthn/authenticate/verify": {
       "post": {
         "operationId": "database_post_users_webauthn_authenticate_verify",
-        "summary": "Create users webauthn authenticate verify",
+        "summary": "Finish passkey login",
+        "description": "Verifies the WebAuthn assertion and issues a session token (or a TOTP challenge).",
         "tags": [
-          "User Webauthn"
+          "WebAuthn"
         ],
         "requestBody": {
           "content": {
@@ -47340,9 +47570,10 @@
     "/users/webauthn/credentials/{credentialId}": {
       "delete": {
         "operationId": "database_delete_users_webauthn_credentials_by-credentialId",
-        "summary": "Delete users webauthn credentials",
+        "summary": "Delete a passkey",
+        "description": "Removes one of the authenticated user's passkeys.",
         "tags": [
-          "User Webauthn"
+          "WebAuthn"
         ],
         "parameters": [
           {
@@ -47630,7 +47861,8 @@
     "/users/login": {
       "post": {
         "operationId": "database_post_users_login",
-        "summary": "Create users login",
+        "summary": "User login",
+        "description": "Authenticates a user and returns a JWT.",
         "tags": [
           "Users"
         ],
@@ -47866,7 +48098,8 @@
     "/users/logout": {
       "post": {
         "operationId": "database_post_users_logout",
-        "summary": "Create users logout",
+        "summary": "User logout",
+        "description": "Logs out the user and clears the JWT cookie.",
         "tags": [
           "Users"
         ],
@@ -48038,7 +48271,8 @@
     "/users/me": {
       "get": {
         "operationId": "database_get_users_me",
-        "summary": "Get users me",
+        "summary": "Get current user's info",
+        "description": "Retrieves information about the currently authenticated user.",
         "tags": [
           "Users"
         ],
@@ -48169,7 +48403,8 @@
     "/users/me/dismiss-donation-modal": {
       "post": {
         "operationId": "database_post_users_me_dismiss-donation-modal",
-        "summary": "Create users me dismiss donation modal",
+        "summary": "Permanently dismiss the donation reminder modal",
+        "description": "Marks the donation reminder modal as dismissed for the currently authenticated user so it is never shown to them again.",
         "tags": [
           "Users"
         ],
@@ -48271,7 +48506,8 @@
     "/users/create": {
       "post": {
         "operationId": "database_post_users_create",
-        "summary": "Create users create",
+        "summary": "Create a new user",
+        "description": "Creates a new user with a username and password.",
         "tags": [
           "Users"
         ],
@@ -48453,7 +48689,8 @@
     "/users/me/token": {
       "get": {
         "operationId": "database_get_users_me_token",
-        "summary": "Get users me token",
+        "summary": "Get current session token",
+        "description": "Returns the JWT for the currently authenticated session. Intended for mobile WebView clients that cannot read HTTP-only cookies.",
         "tags": [
           "Users"
         ],
@@ -48512,7 +48749,8 @@
     "/users/setup-required": {
       "get": {
         "operationId": "database_get_users_setup-required",
-        "summary": "Get users setup required",
+        "summary": "Check if setup is required",
+        "description": "Checks if the system requires initial setup (i.e., no users exist).",
         "tags": [
           "Users"
         ],
@@ -48582,7 +48820,8 @@
     "/users/internal/auto-session": {
       "post": {
         "operationId": "database_post_users_internal_auto-session",
-        "summary": "Create users internal auto session",
+        "summary": "Mint a session for the sole local desktop user",
+        "description": "Used by the Electron desktop app to skip the login form entirely when running standalone against the embedded local backend. Only available over loopback. Logs in as the sole local user regardless of its credentials; if the local database has more than one user (e.g. repeated manual registration), deterministically logs in as the admin account, or the earliest-registered account if none is admin -- a login form must never appear for the local backend under any circumstance. Only declines if zero local users exist at all, which normal desktop provisioning never produces. Provisions the resolved user's data-encryption key if missing before minting the session, matching every other login path -- self-heals an account that previously ended up with a valid session but no usable encryption key.",
         "tags": [
           "Users"
         ],
@@ -48689,7 +48928,8 @@
     "/users/count": {
       "get": {
         "operationId": "database_get_users_count",
-        "summary": "Get users count",
+        "summary": "Count users",
+        "description": "Returns the total number of users in the system.",
         "tags": [
           "Users"
         ],
@@ -48790,7 +49030,8 @@
     "/users/db-health": {
       "get": {
         "operationId": "database_get_users_db-health",
-        "summary": "Get users db health",
+        "summary": "Database health check",
+        "description": "Checks if the database is accessible.",
         "tags": [
           "Users"
         ],
@@ -48865,7 +49106,8 @@
     "/users/registration-allowed": {
       "get": {
         "operationId": "database_get_users_registration-allowed",
-        "summary": "Get users registration allowed",
+        "summary": "Get registration status",
+        "description": "Checks if user registration is currently allowed.",
         "tags": [
           "Users"
         ],
@@ -48933,7 +49175,8 @@
       },
       "patch": {
         "operationId": "database_patch_users_registration-allowed",
-        "summary": "Update users registration allowed",
+        "summary": "Set registration status",
+        "description": "Enables or disables user registration.",
         "tags": [
           "Users"
         ],
@@ -49275,7 +49518,8 @@
     "/users/oidc-silent-login-default": {
       "get": {
         "operationId": "database_get_users_oidc-silent-login-default",
-        "summary": "Get users oidc silent login default",
+        "summary": "Get OIDC silent login default setting",
+        "description": "Returns whether silent OIDC login is enabled as the default behavior. Can be pinned via the OIDC_SILENT_LOGIN_DEFAULT env var.",
         "tags": [
           "Users"
         ],
@@ -49349,7 +49593,8 @@
       },
       "patch": {
         "operationId": "database_patch_users_oidc-silent-login-default",
-        "summary": "Update users oidc silent login default",
+        "summary": "Set OIDC silent login default setting",
+        "description": "Enables or disables silent OIDC login as the default behavior on the login page.",
         "tags": [
           "Users"
         ],
@@ -49507,7 +49752,8 @@
     "/users/password-login-allowed": {
       "get": {
         "operationId": "database_get_users_password-login-allowed",
-        "summary": "Get users password login allowed",
+        "summary": "Get password login status",
+        "description": "Checks if password-based login is currently allowed.",
         "tags": [
           "Users"
         ],
@@ -49575,7 +49821,8 @@
       },
       "patch": {
         "operationId": "database_patch_users_password-login-allowed",
-        "summary": "Update users password login allowed",
+        "summary": "Set password login status",
+        "description": "Enables or disables password-based login.",
         "tags": [
           "Users"
         ],
@@ -49736,7 +49983,8 @@
     "/users/password-reset-allowed": {
       "get": {
         "operationId": "database_get_users_password-reset-allowed",
-        "summary": "Get users password reset allowed",
+        "summary": "Get password reset status",
+        "description": "Checks if password reset is currently allowed.",
         "tags": [
           "Users"
         ],
@@ -49804,7 +50052,8 @@
       },
       "patch": {
         "operationId": "database_patch_users_password-reset-allowed",
-        "summary": "Update users password reset allowed",
+        "summary": "Set password reset status",
+        "description": "Enables or disables password reset.",
         "tags": [
           "Users"
         ],
@@ -49941,7 +50190,8 @@
     "/users/delete-account": {
       "delete": {
         "operationId": "database_delete_users_delete-account",
-        "summary": "Delete users delete account",
+        "summary": "Delete user account",
+        "description": "Deletes the authenticated user's account.",
         "tags": [
           "Users"
         ],
@@ -50106,7 +50356,8 @@
     "/users/change-password": {
       "post": {
         "operationId": "database_post_users_change-password",
-        "summary": "Create users change password",
+        "summary": "Change user password",
+        "description": "Changes the authenticated user's password.",
         "tags": [
           "Users"
         ],
@@ -50268,7 +50519,8 @@
     "/users/delete-user": {
       "delete": {
         "operationId": "database_delete_users_delete-user",
-        "summary": "Delete users delete user",
+        "summary": "Delete user (admin only)",
+        "description": "Allows an admin to delete another user and all related data.",
         "tags": [
           "Users"
         ],
@@ -50410,7 +50662,8 @@
     "/users/oidc-config": {
       "post": {
         "operationId": "database_post_users_oidc-config",
-        "summary": "Create users oidc config",
+        "summary": "Configure OIDC provider",
+        "description": "Creates or updates the OIDC provider configuration.",
         "tags": [
           "Users"
         ],
@@ -50595,7 +50848,8 @@
       },
       "delete": {
         "operationId": "database_delete_users_oidc-config",
-        "summary": "Delete users oidc config",
+        "summary": "Disable OIDC configuration",
+        "description": "Disables the OIDC provider configuration.",
         "tags": [
           "Users"
         ],
@@ -50695,7 +50949,8 @@
       },
       "get": {
         "operationId": "database_get_users_oidc-config",
-        "summary": "Get users oidc config",
+        "summary": "Get OIDC configuration",
+        "description": "Returns the public OIDC configuration.",
         "tags": [
           "Users"
         ],
@@ -50789,7 +51044,8 @@
     "/users/oidc-config/admin": {
       "get": {
         "operationId": "database_get_users_oidc-config_admin",
-        "summary": "Get users oidc config admin",
+        "summary": "Get OIDC configuration for admin",
+        "description": "Returns the full OIDC configuration for an admin.",
         "tags": [
           "Users"
         ],
@@ -50940,7 +51196,8 @@
     "/users/oidc/authorize": {
       "get": {
         "operationId": "database_get_users_oidc_authorize",
-        "summary": "Get users oidc authorize",
+        "summary": "Get OIDC authorization URL",
+        "description": "Returns the OIDC authorization URL.",
         "tags": [
           "Users"
         ],
@@ -50951,7 +51208,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Whether to extend the session to 30 days instead of 2 hours."
           },
           {
             "name": "desktopCallbackPort",
@@ -51104,7 +51362,8 @@
     "/users/oidc/callback": {
       "get": {
         "operationId": "database_get_users_oidc_callback",
-        "summary": "Get users oidc callback",
+        "summary": "OIDC callback",
+        "description": "Handles the OIDC callback, exchanges the code for a token, and creates or logs in the user.",
         "tags": [
           "Users"
         ],
@@ -51215,7 +51474,8 @@
     "/vault/profiles": {
       "get": {
         "operationId": "database_get_vault_profiles",
-        "summary": "Get vault profiles",
+        "summary": "List Vault profiles",
+        "description": "Returns all Vault signer profiles owned by the authenticated user or marked as shared.",
         "tags": [
           "Vault"
         ],
@@ -51288,7 +51548,8 @@
       },
       "post": {
         "operationId": "database_post_vault_profiles",
-        "summary": "Create vault profiles",
+        "summary": "Create a Vault profile",
+        "description": "Creates a new Vault signer profile owned by the authenticated user. The shared flag requires admin privileges.",
         "tags": [
           "Vault"
         ],
@@ -51466,7 +51727,8 @@
     "/vault/profiles/{id}": {
       "put": {
         "operationId": "database_put_vault_profiles_by-id",
-        "summary": "Replace vault profiles",
+        "summary": "Update a Vault profile",
+        "description": "Updates a Vault signer profile. Only the owner may edit; toggling shared to true requires admin privileges.",
         "tags": [
           "Vault"
         ],
@@ -51662,7 +51924,8 @@
       },
       "delete": {
         "operationId": "database_delete_vault_profiles_by-id",
-        "summary": "Delete vault profiles",
+        "summary": "Delete a Vault profile",
+        "description": "Permanently deletes a Vault signer profile. Only the owner may delete it.",
         "tags": [
           "Vault"
         ],
@@ -51816,7 +52079,8 @@
     "/vault/oidc/callback": {
       "get": {
         "operationId": "database_get_vault_oidc_callback",
-        "summary": "Get vault oidc callback",
+        "summary": "Vault OIDC callback",
+        "description": "Unauthenticated endpoint the IdP redirects to after login. Correlates the authorization code to a pending session via the Vault-issued state parameter.",
         "tags": [
           "Vault"
         ],
@@ -51888,7 +52152,7 @@
     "/workspaces": {
       "post": {
         "operationId": "database_post_workspaces",
-        "summary": "Create workspaces",
+        "summary": "Save the current tab arrangement as a new named workspace",
         "tags": [
           "Workspaces"
         ],
@@ -52055,7 +52319,8 @@
       },
       "get": {
         "operationId": "database_get_workspaces",
-        "summary": "Get workspaces",
+        "summary": "List the current user's saved workspaces",
+        "description": "Returns every manual workspace plus the single auto-maintained \"Last Session\" workspace, each with a computed tabCount.",
         "tags": [
           "Workspaces"
         ],
@@ -52130,7 +52395,8 @@
     "/workspaces/last-session": {
       "get": {
         "operationId": "database_get_workspaces_last-session",
-        "summary": "Get workspaces last session",
+        "summary": "Fetch the auto-maintained \"Last Session\" workspace",
+        "description": "Returns null if the current session has never been auto-saved yet.",
         "tags": [
           "Workspaces"
         ],
@@ -52202,7 +52468,8 @@
       },
       "put": {
         "operationId": "database_put_workspaces_last-session",
-        "summary": "Replace workspaces last session",
+        "summary": "Upsert the auto-maintained \"Last Session\" workspace",
+        "description": "Always overwrites the single Last Session row for the caller - never creates a second one. Called by the frontend's debounced auto-save effect.",
         "tags": [
           "Workspaces"
         ],
@@ -52323,7 +52590,8 @@
     "/workspaces/{id}": {
       "patch": {
         "operationId": "database_patch_workspaces_by-id",
-        "summary": "Update workspaces",
+        "summary": "Rename or recolor a workspace",
+        "description": "Does not accept a payload - use PUT /workspaces/{id}/content to overwrite a workspace's saved tab arrangement. Rejects the Last Session workspace.",
         "tags": [
           "Workspaces"
         ],
@@ -52510,7 +52778,8 @@
       },
       "delete": {
         "operationId": "database_delete_workspaces_by-id",
-        "summary": "Delete workspaces",
+        "summary": "Delete a workspace",
+        "description": "Rejects the Last Session workspace, which is not user-deletable.",
         "tags": [
           "Workspaces"
         ],
@@ -52653,7 +52922,8 @@
     "/workspaces/{id}/content": {
       "put": {
         "operationId": "database_put_workspaces_by-id_content",
-        "summary": "Replace workspaces content",
+        "summary": "Overwrite a workspace's saved tab arrangement with a new payload",
+        "description": "Used by \"Update with current\" in the Workspaces panel. Rejects the Last Session workspace.",
         "tags": [
           "Workspaces"
         ],
@@ -52826,7 +53096,7 @@
     "/workspaces/{id}/duplicate": {
       "post": {
         "operationId": "database_post_workspaces_by-id_duplicate",
-        "summary": "Create workspaces duplicate",
+        "summary": "Duplicate a workspace's content and color/icon under a new name",
         "tags": [
           "Workspaces"
         ],
@@ -52997,7 +53267,8 @@
     "/workspaces/{id}/set-default": {
       "post": {
         "operationId": "database_post_workspaces_by-id_set-default",
-        "summary": "Create workspaces set default",
+        "summary": "Mark a workspace as the restore-on-login default",
+        "description": "Clears isDefault on any other workspace for the caller. Idempotent if the target is already the default. Rejects the Last Session workspace.",
         "tags": [
           "Workspaces"
         ],
@@ -53131,7 +53402,8 @@
     "/workspaces/{id}/unset-default": {
       "post": {
         "operationId": "database_post_workspaces_by-id_unset-default",
-        "summary": "Create workspaces unset default",
+        "summary": "Remove a workspace as the restore-on-login default",
+        "description": "Idempotent if the target is not currently the default. Rejects the Last Session workspace.",
         "tags": [
           "Workspaces"
         ],
@@ -53265,7 +53537,8 @@
     "/workspaces/{id}/apply": {
       "post": {
         "operationId": "database_post_workspaces_by-id_apply",
-        "summary": "Create workspaces apply",
+        "summary": "Fetch a workspace to apply and mark it as just used",
+        "description": "Returns the full workspace with its payload parsed, and touches lastUsedAt server-side so the caller does not need a second round trip.",
         "tags": [
           "Workspaces"
         ],
@@ -53406,9 +53679,10 @@
     "/docker/containers/{sessionId}/{containerId}/stats": {
       "get": {
         "operationId": "docker_get_docker_containers_by-sessionId_by-containerId_stats",
-        "summary": "Get docker containers stats",
+        "summary": "Get container stats",
+        "description": "Retrieves stats for a specific container.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -53615,9 +53889,10 @@
     "/docker/containers/{sessionId}/{containerId}": {
       "get": {
         "operationId": "docker_get_docker_containers_by-sessionId_by-containerId",
-        "summary": "Get docker containers",
+        "summary": "Get container details",
+        "description": "Retrieves detailed information about a specific container.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -53847,9 +54122,10 @@
     "/docker/containers/{sessionId}/{containerId}/start": {
       "post": {
         "operationId": "docker_post_docker_containers_by-sessionId_by-containerId_start",
-        "summary": "Create docker containers start",
+        "summary": "Start container",
+        "description": "Starts a specific container.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -54032,9 +54308,10 @@
     "/docker/containers/{sessionId}/{containerId}/stop": {
       "post": {
         "operationId": "docker_post_docker_containers_by-sessionId_by-containerId_stop",
-        "summary": "Create docker containers stop",
+        "summary": "Stop container",
+        "description": "Stops a specific container.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -54217,9 +54494,10 @@
     "/docker/containers/{sessionId}/{containerId}/restart": {
       "post": {
         "operationId": "docker_post_docker_containers_by-sessionId_by-containerId_restart",
-        "summary": "Create docker containers restart",
+        "summary": "Restart container",
+        "description": "Restarts a specific container.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -54402,9 +54680,10 @@
     "/docker/containers/{sessionId}/{containerId}/pause": {
       "post": {
         "operationId": "docker_post_docker_containers_by-sessionId_by-containerId_pause",
-        "summary": "Create docker containers pause",
+        "summary": "Pause container",
+        "description": "Pauses a specific container.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -54587,9 +54866,10 @@
     "/docker/containers/{sessionId}/{containerId}/unpause": {
       "post": {
         "operationId": "docker_post_docker_containers_by-sessionId_by-containerId_unpause",
-        "summary": "Create docker containers unpause",
+        "summary": "Unpause container",
+        "description": "Unpauses a specific container.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -54772,9 +55052,10 @@
     "/docker/containers/{sessionId}/{containerId}/remove": {
       "delete": {
         "operationId": "docker_delete_docker_containers_by-sessionId_by-containerId_remove",
-        "summary": "Delete docker containers remove",
+        "summary": "Remove container",
+        "description": "Removes a specific container.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -54996,9 +55277,10 @@
     "/docker/containers/{sessionId}": {
       "get": {
         "operationId": "docker_get_docker_containers_by-sessionId",
-        "summary": "Get docker containers",
+        "summary": "List all containers",
+        "description": "Lists all Docker containers on the host.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -55154,9 +55436,10 @@
     "/docker/containers/{sessionId}/{containerId}/logs": {
       "get": {
         "operationId": "docker_get_docker_containers_by-sessionId_by-containerId_logs",
-        "summary": "Get docker containers logs",
+        "summary": "Get container logs",
+        "description": "Retrieves logs for a specific container.",
         "tags": [
-          "Container"
+          "Docker"
         ],
         "parameters": [
           {
@@ -55375,9 +55658,10 @@
     "/docker/ssh/disconnect": {
       "post": {
         "operationId": "docker_post_docker_ssh_disconnect",
-        "summary": "Create docker ssh disconnect",
+        "summary": "Disconnect SSH session",
+        "description": "Closes an active SSH session for Docker operations.",
         "tags": [
-          "Routes"
+          "Docker"
         ],
         "requestBody": {
           "content": {
@@ -55480,9 +55764,10 @@
     "/docker/ssh/connect-totp": {
       "post": {
         "operationId": "docker_post_docker_ssh_connect-totp",
-        "summary": "Create docker ssh connect totp",
+        "summary": "Verify TOTP and complete connection",
+        "description": "Verifies the TOTP code and completes the SSH connection.",
         "tags": [
-          "Routes"
+          "Docker"
         ],
         "requestBody": {
           "content": {
@@ -55673,9 +55958,10 @@
     "/docker/ssh/connect-warpgate": {
       "post": {
         "operationId": "docker_post_docker_ssh_connect-warpgate",
-        "summary": "Create docker ssh connect warpgate",
+        "summary": "Complete Warpgate authentication",
+        "description": "Submits empty response to complete Warpgate authentication after user completes browser auth.",
         "tags": [
-          "Routes"
+          "Docker"
         ],
         "requestBody": {
           "content": {
@@ -55866,9 +56152,10 @@
     "/docker/ssh/keepalive": {
       "post": {
         "operationId": "docker_post_docker_ssh_keepalive",
-        "summary": "Create docker ssh keepalive",
+        "summary": "Keep SSH session alive",
+        "description": "Keeps an active SSH session alive.",
         "tags": [
-          "Routes"
+          "Docker"
         ],
         "requestBody": {
           "content": {
@@ -56028,9 +56315,10 @@
     "/docker/ssh/status": {
       "get": {
         "operationId": "docker_get_docker_ssh_status",
-        "summary": "Get docker ssh status",
+        "summary": "Check SSH session status",
+        "description": "Checks the status of an active SSH session.",
         "tags": [
-          "Routes"
+          "Docker"
         ],
         "parameters": [
           {
@@ -56145,9 +56433,10 @@
     "/docker/validate/{sessionId}": {
       "get": {
         "operationId": "docker_get_docker_validate_by-sessionId",
-        "summary": "Get docker validate",
+        "summary": "Validate Docker availability",
+        "description": "Validates if Docker is available on the host.",
         "tags": [
-          "Routes"
+          "Docker"
         ],
         "parameters": [
           {
@@ -56381,9 +56670,10 @@
     "/docker/ssh/connect": {
       "post": {
         "operationId": "docker_post_docker_ssh_connect",
-        "summary": "Create docker ssh connect",
+        "summary": "Establish SSH session for Docker",
+        "description": "Establishes an SSH session to a host for Docker operations.",
         "tags": [
-          "Routes"
+          "Docker"
         ],
         "requestBody": {
           "content": {
@@ -57671,9 +57961,10 @@
     "/ssh/file_manager/ssh/executeFile": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_executeFile",
-        "summary": "Create ssh file manager ssh executeFile",
+        "summary": "Execute a file",
+        "description": "Executes a file on the remote host.",
         "tags": [
-          "Action"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -57828,9 +58119,10 @@
     "/ssh/file_manager/ssh/changePermissions": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_changePermissions",
-        "summary": "Create ssh file manager ssh changePermissions",
+        "summary": "Change file permissions",
+        "description": "Changes the permissions of a file on the remote host.",
         "tags": [
-          "Action"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -57995,9 +58287,10 @@
     "/ssh/file_manager/ssh/copyItem": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_copyItem",
-        "summary": "Create ssh file manager ssh copyItem",
+        "summary": "Copy a file or directory",
+        "description": "Copies a file or directory on the remote host.",
         "tags": [
-          "Action"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -58263,9 +58556,10 @@
     "/ssh/file_manager/ssh/uploadFileStream": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_uploadFileStream",
-        "summary": "Create ssh file manager ssh uploadFileStream",
+        "summary": "Stream-upload a file via multipart form",
+        "description": "Uploads a file to the remote host by streaming multipart form data directly into an SFTP write stream, avoiding full in-memory buffering.",
         "tags": [
-          "Content"
+          "File Manager"
         ],
         "parameters": [
           {
@@ -58411,9 +58705,10 @@
     "/ssh/file_manager/ssh/uploadFileChunk": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_uploadFileChunk",
-        "summary": "Create ssh file manager ssh uploadFileChunk",
+        "summary": "Upload one raw file chunk",
+        "description": "Writes a raw request body to the remote file at the supplied byte offset, allowing browser clients to avoid multipart/FormData 2GB limits.",
         "tags": [
-          "Content"
+          "File Manager"
         ],
         "parameters": [
           {
@@ -58610,9 +58905,10 @@
     "/ssh/file_manager/ssh/resolvePath": {
       "get": {
         "operationId": "file-manager_get_ssh_file_manager_ssh_resolvePath",
-        "summary": "Get ssh file manager ssh resolvePath",
+        "summary": "Resolve a path with environment variables",
+        "description": "Expands environment variables and ~ in a path via the SSH session.",
         "tags": [
-          "Content"
+          "File Manager"
         ],
         "parameters": [
           {
@@ -58742,9 +59038,10 @@
     "/ssh/file_manager/ssh/readFile": {
       "get": {
         "operationId": "file-manager_get_ssh_file_manager_ssh_readFile",
-        "summary": "Get ssh file manager ssh readFile",
+        "summary": "Read a file",
+        "description": "Reads the content of a file from the remote host.",
         "tags": [
-          "Content"
+          "File Manager"
         ],
         "parameters": [
           {
@@ -58988,9 +59285,10 @@
     "/ssh/file_manager/ssh/writeFile": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_writeFile",
-        "summary": "Create ssh file manager ssh writeFile",
+        "summary": "Write to a file",
+        "description": "Writes content to a file on the remote host and preserves the existing permissions when the file already exists.",
         "tags": [
-          "Content"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -59269,9 +59567,10 @@
     "/ssh/file_manager/ssh/identifySymlink": {
       "get": {
         "operationId": "file-manager_get_ssh_file_manager_ssh_identifySymlink",
-        "summary": "Get ssh file manager ssh identifySymlink",
+        "summary": "Identify symbolic link",
+        "description": "Identifies the target of a symbolic link.",
         "tags": [
-          "Content"
+          "File Manager"
         ],
         "parameters": [
           {
@@ -59414,9 +59713,10 @@
     "/ssh/file_manager/ssh/uploadFile": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_uploadFile",
-        "summary": "Create ssh file manager ssh uploadFile",
+        "summary": "Upload a file",
+        "description": "Uploads a file to the remote host.",
         "tags": [
-          "Content"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -59614,9 +59914,10 @@
     "/ssh/file_manager/ssh/downloadFileStream": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_downloadFileStream",
-        "summary": "Create ssh file manager ssh downloadFileStream",
+        "summary": "Stream-download a file",
+        "description": "Downloads a file as a binary stream. Uses SCP legacy mode (cat over exec) when the host has scpLegacy enabled, otherwise uses SFTP.",
         "tags": [
-          "Download"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -59728,9 +60029,10 @@
     "/ssh/file_manager/ssh/downloadFile": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_downloadFile",
-        "summary": "Create ssh file manager ssh downloadFile",
+        "summary": "Download a file",
+        "description": "Downloads a file from the remote host. Uses SCP legacy mode (cat over exec) when the host has scpLegacy enabled, otherwise uses SFTP.",
         "tags": [
-          "Download"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -59880,9 +60182,10 @@
     "/ssh/file_manager/ssh/connect-totp": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_connect-totp",
-        "summary": "Create ssh file manager ssh connect totp",
+        "summary": "Verify TOTP and complete connection",
+        "description": "Verifies the TOTP code and completes the SSH connection for file manager.",
         "tags": [
-          "Index"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -60066,9 +60369,10 @@
     "/ssh/file_manager/ssh/connect-warpgate": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_connect-warpgate",
-        "summary": "Create ssh file manager ssh connect warpgate",
+        "summary": "Complete Warpgate authentication",
+        "description": "Submits empty response to complete Warpgate authentication after user completes browser auth.",
         "tags": [
-          "Index"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -60252,9 +60556,10 @@
     "/ssh/file_manager/ssh/disconnect": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_disconnect",
-        "summary": "Create ssh file manager ssh disconnect",
+        "summary": "Disconnect from SSH",
+        "description": "Closes an active SSH connection for file manager.",
         "tags": [
-          "Index"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -60347,9 +60652,10 @@
     "/ssh/file_manager/sudo-password": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_sudo-password",
-        "summary": "Create ssh file manager sudo password",
+        "summary": "Set sudo password for session",
+        "description": "Stores sudo password temporarily in session for elevated operations.",
         "tags": [
-          "Index"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -60466,9 +60772,10 @@
     "/ssh/file_manager/ssh/status": {
       "get": {
         "operationId": "file-manager_get_ssh_file_manager_ssh_status",
-        "summary": "Get ssh file manager ssh status",
+        "summary": "Get SSH connection status",
+        "description": "Checks the status of an SSH connection for file manager.",
         "tags": [
-          "Index"
+          "File Manager"
         ],
         "parameters": [
           {
@@ -60555,9 +60862,10 @@
     "/ssh/file_manager/ssh/keepalive": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_keepalive",
-        "summary": "Create ssh file manager ssh keepalive",
+        "summary": "Keep SSH session alive",
+        "description": "Keeps an active SSH session for file manager alive.",
         "tags": [
-          "Index"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -60710,9 +61018,10 @@
     "/ssh/file_manager/ssh/extractArchive": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_extractArchive",
-        "summary": "Create ssh file manager ssh extractArchive",
+        "summary": "Extract archive file",
+        "description": "Extracts an archive file (.tar, .tar.gz, .tgz, .zip, .tar.bz2, .tbz2, .tar.xz, .txz) to a specified or default location on the remote host.",
         "tags": [
-          "Index"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -60857,9 +61166,10 @@
     "/ssh/file_manager/ssh/compressFiles": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_compressFiles",
-        "summary": "Create ssh file manager ssh compressFiles",
+        "summary": "Compress files",
+        "description": "Compresses files and/or directories on the remote host.",
         "tags": [
-          "Index"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -62360,9 +62670,10 @@
     "/ssh/file_manager/ssh/connect": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_connect",
-        "summary": "Create ssh file manager ssh connect",
+        "summary": "Connect to SSH for file management",
+        "description": "Establishes an SSH/SFTP connection for file manager operations. Supports password, key-based, and keyboard-interactive authentication, as well as jump hosts and SOCKS5 proxies.",
         "tags": [
-          "Index"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -63465,9 +63776,10 @@
     "/ssh/file_manager/ssh/listFiles": {
       "get": {
         "operationId": "file-manager_get_ssh_file_manager_ssh_listFiles",
-        "summary": "Get ssh file manager ssh listFiles",
+        "summary": "List files in a directory",
+        "description": "Lists the files and directories in a given path on the remote host.",
         "tags": [
-          "List"
+          "File Manager"
         ],
         "parameters": [
           {
@@ -64280,9 +64592,10 @@
     "/ssh/file_manager/ssh/createFile": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_createFile",
-        "summary": "Create ssh file manager ssh createFile",
+        "summary": "Create a file",
+        "description": "Creates an empty file on the remote host.",
         "tags": [
-          "Operation"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -64475,9 +64788,10 @@
     "/ssh/file_manager/ssh/createFolder": {
       "post": {
         "operationId": "file-manager_post_ssh_file_manager_ssh_createFolder",
-        "summary": "Create ssh file manager ssh createFolder",
+        "summary": "Create a folder",
+        "description": "Creates a new folder on the remote host.",
         "tags": [
-          "Operation"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -64670,9 +64984,10 @@
     "/ssh/file_manager/ssh/deleteItem": {
       "delete": {
         "operationId": "file-manager_delete_ssh_file_manager_ssh_deleteItem",
-        "summary": "Delete ssh file manager ssh deleteItem",
+        "summary": "Delete a file or directory",
+        "description": "Deletes a file or directory on the remote host.",
         "tags": [
-          "Operation"
+          "File Manager"
         ],
         "responses": {
           "200": {
@@ -64918,9 +65233,10 @@
     "/ssh/file_manager/ssh/renameItem": {
       "put": {
         "operationId": "file-manager_put_ssh_file_manager_ssh_renameItem",
-        "summary": "Replace ssh file manager ssh renameItem",
+        "summary": "Rename a file or directory",
+        "description": "Renames a file or directory on the remote host.",
         "tags": [
-          "Operation"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -65273,9 +65589,10 @@
     "/ssh/file_manager/ssh/moveItem": {
       "put": {
         "operationId": "file-manager_put_ssh_file_manager_ssh_moveItem",
-        "summary": "Replace ssh file manager ssh moveItem",
+        "summary": "Move a file or directory",
+        "description": "Moves a file or directory on the remote host.",
         "tags": [
-          "Operation"
+          "File Manager"
         ],
         "requestBody": {
           "content": {
@@ -65552,9 +65869,10 @@
     "/guacamole/connect-host/{hostId}": {
       "post": {
         "operationId": "database_post_guacamole_connect-host_by-hostId",
-        "summary": "Create guacamole connect host",
+        "summary": "Generate Guacamole connection token from host configuration",
+        "description": "Fetches host configuration from database and generates a connection token for RDP/VNC/Telnet",
         "tags": [
-          "Routes"
+          "Guacamole"
         ],
         "parameters": [
           {
@@ -65563,7 +65881,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Host ID to connect to"
           }
         ],
         "requestBody": {
@@ -65824,9 +66143,10 @@
     "/guacamole/token": {
       "post": {
         "operationId": "database_post_guacamole_token",
-        "summary": "Create guacamole token",
+        "summary": "Generate an encrypted Guacamole connection token",
+        "description": "Creates an AES-256-CBC encrypted token for guacamole-lite with the given connection parameters",
         "tags": [
-          "Routes"
+          "Guacamole"
         ],
         "requestBody": {
           "content": {
@@ -65947,9 +66267,9 @@
     "/metrics/history/{id}": {
       "get": {
         "operationId": "metrics_get_metrics_history_by-id",
-        "summary": "Get metrics history",
+        "summary": "Get historical metrics for a host",
         "tags": [
-          "History"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -66225,9 +66545,10 @@
     "/status": {
       "get": {
         "operationId": "metrics_get_status",
-        "summary": "Get status",
+        "summary": "Get all host statuses",
+        "description": "Retrieves the status of all hosts for the authenticated user.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -66313,9 +66634,10 @@
     "/status/{id}": {
       "get": {
         "operationId": "metrics_get_status_by-id",
-        "summary": "Get status",
+        "summary": "Get host status by ID",
+        "description": "Retrieves the status of a specific host by its ID.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -66440,9 +66762,10 @@
     "/clear-connections": {
       "post": {
         "operationId": "metrics_post_clear-connections",
-        "summary": "Create clear connections",
+        "summary": "Clear all SSH connections",
+        "description": "Clears all SSH connections from the connection pool.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "responses": {
           "200": {
@@ -66521,9 +66844,10 @@
     "/refresh": {
       "post": {
         "operationId": "metrics_post_refresh",
-        "summary": "Create refresh",
+        "summary": "Refresh polling",
+        "description": "Refreshes host polling for the authenticated user.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "responses": {
           "200": {
@@ -66608,9 +66932,10 @@
     "/host-updated": {
       "post": {
         "operationId": "metrics_post_host-updated",
-        "summary": "Create host updated",
+        "summary": "Start polling for updated host",
+        "description": "Starts polling for a specific host after it has been updated.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "requestBody": {
           "content": {
@@ -66774,9 +67099,10 @@
     "/host-deleted": {
       "post": {
         "operationId": "metrics_post_host-deleted",
-        "summary": "Create host deleted",
+        "summary": "Stop polling for deleted host",
+        "description": "Stops polling for a specific host after it has been deleted.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "requestBody": {
           "content": {
@@ -66912,9 +67238,10 @@
     "/metrics/{id}": {
       "get": {
         "operationId": "metrics_get_metrics_by-id",
-        "summary": "Get metrics",
+        "summary": "Get host metrics",
+        "description": "Retrieves current metrics for a specific host including CPU, memory, disk, network, processes, and system information.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -67395,9 +67722,10 @@
     "/metrics/start/{id}": {
       "post": {
         "operationId": "metrics_post_metrics_start_by-id",
-        "summary": "Create metrics start",
+        "summary": "Start metrics collection",
+        "description": "Establishes an SSH connection and starts collecting metrics for a specific host.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -68010,9 +68338,10 @@
     "/metrics/stop/{id}": {
       "post": {
         "operationId": "metrics_post_metrics_stop_by-id",
-        "summary": "Create metrics stop",
+        "summary": "Stop metrics collection",
+        "description": "Stops metrics collection for a specific host and cleans up the SSH session.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -68142,9 +68471,10 @@
     "/metrics/connect-totp": {
       "post": {
         "operationId": "metrics_post_metrics_connect-totp",
-        "summary": "Create metrics connect totp",
+        "summary": "Complete TOTP verification for metrics",
+        "description": "Verifies the TOTP code and completes the metrics SSH connection.",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "requestBody": {
           "content": {
@@ -69708,9 +70038,9 @@
     "/host-metrics/platform/{id}": {
       "get": {
         "operationId": "metrics_get_host-metrics_platform_by-id",
-        "summary": "Get host metrics platform",
+        "summary": "Detect available management tooling on a host",
         "tags": [
-          "Index"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -70473,9 +70803,9 @@
     "/host-metrics/managers/processes/{id}/signal": {
       "post": {
         "operationId": "metrics_post_host-metrics_managers_processes_by-id_signal",
-        "summary": "Create host metrics managers processes signal",
+        "summary": "Send a signal to a process (TERM/KILL/HUP/INT)",
         "tags": [
-          "Processes"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -70628,9 +70958,9 @@
     "/host-metrics/managers/processes/{id}": {
       "get": {
         "operationId": "metrics_get_host-metrics_managers_processes_by-id",
-        "summary": "Get host metrics managers processes",
+        "summary": "List processes (rich, sortable, filterable client-side)",
         "tags": [
-          "Processes"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -70807,9 +71137,9 @@
     "/host-metrics/managers/services/{id}/action": {
       "post": {
         "operationId": "metrics_post_host-metrics_managers_services_by-id_action",
-        "summary": "Create host metrics managers services action",
+        "summary": "Start/stop/restart/enable/disable a systemd service",
         "tags": [
-          "Services"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -70956,9 +71286,9 @@
     "/host-metrics/managers/services/{id}": {
       "get": {
         "operationId": "metrics_get_host-metrics_managers_services_by-id",
-        "summary": "Get host metrics managers services",
+        "summary": "List systemd services",
         "tags": [
-          "Services"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -72090,9 +72420,9 @@
     "/host-metrics/managers/ssl/{id}/revoke": {
       "post": {
         "operationId": "metrics_post_host-metrics_managers_ssl_by-id_revoke",
-        "summary": "Create host metrics managers ssl revoke",
+        "summary": "Revoke and remove an issued certificate (certbot or acme.sh)",
         "tags": [
-          "Ssl"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -72239,9 +72569,9 @@
     "/host-metrics/managers/tailscale/{id}": {
       "get": {
         "operationId": "metrics_get_host-metrics_managers_tailscale_by-id",
-        "summary": "Get host metrics managers tailscale",
+        "summary": "Get Tailscale status and IPs",
         "tags": [
-          "Tailscale"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -72426,9 +72756,9 @@
     "/host-metrics/managers/tailscale/{id}/action": {
       "post": {
         "operationId": "metrics_post_host-metrics_managers_tailscale_by-id_action",
-        "summary": "Create host metrics managers tailscale action",
+        "summary": "Connect or disconnect Tailscale",
         "tags": [
-          "Tailscale"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -72924,9 +73254,9 @@
     "/host-metrics/managers/wireguard/{id}": {
       "get": {
         "operationId": "metrics_get_host-metrics_managers_wireguard_by-id",
-        "summary": "Get host metrics managers wireguard",
+        "summary": "Get WireGuard interfaces and peers",
         "tags": [
-          "Wireguard"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -73093,9 +73423,9 @@
     "/host-metrics/managers/wireguard/{id}/action": {
       "post": {
         "operationId": "metrics_post_host-metrics_managers_wireguard_by-id_action",
-        "summary": "Create host metrics managers wireguard action",
+        "summary": "Bring a WireGuard interface up or down",
         "tags": [
-          "Wireguard"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -73242,9 +73572,10 @@
     "/host-metrics/preferences/{id}": {
       "post": {
         "operationId": "metrics_post_host-metrics_preferences_by-id",
-        "summary": "Create host metrics preferences",
+        "summary": "Save the Host Metrics layout for a host",
+        "description": "Persists the current user's card layout for the host and keeps statsConfig.enabledWidgets in sync (for hosts the user owns) so the mobile app keeps working.",
         "tags": [
-          "Preferences"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -73394,9 +73725,10 @@
       },
       "get": {
         "operationId": "metrics_get_host-metrics_preferences_by-id",
-        "summary": "Get host metrics preferences",
+        "summary": "Get the Host Metrics layout for a host",
+        "description": "Returns the current user's saved card layout for the host, or a default layout derived from the host's enabled widgets when none is saved.",
         "tags": [
-          "Preferences"
+          "Host Metrics"
         ],
         "parameters": [
           {
@@ -73545,9 +73877,9 @@
     "/proxmox-stats/history/{hostId}": {
       "get": {
         "operationId": "metrics_get_proxmox-stats_history_by-hostId",
-        "summary": "Get proxmox stats history",
+        "summary": "Get historical Proxmox node stats for a host",
         "tags": [
-          "Proxmox Stats History"
+          "Proxmox Stats"
         ],
         "parameters": [
           {
@@ -73725,7 +74057,8 @@
     "/proxmox-stats/start/{id}": {
       "post": {
         "operationId": "metrics_post_proxmox-stats_start_by-id",
-        "summary": "Create proxmox stats start",
+        "summary": "Start Proxmox stats collection",
+        "description": "Registers a viewer and starts (or reuses) polling for a host's Proxmox node stats.",
         "tags": [
           "Proxmox Stats"
         ],
@@ -74062,7 +74395,8 @@
     "/proxmox-stats/stop/{id}": {
       "post": {
         "operationId": "metrics_post_proxmox-stats_stop_by-id",
-        "summary": "Create proxmox stats stop",
+        "summary": "Stop Proxmox stats collection",
+        "description": "Unregisters a viewer session for a host's Proxmox node stats polling.",
         "tags": [
           "Proxmox Stats"
         ],
@@ -74194,7 +74528,8 @@
     "/proxmox-stats/{id}": {
       "get": {
         "operationId": "metrics_get_proxmox-stats_by-id",
-        "summary": "Get proxmox stats",
+        "summary": "Get cached Proxmox node stats for a host",
+        "description": "Returns the most recently polled Proxmox Stats snapshot for a host, or an empty skeleton if none has been collected yet.",
         "tags": [
           "Proxmox Stats"
         ],
@@ -74641,9 +74976,9 @@
     "/global-settings": {
       "post": {
         "operationId": "metrics_post_global-settings",
-        "summary": "Create global settings",
+        "summary": "Update global monitoring defaults",
         "tags": [
-          "Settings"
+          "Host Metrics"
         ],
         "requestBody": {
           "content": {
@@ -74792,9 +75127,9 @@
       },
       "get": {
         "operationId": "metrics_get_global-settings",
-        "summary": "Get global settings",
+        "summary": "Get global monitoring defaults",
         "tags": [
-          "Settings"
+          "Host Metrics"
         ],
         "responses": {
           "200": {
@@ -74878,9 +75213,9 @@
     "/global-settings/history": {
       "get": {
         "operationId": "metrics_get_global-settings_history",
-        "summary": "Get global settings history",
+        "summary": "Get metrics history retention setting",
         "tags": [
-          "Settings"
+          "Host Metrics"
         ],
         "responses": {
           "200": {
@@ -74957,9 +75292,9 @@
       },
       "post": {
         "operationId": "metrics_post_global-settings_history",
-        "summary": "Create global settings history",
+        "summary": "Update metrics history retention setting",
         "tags": [
-          "Settings"
+          "Host Metrics"
         ],
         "requestBody": {
           "content": {
@@ -75535,9 +75870,10 @@
     "/session-sharing/create": {
       "post": {
         "operationId": "database_post_session-sharing_create",
-        "summary": "Create session sharing create",
+        "summary": "Create a session share (link or targeted user)",
+        "description": "Mints a share grant for a live terminal/RDP/VNC/Telnet session. Caller must own the live session.",
         "tags": [
-          "Routes"
+          "Session Sharing"
         ],
         "requestBody": {
           "content": {
@@ -75811,9 +76147,10 @@
     "/session-sharing/host/{hostId}/active": {
       "get": {
         "operationId": "database_get_session-sharing_host_by-hostId_active",
-        "summary": "Get session sharing host active",
+        "summary": "List active session shares for a host",
+        "description": "Returns active (non-revoked, non-expired) shares owned by the caller for the given host.",
         "tags": [
-          "Routes"
+          "Session Sharing"
         ],
         "parameters": [
           {
@@ -75927,9 +76264,10 @@
     "/session-sharing/{shareId}": {
       "delete": {
         "operationId": "database_delete_session-sharing_by-shareId",
-        "summary": "Delete session sharing",
+        "summary": "Revoke a session share",
+        "description": "Revokes a share. Owner or admin only. Best-effort kick of live SSH participants; guac joins are not force-disconnected in v1.",
         "tags": [
-          "Routes"
+          "Session Sharing"
         ],
         "parameters": [
           {
@@ -76060,9 +76398,10 @@
     "/session-sharing/resolve/{linkToken}": {
       "get": {
         "operationId": "database_get_session-sharing_resolve_by-linkToken",
-        "summary": "Get session sharing resolve",
+        "summary": "Resolve a guest share link",
+        "description": "Public, unauthenticated endpoint for anonymous share-link guests. Never returns host name, IP, username, or hostId. Rate-limited per IP.",
         "tags": [
-          "Routes"
+          "Session Sharing"
         ],
         "parameters": [
           {
@@ -76195,9 +76534,10 @@
     "/session-sharing/{shareId}/end": {
       "post": {
         "operationId": "database_post_session-sharing_by-shareId_end",
-        "summary": "Create session sharing end",
+        "summary": "End a shared session for all participants",
+        "description": "Owner-only. Terminates the underlying session and notifies joined participants. Guac protocol kick is best-effort in v1.",
         "tags": [
-          "Routes"
+          "Session Sharing"
         ],
         "parameters": [
           {
@@ -78720,9 +79060,10 @@
     "/ssh/tunnel/status/{tunnelName}": {
       "get": {
         "operationId": "tunnel_get_ssh_tunnel_status_by-tunnelName",
-        "summary": "Get ssh tunnel status",
+        "summary": "Get tunnel status by name",
+        "description": "Retrieves the status of a specific SSH tunnel by its name.",
         "tags": [
-          "Routes"
+          "SSH Tunnels"
         ],
         "parameters": [
           {
@@ -78898,9 +79239,10 @@
     "/ssh/tunnel/connect": {
       "post": {
         "operationId": "tunnel_post_ssh_tunnel_connect",
-        "summary": "Create ssh tunnel connect",
+        "summary": "Connect SSH tunnel",
+        "description": "Establishes an SSH tunnel connection with the specified configuration.",
         "tags": [
-          "Routes"
+          "SSH Tunnels"
         ],
         "requestBody": {
           "content": {
@@ -79116,9 +79458,10 @@
     "/ssh/tunnel/disconnect": {
       "post": {
         "operationId": "tunnel_post_ssh_tunnel_disconnect",
-        "summary": "Create ssh tunnel disconnect",
+        "summary": "Disconnect SSH tunnel",
+        "description": "Disconnects an active SSH tunnel.",
         "tags": [
-          "Routes"
+          "SSH Tunnels"
         ],
         "requestBody": {
           "content": {
@@ -79282,9 +79625,10 @@
     "/ssh/tunnel/status": {
       "get": {
         "operationId": "tunnel_get_ssh_tunnel_status",
-        "summary": "Get ssh tunnel status",
+        "summary": "Get all tunnel statuses",
+        "description": "Retrieves the status of all SSH tunnels.",
         "tags": [
-          "Routes"
+          "SSH Tunnels"
         ],
         "responses": {
           "200": {
@@ -79356,9 +79700,10 @@
     "/ssh/tunnel/cancel": {
       "post": {
         "operationId": "tunnel_post_ssh_tunnel_cancel",
-        "summary": "Create ssh tunnel cancel",
+        "summary": "Cancel tunnel retry",
+        "description": "Cancels the retry mechanism for a failed SSH tunnel connection.",
         "tags": [
-          "Routes"
+          "SSH Tunnels"
         ],
         "requestBody": {
           "content": {
@@ -79578,7 +79923,8 @@
     "/activity/recent": {
       "get": {
         "operationId": "dashboard_get_activity_recent",
-        "summary": "Get activity recent",
+        "summary": "Get recent activity",
+        "description": "Fetches the most recent activities for the authenticated user.",
         "tags": [
           "Dashboard"
         ],
@@ -79589,7 +79935,8 @@
             "required": false,
             "schema": {
               "type": "integer"
-            }
+            },
+            "description": "The maximum number of activities to return."
           }
         ],
         "responses": {
@@ -79691,7 +80038,8 @@
     "/activity/log": {
       "post": {
         "operationId": "dashboard_post_activity_log",
-        "summary": "Create activity log",
+        "summary": "Log a new activity",
+        "description": "Logs a new user activity, such as accessing a terminal or file manager. This endpoint is rate-limited.",
         "tags": [
           "Dashboard"
         ],
@@ -79897,7 +80245,8 @@
     "/activity/reset": {
       "delete": {
         "operationId": "dashboard_delete_activity_reset",
-        "summary": "Delete activity reset",
+        "summary": "Reset recent activity",
+        "description": "Clears all recent activity for the authenticated user.",
         "tags": [
           "Dashboard"
         ],
@@ -80005,7 +80354,8 @@
     "/uptime": {
       "get": {
         "operationId": "dashboard_get_uptime",
-        "summary": "Get uptime",
+        "summary": "Get server uptime",
+        "description": "Returns the uptime of the server in various formats.",
         "tags": [
           "Dashboard"
         ],

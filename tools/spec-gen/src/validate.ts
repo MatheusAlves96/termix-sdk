@@ -2,9 +2,9 @@
  * Phase 10: validation and report. See tools/spec-gen/docs/spec-generation-strategy.md.
  *
  * Implements the mechanical checks (route counts, response coverage, confidence
- * distribution, opaque handlers). The diff against the official openapi.json and the
- * @redocly/cli lint pass are not wired in yet — see the "not yet implemented" note this
- * report ends with.
+ * distribution, opaque handlers) plus a real `@redocly/cli lint` pass. The diff against
+ * the official openapi.json is not wired in yet — see the "not yet implemented" note
+ * this report ends with.
  */
 
 import { execFileSync } from "node:child_process";
@@ -72,6 +72,7 @@ export function buildReport(
   analyses: RouteAnalysis[],
   testExamples: TestExample[] = [],
   frontendCrossChecks: FrontendCrossCheck[] = [],
+  jsdocBlockCount = 0,
 ): string {
   const lines: string[] = [];
   const push = (s: string) => lines.push(s);
@@ -208,6 +209,11 @@ export function buildReport(
       push(`  - ${c.call.method} ${c.call.path} (\`${c.call.file}:${c.call.line}\`, ${c.call.functionName}) — ${w}`);
     }
   }
+  push("");
+
+  push("## Existing @openapi text reuse (Phase 8)");
+  push("");
+  push(`- \`@openapi\` JSDoc blocks parsed: **${jsdocBlockCount}**. Their \`summary\`/\`description\`/\`tags\`/parameter descriptions are reused verbatim when present; \`requestBody\`/\`responses\` from them are never used as a schema source.`);
   push("");
 
   push("## Not yet implemented");

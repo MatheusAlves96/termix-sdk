@@ -13,6 +13,7 @@ import { buildOpenApiDocument } from "./openapi.js";
 import { buildReport, lintOpenApi } from "./validate.js";
 import { extractTestExamples } from "./tests-examples.js";
 import { extractFrontendCrossChecks } from "./frontend-client.js";
+import { extractJsdocText } from "./jsdoc-text.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -116,13 +117,17 @@ async function main(): Promise<void> {
     writeFileSync(frontendOutPath, JSON.stringify(frontendCrossChecks, null, 2) + "\n", "utf8");
     console.error(`[spec-gen] wrote ${frontendOutPath}`);
 
-    const openapi = buildOpenApiDocument(ir, drizzleIr, analyses, testExamples, frontendCrossChecks);
+    const jsdocText = extractJsdocText(project);
+    console.error(`[spec-gen] Phase 8: reused text from ${jsdocText.size} existing @openapi block(s)`);
+
+    const openapi = buildOpenApiDocument(ir, drizzleIr, analyses, testExamples, frontendCrossChecks, jsdocText);
     const openapiPath = join(outDir, "termix-openapi.json");
     writeFileSync(openapiPath, JSON.stringify(openapi, null, 2) + "\n", "utf8");
     console.error(`[spec-gen] Phase 9: wrote ${openapiPath} (${Object.keys(openapi.paths).length} paths)`);
 
     const lintSummary = lintOpenApi(openapiPath);
-    const report = buildReport(ir, drizzleIr, analyses, testExamples, frontendCrossChecks) + "\n" + lintSummary;
+    const report =
+      buildReport(ir, drizzleIr, analyses, testExamples, frontendCrossChecks, jsdocText.size) + "\n" + lintSummary;
     const reportPath = join(outDir, "report.md");
     writeFileSync(reportPath, report, "utf8");
     console.error(`[spec-gen] Phase 10: wrote ${reportPath}`);
