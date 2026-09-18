@@ -237,3 +237,18 @@ export interface FrontendCrossCheck {
   warnings: string[];
 }
 
+// ---- Phase 10, criterion 4: diff against the official openapi.json ----
+
+export interface OfficialSpecDiff {
+  available: boolean;
+  /** Why the diff isn't available, when `available` is false */
+  reason?: string;
+  officialOperationCount: number;
+  generatedOperationCount: number;
+  /** "METHOD /path" strings, in the official spec but not in ours (expect this to be empty) */
+  onlyInOfficial: string[];
+  /** "METHOD /path" strings we found that the official spec doesn't document (the known gap) */
+  onlyInGenerated: string[];
+  matchedCount: number;
+}
+

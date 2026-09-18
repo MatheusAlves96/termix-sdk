@@ -178,83 +178,102 @@ export function discoverRoutes(
 
   // ---- string-literal / path resolution (separate from origin resolution) ----
 
-  function resolveStringLiteral(exprIn: Node, depth = 0): string | null {
-    if (depth > 40) return null;
+  /**
+   * Resolves a string-valued expression to every value it can actually take, not just one.
+   * This matters beyond string literals and simple aliases: a template-literal path segment
+   * can depend on a destructured parameter with a default (`{ pathPrefix = "metrics" }`),
+   * and when the enclosing function is called from *multiple* call sites — some overriding
+   * it, some not — each call site is a genuinely separate route registration from the same
+   * source statement. Confirmed case: `registerHostMetricsViewerRoutes` is called once
+   * directly (giving `/metrics/heartbeat` etc. from the untouched default) and once wrapped
+   * by `registerProxmoxStatsRoutes`, which overrides `pathPrefix` to `"proxmox-stats"`
+   * (giving `/proxmox-stats/heartbeat` etc.) — both are real routes; resolving to just one
+   * value here silently drops the other. An empty array means "could not resolve at all".
+   */
+  function resolveStringLiteral(exprIn: Node, depth = 0): string[] {
+    if (depth > 40) return [];
     let expr: Node = exprIn;
     while (Node.isParenthesizedExpression(expr)) expr = expr.getExpression();
 
     if (Node.isStringLiteral(expr) || Node.isNoSubstitutionTemplateLiteral(expr)) {
-      return expr.getLiteralText();
+      return [expr.getLiteralText()];
     }
     if (Node.isTemplateExpression(expr)) {
-      let out = expr.getHead().getLiteralText();
+      let candidates = [expr.getHead().getLiteralText()];
       for (const span of expr.getTemplateSpans()) {
         const resolved = resolveStringLiteral(span.getExpression(), depth + 1);
-        if (resolved === null) return null;
-        out += resolved + span.getLiteral().getLiteralText();
+        if (resolved.length === 0) return [];
+        const tail = span.getLiteral().getLiteralText();
+        candidates = candidates.flatMap((prefix) => resolved.map((r) => prefix + r + tail));
       }
-      return out;
+      return candidates;
     }
     if (Node.isIdentifier(expr)) {
       const symbol = expr.getSymbol();
-      if (!symbol) return null;
+      if (!symbol) return [];
       let resolved = symbol;
       for (let i = 0; i < 10; i++) {
         const aliased = resolved.getAliasedSymbol();
         if (!aliased) break;
         resolved = aliased;
       }
+      const out: string[] = [];
       for (const decl of resolved.getDeclarations()) {
         if (Node.isVariableDeclaration(decl)) {
           const init = decl.getInitializer();
-          if (init) {
-            const r = resolveStringLiteral(init, depth + 1);
-            if (r !== null) return r;
-          }
+          if (init) out.push(...resolveStringLiteral(init, depth + 1));
         } else if (Node.isBindingElement(decl)) {
-          const fromCallSite = resolveBindingElementFromCallSites(decl, depth + 1);
-          if (fromCallSite !== null) return fromCallSite;
-          const init = decl.getInitializer();
-          if (init) return resolveStringLiteral(init, depth + 1);
+          out.push(...resolveBindingElementFromCallSites(decl, depth + 1));
         } else if (decl.getKind() === SyntaxKind.Parameter) {
           const paramDecl = decl.asKindOrThrow(SyntaxKind.Parameter);
           const init = paramDecl.getInitializer();
-          if (init) return resolveStringLiteral(init, depth + 1);
+          if (init) out.push(...resolveStringLiteral(init, depth + 1));
         }
       }
-      return null;
+      return [...new Set(out)];
     }
-    return null;
+    return [];
   }
 
-  /** For a destructured `{ pathPrefix = "x" }` parameter, prefers the value passed at the call site over the default. */
-  function resolveBindingElementFromCallSites(bindingEl: Node, depth: number): string | null {
+  /**
+   * For a destructured `{ pathPrefix = "x" }` parameter: one value per call site of the
+   * enclosing function — the value that call site's object literal passes for this
+   * property, or the parameter's own default when that call site doesn't override it.
+   */
+  function resolveBindingElementFromCallSites(bindingEl: Node, depth: number): string[] {
     const be = bindingEl.asKindOrThrow(SyntaxKind.BindingElement);
     const propName = be.getPropertyNameNode()?.getText() ?? be.getName();
+    const defaultInit = be.getInitializer();
+    const defaultValues = defaultInit ? resolveStringLiteral(defaultInit, depth + 1) : [];
 
     let owner: Node | undefined = be;
     while (owner && owner.getKind() !== SyntaxKind.Parameter) owner = owner.getParent();
-    if (!owner) return null;
+    if (!owner) return defaultValues;
     const param = owner.asKindOrThrow(SyntaxKind.Parameter);
     const fn = param.getParent();
-    if (!fn || !Node.isFunctionDeclaration(fn)) return null;
+    if (!fn || !Node.isFunctionDeclaration(fn)) return defaultValues;
     const paramIndex = fn.getParameters().findIndex((p) => p === param);
     const nameNode = fn.getNameNode();
-    if (!nameNode) return null;
+    if (!nameNode) return defaultValues;
 
+    const out: string[] = [];
     for (const ref of nameNode.findReferencesAsNodes()) {
       const call = ref.getParentIfKind(SyntaxKind.CallExpression);
       if (!call || call.getExpression() !== ref) continue;
       const arg = call.getArguments()[paramIndex];
-      if (!arg || !Node.isObjectLiteralExpression(arg)) continue;
-      for (const prop of arg.getProperties()) {
-        if (Node.isPropertyAssignment(prop) && prop.getName() === propName) {
-          const init = prop.getInitializer();
-          return init ? resolveStringLiteral(init, depth + 1) : null;
+      let overridden: string[] | undefined;
+      if (arg && Node.isObjectLiteralExpression(arg)) {
+        for (const prop of arg.getProperties()) {
+          if (Node.isPropertyAssignment(prop) && prop.getName() === propName) {
+            const init = prop.getInitializer();
+            overridden = init ? resolveStringLiteral(init, depth + 1) : [];
+            break;
+          }
         }
       }
+      out.push(...(overridden ?? defaultValues));
     }
-    return null;
+    return out.length > 0 ? [...new Set(out)] : defaultValues;
   }
 
   function isPathExpression(expr: Node): boolean {
@@ -266,7 +285,9 @@ export function discoverRoutes(
     );
   }
 
-  function resolvePathList(expr: Node): (string | null)[] {
+  /** One entry per syntactic path candidate (array-literal element, or the sole expression);
+   *  each entry is that candidate's resolved fan-out (empty = unresolved). */
+  function resolvePathCandidates(expr: Node): string[][] {
     if (Node.isArrayLiteralExpression(expr)) {
       return expr.getElements().map((el) => resolveStringLiteral(el));
     }
@@ -316,12 +337,13 @@ export function discoverRoutes(
     if (rest.length === 0) return; // X.use("/path") alone is not meaningful, ignore
     const last = rest[rest.length - 1];
     const targets = resolveOrigin(last);
-    const pathList = resolvePathList(first);
+    const pathCandidates = resolvePathCandidates(first);
 
     if (targets.length > 0) {
-      for (const p of pathList) {
-        if (p === null) continue;
-        for (const from of objectOrigins) for (const to of targets) addMountEdge(from, to, p);
+      for (const candidate of pathCandidates) {
+        for (const p of candidate) {
+          for (const from of objectOrigins) for (const to of targets) addMountEdge(from, to, p);
+        }
       }
       return;
     }
@@ -330,32 +352,34 @@ export function discoverRoutes(
     const middlewares = rest.slice(0, -1).map((m) => m.getText());
     const handlerKind = classifyHandlerKind(last);
     const loc = { file: toRel(call.getSourceFile().getFilePath()), line: call.getStartLineNumber() };
-    for (const p of pathList) {
-      for (const origin of objectOrigins) {
-        if (p === null) {
-          unresolved.push({
-            file: loc.file,
-            line: loc.line,
-            reason: "could not resolve string literal for X.use() catch-all path",
-            snippet: call.getText().slice(0, 200),
-          });
-          continue;
-        }
-        addRawRoute({
-          originKey: origin.key,
-          origin,
-          method: "*",
-          pathSegment: p,
-          pathText: first.getText(),
-          middlewares,
-          handlerKind,
+    for (const candidate of pathCandidates) {
+      if (candidate.length === 0) {
+        unresolved.push({
           file: loc.file,
           line: loc.line,
-          anyMethod: true,
-          callSiteId,
-          handlerNode: last,
-          callNode: call,
+          reason: "could not resolve string literal for X.use() catch-all path",
+          snippet: call.getText().slice(0, 200),
         });
+        continue;
+      }
+      for (const p of candidate) {
+        for (const origin of objectOrigins) {
+          addRawRoute({
+            originKey: origin.key,
+            origin,
+            method: "*",
+            pathSegment: p,
+            pathText: first.getText(),
+            middlewares,
+            handlerKind,
+            file: loc.file,
+            line: loc.line,
+            anyMethod: true,
+            callSiteId,
+            handlerNode: last,
+            callNode: call,
+          });
+        }
       }
     }
   }
@@ -371,37 +395,39 @@ export function discoverRoutes(
     const handler = rest[rest.length - 1];
     const middlewares = rest.slice(0, -1).map((m) => m.getText());
     const handlerKind = classifyHandlerKind(handler);
-    const pathList = resolvePathList(pathArg);
+    const pathCandidates = resolvePathCandidates(pathArg);
     const loc = { file: toRel(call.getSourceFile().getFilePath()), line: call.getStartLineNumber() };
     const callSiteId = `${loc.file}:${call.getStart()}`;
     const httpMethod = method.toUpperCase() as RouteRecord["method"];
 
-    for (const p of pathList) {
-      for (const origin of objectOrigins) {
-        if (p === null) {
-          unresolved.push({
-            file: loc.file,
-            line: loc.line,
-            reason: `could not resolve string literal for ${method}() path`,
-            snippet: call.getText().slice(0, 200),
-          });
-          continue;
-        }
-        addRawRoute({
-          originKey: origin.key,
-          origin,
-          method: httpMethod,
-          pathSegment: p,
-          pathText: pathArg.getText(),
-          middlewares,
-          handlerKind,
+    for (const candidate of pathCandidates) {
+      if (candidate.length === 0) {
+        unresolved.push({
           file: loc.file,
           line: loc.line,
-          anyMethod: false,
-          callSiteId,
-          handlerNode: handler,
-          callNode: call,
+          reason: `could not resolve string literal for ${method}() path`,
+          snippet: call.getText().slice(0, 200),
         });
+        continue;
+      }
+      for (const p of candidate) {
+        for (const origin of objectOrigins) {
+          addRawRoute({
+            originKey: origin.key,
+            origin,
+            method: httpMethod,
+            pathSegment: p,
+            pathText: pathArg.getText(),
+            middlewares,
+            handlerKind,
+            file: loc.file,
+            line: loc.line,
+            anyMethod: false,
+            callSiteId,
+            handlerNode: handler,
+            callNode: call,
+          });
+        }
       }
     }
   }

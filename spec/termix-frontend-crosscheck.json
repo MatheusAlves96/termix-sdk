@@ -9989,6 +9989,122 @@
     "warnings": []
   },
   {
+    "routeId": "src/backend/hosts/metrics/viewer-routes.ts#L73:POST:/metrics/heartbeat",
+    "call": {
+      "functionName": "sendMetricsHeartbeat",
+      "file": "src/ui/api/host-metrics-status-api.ts",
+      "line": 261,
+      "method": "POST",
+      "path": "/metrics/heartbeat",
+      "service": "metrics",
+      "bodyType": {
+        "type": "object",
+        "properties": {
+          "viewerSessionId": {
+            "type": "string",
+            "confidence": "frontend-type"
+          }
+        },
+        "required": [
+          "viewerSessionId"
+        ],
+        "confidence": "frontend-type"
+      },
+      "returnType": {
+        "type": "unknown",
+        "confidence": "frontend-type"
+      },
+      "transportNotes": []
+    },
+    "warnings": []
+  },
+  {
+    "routeId": "src/backend/hosts/metrics/viewer-routes.ts#L132:POST:/metrics/register-viewer",
+    "call": {
+      "functionName": "registerMetricsViewer",
+      "file": "src/ui/api/host-metrics-status-api.ts",
+      "line": 275,
+      "method": "POST",
+      "path": "/metrics/register-viewer",
+      "service": "metrics",
+      "bodyType": {
+        "type": "object",
+        "properties": {
+          "hostId": {
+            "type": "number",
+            "confidence": "frontend-type"
+          }
+        },
+        "required": [
+          "hostId"
+        ],
+        "confidence": "frontend-type"
+      },
+      "returnType": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "confidence": "frontend-type"
+          },
+          "viewerSessionId": {
+            "type": "string",
+            "confidence": "frontend-type"
+          },
+          "skipped": {
+            "type": "boolean",
+            "confidence": "frontend-type"
+          },
+          "reason": {
+            "type": "string",
+            "confidence": "frontend-type"
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "confidence": "frontend-type"
+      },
+      "transportNotes": []
+    },
+    "warnings": []
+  },
+  {
+    "routeId": "src/backend/hosts/metrics/viewer-routes.ts#L259:POST:/metrics/unregister-viewer",
+    "call": {
+      "functionName": "unregisterMetricsViewer",
+      "file": "src/ui/api/host-metrics-status-api.ts",
+      "line": 291,
+      "method": "POST",
+      "path": "/metrics/unregister-viewer",
+      "service": "metrics",
+      "bodyType": {
+        "type": "object",
+        "properties": {
+          "hostId": {
+            "type": "number",
+            "confidence": "frontend-type"
+          },
+          "viewerSessionId": {
+            "type": "string",
+            "confidence": "frontend-type"
+          }
+        },
+        "required": [
+          "hostId",
+          "viewerSessionId"
+        ],
+        "confidence": "frontend-type"
+      },
+      "returnType": {
+        "type": "unknown",
+        "confidence": "frontend-type"
+      },
+      "transportNotes": []
+    },
+    "warnings": []
+  },
+  {
     "routeId": "src/backend/hosts/metrics/index.ts#L2804:POST:/metrics/connect-totp",
     "call": {
       "functionName": "submitMetricsTOTP",

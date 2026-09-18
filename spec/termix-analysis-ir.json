@@ -60099,6 +60099,134 @@
     "opaque": false
   },
   {
+    "routeId": "src/backend/hosts/metrics/viewer-routes.ts#L132:POST:/metrics/register-viewer",
+    "auth": {
+      "required": true,
+      "requiresAdmin": false,
+      "requiresDataAccess": false,
+      "adminImpersonation": true
+    },
+    "pathParams": [],
+    "queryParams": [],
+    "headers": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "hostId": {
+              "type": "number",
+              "confidence": "inferred"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
+    "responses": [
+      {
+        "status": 200,
+        "contentType": "application/json",
+        "schema": {
+          "type": "unknown",
+          "confidence": "handler-literal",
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "const": false,
+                  "type": "boolean",
+                  "confidence": "handler-literal"
+                },
+                "skipped": {
+                  "const": true,
+                  "type": "boolean",
+                  "confidence": "handler-literal"
+                },
+                "reason": {
+                  "const": "internal_error",
+                  "type": "string",
+                  "confidence": "handler-literal"
+                }
+              },
+              "required": [
+                "success",
+                "skipped",
+                "reason"
+              ],
+              "confidence": "handler-literal"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "const": true,
+                  "type": "boolean",
+                  "confidence": "handler-literal"
+                },
+                "viewerSessionId": {
+                  "type": "string",
+                  "confidence": "repository-type"
+                }
+              },
+              "required": [
+                "success",
+                "viewerSessionId"
+              ],
+              "confidence": "handler-literal"
+            }
+          ]
+        }
+      },
+      {
+        "status": 400,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "const": "Invalid hostId",
+              "type": "string",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "error"
+          ],
+          "confidence": "handler-literal"
+        }
+      },
+      {
+        "status": 401,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "const": "Session expired - please log in again",
+              "type": "string",
+              "confidence": "handler-literal"
+            },
+            "code": {
+              "const": "SESSION_EXPIRED",
+              "type": "string",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "error",
+            "code"
+          ],
+          "confidence": "handler-literal"
+        }
+      }
+    ],
+    "opaque": false
+  },
+  {
     "routeId": "src/backend/hosts/metrics/viewer-routes.ts#L132:POST:/proxmox-stats/register-viewer",
     "auth": {
       "required": true,
@@ -60227,6 +60355,119 @@
     "opaque": false
   },
   {
+    "routeId": "src/backend/hosts/metrics/viewer-routes.ts#L259:POST:/metrics/unregister-viewer",
+    "auth": {
+      "required": true,
+      "requiresAdmin": false,
+      "requiresDataAccess": false,
+      "adminImpersonation": true
+    },
+    "pathParams": [],
+    "queryParams": [],
+    "headers": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "hostId": {
+              "type": "number",
+              "confidence": "inferred"
+            },
+            "viewerSessionId": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
+    "responses": [
+      {
+        "status": 200,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "success": {
+              "const": true,
+              "type": "boolean",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "success"
+          ],
+          "confidence": "handler-literal"
+        }
+      },
+      {
+        "status": 400,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "const": "Invalid viewerSessionId",
+              "type": "string",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "error"
+          ],
+          "confidence": "handler-literal"
+        }
+      },
+      {
+        "status": 401,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "const": "Session expired - please log in again",
+              "type": "string",
+              "confidence": "handler-literal"
+            },
+            "code": {
+              "const": "SESSION_EXPIRED",
+              "type": "string",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "error",
+            "code"
+          ],
+          "confidence": "handler-literal"
+        }
+      },
+      {
+        "status": 500,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "const": "Failed to unregister viewer",
+              "type": "string",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "error"
+          ],
+          "confidence": "handler-literal"
+        }
+      }
+    ],
+    "opaque": false
+  },
+  {
     "routeId": "src/backend/hosts/metrics/viewer-routes.ts#L259:POST:/proxmox-stats/unregister-viewer",
     "auth": {
       "required": true,
@@ -60326,6 +60567,133 @@
           "properties": {
             "error": {
               "const": "Failed to unregister viewer",
+              "type": "string",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "error"
+          ],
+          "confidence": "handler-literal"
+        }
+      }
+    ],
+    "opaque": false
+  },
+  {
+    "routeId": "src/backend/hosts/metrics/viewer-routes.ts#L73:POST:/metrics/heartbeat",
+    "auth": {
+      "required": true,
+      "requiresAdmin": false,
+      "requiresDataAccess": false,
+      "adminImpersonation": true
+    },
+    "pathParams": [],
+    "queryParams": [],
+    "headers": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "viewerSessionId": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
+    "responses": [
+      {
+        "status": 200,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "success": {
+              "const": true,
+              "type": "boolean",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "success"
+          ],
+          "confidence": "handler-literal"
+        }
+      },
+      {
+        "status": 400,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "const": "Invalid viewerSessionId",
+              "type": "string",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "error"
+          ],
+          "confidence": "handler-literal"
+        }
+      },
+      {
+        "status": 401,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "const": "Session expired - please log in again",
+              "type": "string",
+              "confidence": "handler-literal"
+            },
+            "code": {
+              "const": "SESSION_EXPIRED",
+              "type": "string",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "error",
+            "code"
+          ],
+          "confidence": "handler-literal"
+        }
+      },
+      {
+        "status": 404,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "const": "Viewer session not found",
+              "type": "string",
+              "confidence": "handler-literal"
+            }
+          },
+          "required": [
+            "error"
+          ],
+          "confidence": "handler-literal"
+        }
+      },
+      {
+        "status": 500,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "const": "Failed to update heartbeat",
               "type": "string",
               "confidence": "handler-literal"
             }

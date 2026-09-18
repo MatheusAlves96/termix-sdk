@@ -14,6 +14,7 @@ import { buildReport, lintOpenApi } from "./validate.js";
 import { extractTestExamples } from "./tests-examples.js";
 import { extractFrontendCrossChecks } from "./frontend-client.js";
 import { extractJsdocText } from "./jsdoc-text.js";
+import { diffAgainstOfficial, generateOfficialSpec } from "./official-diff.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -39,6 +40,7 @@ async function main(): Promise<void> {
   const repoPathArg = typeof args.repo === "string" ? args.repo : undefined;
   const tagArg = typeof args.tag === "string" && args.tag !== "latest" ? args.tag : undefined;
   const keep = args.keep === true;
+  const skipOfficialDiff = args["skip-official-diff"] === true;
 
   const clone = await obtainTermixSource({
     repoPath: repoPathArg,
@@ -122,12 +124,31 @@ async function main(): Promise<void> {
 
     const openapi = buildOpenApiDocument(ir, drizzleIr, analyses, testExamples, frontendCrossChecks, jsdocText);
     const openapiPath = join(outDir, "termix-openapi.json");
+
+    let officialSpec: Record<string, unknown> | null = null;
+    if (!skipOfficialDiff) {
+      console.error("[spec-gen] regenerating the official spec (npm run generate:openapi) to diff against...");
+      officialSpec = generateOfficialSpec(clone.repoPath);
+    }
+    const officialDiff = diffAgainstOfficial(ir, officialSpec);
+    (openapi as Record<string, unknown>)["x-official-spec-diff"] = officialDiff;
+    if (officialDiff.available) {
+      console.error(
+        `[spec-gen] Phase 10 (official diff): ${officialDiff.matchedCount}/${officialDiff.officialOperationCount} official operations matched, ` +
+          `${officialDiff.onlyInOfficial.length} only in the official spec, ${officialDiff.onlyInGenerated.length} only in ours`,
+      );
+    } else {
+      console.error(`[spec-gen] Phase 10 (official diff): skipped — ${officialDiff.reason}`);
+    }
+
     writeFileSync(openapiPath, JSON.stringify(openapi, null, 2) + "\n", "utf8");
     console.error(`[spec-gen] Phase 9: wrote ${openapiPath} (${Object.keys(openapi.paths).length} paths)`);
 
     const lintSummary = lintOpenApi(openapiPath);
     const report =
-      buildReport(ir, drizzleIr, analyses, testExamples, frontendCrossChecks, jsdocText.size) + "\n" + lintSummary;
+      buildReport(ir, drizzleIr, analyses, testExamples, frontendCrossChecks, jsdocText.size, officialDiff) +
+      "\n" +
+      lintSummary;
     const reportPath = join(outDir, "report.md");
     writeFileSync(reportPath, report, "utf8");
     console.error(`[spec-gen] Phase 10: wrote ${reportPath}`);

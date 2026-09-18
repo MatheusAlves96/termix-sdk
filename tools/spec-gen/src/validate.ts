@@ -15,6 +15,7 @@ import type {
   Confidence,
   DrizzleIR,
   FrontendCrossCheck,
+  OfficialSpecDiff,
   RouteAnalysis,
   RouteRecord,
   RoutesIR,
@@ -73,6 +74,7 @@ export function buildReport(
   testExamples: TestExample[] = [],
   frontendCrossChecks: FrontendCrossCheck[] = [],
   jsdocBlockCount = 0,
+  officialDiff?: OfficialSpecDiff,
 ): string {
   const lines: string[] = [];
   const push = (s: string) => lines.push(s);
@@ -216,9 +218,28 @@ export function buildReport(
   push(`- \`@openapi\` JSDoc blocks parsed: **${jsdocBlockCount}**. Their \`summary\`/\`description\`/\`tags\`/parameter descriptions are reused verbatim when present; \`requestBody\`/\`responses\` from them are never used as a schema source.`);
   push("");
 
-  push("## Not yet implemented");
+  push("## Diff against the official spec (Phase 10, criterion 4)");
   push("");
-  push("- Diff against the official Termix openapi.json (design doc Phase 10, criterion 4).");
+  if (!officialDiff || !officialDiff.available) {
+    push(`Not available${officialDiff?.reason ? `: ${officialDiff.reason}` : " (this run was invoked with --skip-official-diff)."}`);
+  } else {
+    push(
+      `Official spec regenerated with \`npm run generate:openapi\` (Termix's own release process) rather than scraped from the docs site — see \`official-diff.ts\` for why.`,
+    );
+    push("");
+    push(`- Official operations: **${officialDiff.officialOperationCount}**`);
+    push(`- Our operations: **${officialDiff.generatedOperationCount}**`);
+    push(`- Matched: **${officialDiff.matchedCount}**`);
+    push(`- Only in the official spec (we should have these too — worth investigating each one): **${officialDiff.onlyInOfficial.length}**`);
+    if (officialDiff.onlyInOfficial.length > 0) {
+      for (const k of officialDiff.onlyInOfficial.slice(0, 30)) push(`  - ${k}`);
+      if (officialDiff.onlyInOfficial.length > 30) push(`  - ...and ${officialDiff.onlyInOfficial.length - 30} more`);
+    }
+    push(`- Only in ours (the known coverage gap — real endpoints the official spec never documented): **${officialDiff.onlyInGenerated.length}**`);
+    if (officialDiff.onlyInGenerated.length > 0 && officialDiff.onlyInGenerated.length <= 15) {
+      for (const k of officialDiff.onlyInGenerated) push(`  - ${k}`);
+    }
+  }
   push("");
 
   return lines.join("\n");

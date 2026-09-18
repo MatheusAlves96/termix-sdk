@@ -2,8 +2,8 @@
   "meta": {
     "tag": "release-2.7.1-tag",
     "commit": "76fd9eedbf0f7e853d5ffe40717cac126ffe6a98",
-    "generatedAt": "2026-09-18T20:49:58.991Z",
-    "sourceRepo": "C:\\Users\\Matheus\\AppData\\Local\\Temp\\termix-spec-gen-FVzrNk\\Termix",
+    "generatedAt": "2026-09-18T21:23:15.389Z",
+    "sourceRepo": "C:\\Users\\Matheus\\AppData\\Local\\Temp\\termix-spec-gen-78m8Tb\\Termix",
     "expressVersion": null
   },
   "services": [
@@ -7331,6 +7331,22 @@
       "anyMethod": false
     },
     {
+      "id": "src/backend/hosts/metrics/viewer-routes.ts#L132:POST:/metrics/register-viewer",
+      "method": "POST",
+      "path": "/metrics/register-viewer",
+      "expressPath": "/metrics/register-viewer",
+      "service": "metrics",
+      "port": 30005,
+      "file": "src/backend/hosts/metrics/viewer-routes.ts",
+      "line": 132,
+      "handlerKind": "inline-arrow",
+      "middlewares": [],
+      "sharedHandlerWith": [
+        "src/backend/hosts/metrics/viewer-routes.ts#L132:POST:/proxmox-stats/register-viewer"
+      ],
+      "anyMethod": false
+    },
+    {
       "id": "src/backend/hosts/metrics/viewer-routes.ts#L132:POST:/proxmox-stats/register-viewer",
       "method": "POST",
       "path": "/proxmox-stats/register-viewer",
@@ -7341,7 +7357,25 @@
       "line": 132,
       "handlerKind": "inline-arrow",
       "middlewares": [],
-      "sharedHandlerWith": [],
+      "sharedHandlerWith": [
+        "src/backend/hosts/metrics/viewer-routes.ts#L132:POST:/metrics/register-viewer"
+      ],
+      "anyMethod": false
+    },
+    {
+      "id": "src/backend/hosts/metrics/viewer-routes.ts#L259:POST:/metrics/unregister-viewer",
+      "method": "POST",
+      "path": "/metrics/unregister-viewer",
+      "expressPath": "/metrics/unregister-viewer",
+      "service": "metrics",
+      "port": 30005,
+      "file": "src/backend/hosts/metrics/viewer-routes.ts",
+      "line": 259,
+      "handlerKind": "inline-arrow",
+      "middlewares": [],
+      "sharedHandlerWith": [
+        "src/backend/hosts/metrics/viewer-routes.ts#L259:POST:/proxmox-stats/unregister-viewer"
+      ],
       "anyMethod": false
     },
     {
@@ -7355,7 +7389,25 @@
       "line": 259,
       "handlerKind": "inline-arrow",
       "middlewares": [],
-      "sharedHandlerWith": [],
+      "sharedHandlerWith": [
+        "src/backend/hosts/metrics/viewer-routes.ts#L259:POST:/metrics/unregister-viewer"
+      ],
+      "anyMethod": false
+    },
+    {
+      "id": "src/backend/hosts/metrics/viewer-routes.ts#L73:POST:/metrics/heartbeat",
+      "method": "POST",
+      "path": "/metrics/heartbeat",
+      "expressPath": "/metrics/heartbeat",
+      "service": "metrics",
+      "port": 30005,
+      "file": "src/backend/hosts/metrics/viewer-routes.ts",
+      "line": 73,
+      "handlerKind": "inline-arrow",
+      "middlewares": [],
+      "sharedHandlerWith": [
+        "src/backend/hosts/metrics/viewer-routes.ts#L73:POST:/proxmox-stats/heartbeat"
+      ],
       "anyMethod": false
     },
     {
@@ -7369,7 +7421,9 @@
       "line": 73,
       "handlerKind": "inline-arrow",
       "middlewares": [],
-      "sharedHandlerWith": [],
+      "sharedHandlerWith": [
+        "src/backend/hosts/metrics/viewer-routes.ts#L73:POST:/metrics/heartbeat"
+      ],
       "anyMethod": false
     },
     {

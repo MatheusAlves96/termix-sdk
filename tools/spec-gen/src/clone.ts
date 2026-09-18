@@ -33,7 +33,8 @@ async function resolveLatestTag(): Promise<string> {
   return data.tag_name;
 }
 
-function run(cmd: string, args: string[], cwd: string): string {
+/** Exported for reuse by official-diff.ts (Phase 10's `npm run generate:openapi` call). */
+export function run(cmd: string, args: string[], cwd: string): string {
   // On Windows, npm (unlike git) is a .cmd shim: spawning it needs a shell even when given
   // its exact filename. Args here are always hardcoded literals (never interpolated from
   // untrusted input), so shell:true carries no injection risk in this specific call.

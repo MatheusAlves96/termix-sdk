@@ -8,7 +8,7 @@
   "x-termix-source": {
     "tag": "release-2.7.1-tag",
     "commit": "76fd9eedbf0f7e853d5ffe40717cac126ffe6a98",
-    "generatedAt": "2026-09-18T20:49:58.991Z"
+    "generatedAt": "2026-09-18T21:23:15.389Z"
   },
   "servers": [
     {
@@ -75408,6 +75408,170 @@
         ]
       }
     },
+    "/metrics/register-viewer": {
+      "post": {
+        "operationId": "metrics_post_metrics_register-viewer",
+        "summary": "Register metrics viewer",
+        "description": "Registers a new viewer session for a host to track who is viewing metrics.",
+        "tags": [
+          "Host Metrics"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hostId": {
+                    "type": "number",
+                    "x-confidence": "inferred"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "success": {
+                          "const": false,
+                          "type": "boolean",
+                          "x-confidence": "handler-literal"
+                        },
+                        "skipped": {
+                          "const": true,
+                          "type": "boolean",
+                          "x-confidence": "handler-literal"
+                        },
+                        "reason": {
+                          "const": "internal_error",
+                          "type": "string",
+                          "x-confidence": "handler-literal"
+                        }
+                      },
+                      "required": [
+                        "success",
+                        "skipped",
+                        "reason"
+                      ],
+                      "x-confidence": "handler-literal"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "success": {
+                          "const": true,
+                          "type": "boolean",
+                          "x-confidence": "handler-literal"
+                        },
+                        "viewerSessionId": {
+                          "type": "string",
+                          "x-confidence": "repository-type"
+                        }
+                      },
+                      "required": [
+                        "success",
+                        "viewerSessionId"
+                      ],
+                      "x-confidence": "handler-literal"
+                    }
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "const": "Invalid hostId",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "const": "Session expired - please log in again",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    },
+                    "code": {
+                      "const": "SESSION_EXPIRED",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyBearer": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "servers": [
+          {
+            "url": "http://localhost:30005",
+            "description": "metrics"
+          }
+        ],
+        "x-source": {
+          "file": "src/backend/hosts/metrics/viewer-routes.ts",
+          "line": 132
+        },
+        "x-shared-handler-with": [
+          "src/backend/hosts/metrics/viewer-routes.ts#L132:POST:/proxmox-stats/register-viewer"
+        ],
+        "x-frontend-calls": [
+          {
+            "function": "registerMetricsViewer",
+            "file": "src/ui/api/host-metrics-status-api.ts",
+            "line": 275
+          }
+        ]
+      }
+    },
     "/proxmox-stats/register-viewer": {
       "post": {
         "operationId": "metrics_post_proxmox-stats_register-viewer",
@@ -75558,7 +75722,162 @@
         "x-source": {
           "file": "src/backend/hosts/metrics/viewer-routes.ts",
           "line": 132
-        }
+        },
+        "x-shared-handler-with": [
+          "src/backend/hosts/metrics/viewer-routes.ts#L132:POST:/metrics/register-viewer"
+        ]
+      }
+    },
+    "/metrics/unregister-viewer": {
+      "post": {
+        "operationId": "metrics_post_metrics_unregister-viewer",
+        "summary": "Unregister metrics viewer",
+        "description": "Unregisters a viewer session when they stop viewing metrics for a host.",
+        "tags": [
+          "Host Metrics"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hostId": {
+                    "type": "number",
+                    "x-confidence": "inferred"
+                  },
+                  "viewerSessionId": {
+                    "x-confidence": "unknown"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "const": true,
+                      "type": "boolean",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "const": "Invalid viewerSessionId",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "const": "Session expired - please log in again",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    },
+                    "code": {
+                      "const": "SESSION_EXPIRED",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "const": "Failed to unregister viewer",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyBearer": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "servers": [
+          {
+            "url": "http://localhost:30005",
+            "description": "metrics"
+          }
+        ],
+        "x-source": {
+          "file": "src/backend/hosts/metrics/viewer-routes.ts",
+          "line": 259
+        },
+        "x-shared-handler-with": [
+          "src/backend/hosts/metrics/viewer-routes.ts#L259:POST:/proxmox-stats/unregister-viewer"
+        ],
+        "x-frontend-calls": [
+          {
+            "function": "unregisterMetricsViewer",
+            "file": "src/ui/api/host-metrics-status-api.ts",
+            "line": 291
+          }
+        ]
       }
     },
     "/proxmox-stats/unregister-viewer": {
@@ -75699,7 +76018,179 @@
         "x-source": {
           "file": "src/backend/hosts/metrics/viewer-routes.ts",
           "line": 259
-        }
+        },
+        "x-shared-handler-with": [
+          "src/backend/hosts/metrics/viewer-routes.ts#L259:POST:/metrics/unregister-viewer"
+        ]
+      }
+    },
+    "/metrics/heartbeat": {
+      "post": {
+        "operationId": "metrics_post_metrics_heartbeat",
+        "summary": "Update viewer heartbeat",
+        "description": "Updates the heartbeat timestamp for a metrics viewer session to keep it alive.",
+        "tags": [
+          "Host Metrics"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "viewerSessionId": {
+                    "x-confidence": "unknown"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "const": true,
+                      "type": "boolean",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "const": "Invalid viewerSessionId",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "const": "Session expired - please log in again",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    },
+                    "code": {
+                      "const": "SESSION_EXPIRED",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "code"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "const": "Viewer session not found",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "const": "Failed to update heartbeat",
+                      "type": "string",
+                      "x-confidence": "handler-literal"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "x-confidence": "handler-literal"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyBearer": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "servers": [
+          {
+            "url": "http://localhost:30005",
+            "description": "metrics"
+          }
+        ],
+        "x-source": {
+          "file": "src/backend/hosts/metrics/viewer-routes.ts",
+          "line": 73
+        },
+        "x-shared-handler-with": [
+          "src/backend/hosts/metrics/viewer-routes.ts#L73:POST:/proxmox-stats/heartbeat"
+        ],
+        "x-frontend-calls": [
+          {
+            "function": "sendMetricsHeartbeat",
+            "file": "src/ui/api/host-metrics-status-api.ts",
+            "line": 261
+          }
+        ]
       }
     },
     "/proxmox-stats/heartbeat": {
@@ -75858,6 +76349,9 @@
           "file": "src/backend/hosts/metrics/viewer-routes.ts",
           "line": 73
         },
+        "x-shared-handler-with": [
+          "src/backend/hosts/metrics/viewer-routes.ts#L73:POST:/metrics/heartbeat"
+        ],
         "x-frontend-calls": [
           {
             "function": "sendProxmoxStatsHeartbeat",
@@ -85223,5 +85717,120 @@
       },
       "description": "Registered via app.use()/router.use() as a method catch-all; not representable as a single OpenAPI operation."
     }
-  ]
+  ],
+  "x-official-spec-diff": {
+    "available": true,
+    "officialOperationCount": 413,
+    "generatedOperationCount": 512,
+    "onlyInOfficial": [
+      "DELETE /host/opkssh/token/{hostId}",
+      "GET /automations/runs",
+      "GET /host/opkssh/token/{hostId}"
+    ],
+    "onlyInGenerated": [
+      "DELETE /host/opkssh-callback/{requestId}",
+      "DELETE /host/opkssh-chooser/{requestId}",
+      "DELETE /host/ssh/opkssh/token/{hostId}",
+      "DELETE /ssh/file_manager/ssh",
+      "DELETE /ssh/file_manager/ssh/trash",
+      "DELETE /ssh/file_manager/ssh/trash/{id}",
+      "GET /automations/runs/history",
+      "GET /database/migration/history",
+      "GET /database/migration/status",
+      "GET /encryption/status",
+      "GET /guacamole/status",
+      "GET /health",
+      "GET /host-metrics/managers/cron/{id}",
+      "GET /host-metrics/managers/disk-breakdown/{id}",
+      "GET /host-metrics/managers/firewall/{id}",
+      "GET /host-metrics/managers/health/{id}",
+      "GET /host-metrics/managers/logs/{id}",
+      "GET /host-metrics/managers/logs/{id}/files",
+      "GET /host-metrics/managers/packages/{id}",
+      "GET /host-metrics/managers/ssl/{id}",
+      "GET /host-metrics/managers/timers/{id}",
+      "GET /host-metrics/managers/top-memory/{id}",
+      "GET /host-metrics/managers/users/{id}",
+      "GET /host/ssh/opkssh/token/{hostId}",
+      "GET /host/transfer/recent",
+      "GET /proxmox/discover/stream",
+      "GET /releases/rss",
+      "GET /session_logs/retention",
+      "GET /ssh/file_manager/ssh",
+      "GET /ssh/file_manager/ssh/activeTransfers",
+      "GET /ssh/file_manager/ssh/transferStatus/{transferId}",
+      "GET /ssh/file_manager/ssh/trash",
+      "GET /ssh/tunnel/status/stream",
+      "GET /termix-id/u/{handle}",
+      "GET /termix-id/u/{handle}/ca",
+      "GET /termix-id/u/{handle}/{algo}",
+      "GET /tmux_monitor/{hostId}/metrics",
+      "GET /tmux_monitor/{hostId}/overview",
+      "GET /tmux_monitor/{hostId}/search",
+      "GET /users/oidc-auto-provision",
+      "GET /users/touch-input-settings",
+      "GET /version",
+      "HEAD /host/opkssh-callback/{requestId}",
+      "HEAD /host/opkssh-chooser/{requestId}",
+      "HEAD /ssh/file_manager/ssh",
+      "OPTIONS /host/opkssh-callback/{requestId}",
+      "OPTIONS /host/opkssh-chooser/{requestId}",
+      "OPTIONS /ssh/file_manager/ssh",
+      "PATCH /host/opkssh-callback/{requestId}",
+      "PATCH /host/opkssh-chooser/{requestId}",
+      "PATCH /ssh/file_manager/ssh",
+      "PATCH /users/oidc-auto-provision",
+      "PATCH /users/touch-input-settings",
+      "POST /database/export",
+      "POST /database/export/preview",
+      "POST /database/import",
+      "POST /database/restore",
+      "POST /encryption/initialize",
+      "POST /encryption/regenerate",
+      "POST /encryption/regenerate-jwt",
+      "POST /host-metrics/managers/cron/{id}",
+      "POST /host-metrics/managers/firewall/{id}/persist",
+      "POST /host-metrics/managers/firewall/{id}/rule",
+      "POST /host-metrics/managers/health/{id}/config",
+      "POST /host-metrics/managers/health/{id}/run",
+      "POST /host-metrics/managers/packages/{id}/action",
+      "POST /host-metrics/managers/ssl/{id}/issue",
+      "POST /host-metrics/managers/ssl/{id}/renew",
+      "POST /host-metrics/managers/users/{id}/action",
+      "POST /host/db/host/{id}/wake",
+      "POST /host/opkssh-callback/{requestId}",
+      "POST /host/opkssh-chooser/{requestId}",
+      "POST /host/transfer/recent",
+      "POST /internal/login-alert",
+      "POST /proxmox-stats/heartbeat",
+      "POST /proxmox-stats/register-viewer",
+      "POST /proxmox-stats/unregister-viewer",
+      "POST /proxmox/sync",
+      "POST /ssh/file_manager/ssh",
+      "POST /ssh/file_manager/ssh/transferCancel/{transferId}",
+      "POST /ssh/file_manager/ssh/transferCleanup/{transferId}",
+      "POST /ssh/file_manager/ssh/transferMethodPreview",
+      "POST /ssh/file_manager/ssh/transferRetry/{transferId}",
+      "POST /ssh/file_manager/ssh/transferToHost",
+      "POST /ssh/file_manager/ssh/trash/{id}/restore",
+      "POST /terminal/image-upload",
+      "POST /tmux_monitor/{hostId}/focus",
+      "POST /tmux_monitor/{hostId}/kill",
+      "POST /tmux_monitor/{hostId}/kill-pane",
+      "POST /tmux_monitor/{hostId}/kill-window",
+      "POST /tmux_monitor/{hostId}/rename",
+      "POST /tmux_monitor/{hostId}/sessions",
+      "POST /tmux_monitor/{hostId}/split",
+      "POST /tmux_monitor/{hostId}/windows",
+      "POST /users/oidc/backchannel-logout",
+      "POST /users/proxy-login",
+      "PUT /host/opkssh-callback/{requestId}",
+      "PUT /host/opkssh-chooser/{requestId}",
+      "PUT /session_logs/retention",
+      "PUT /ssh/file_manager/ssh",
+      "PUT /ssh/file_manager/ssh/trash-retention",
+      "PUT /tmux_monitor/{hostId}/tags"
+    ],
+    "matchedCount": 410
+  }
 }
