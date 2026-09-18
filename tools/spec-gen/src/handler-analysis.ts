@@ -234,26 +234,36 @@ function getReturnExpression(body: Node): Node | null {
   return null;
 }
 
-function schemaFromType(type: Type, ctx: AnalysisContext, depth: number): SchemaNode {
+/**
+ * `conf` is the confidence stamped on every concretely-resolved node (arrays/objects/refs
+ * propagate it to their children). Defaults to "repository-type" for the original call sites
+ * (response schemas resolved off a repository's return type). E0 (docs/
+ * spec-generation-strategy-v2.md) reuses this same walk for a request body's own `req.body
+ * as {...}` cast, where the right confidence is "handler-literal" instead — the type came
+ * from the handler's own source, not from a Drizzle-backed repository return type. `unknown`/
+ * `any` stay `unknown` regardless of the caller: not being able to resolve a type at all means
+ * the same thing no matter who asked.
+ */
+function schemaFromType(type: Type, ctx: AnalysisContext, depth: number, conf: Confidence = "repository-type"): SchemaNode {
   let t = type;
   const aliasSymbol = t.getAliasSymbol() ?? t.getSymbol();
   if (aliasSymbol?.getName() === "Promise") {
     const args = t.getTypeArguments();
-    if (args[0]) return schemaFromType(args[0], ctx, depth);
+    if (args[0]) return schemaFromType(args[0], ctx, depth, conf);
   }
   if (t.isAny() || t.isUnknown()) return { type: "unknown", confidence: "unknown" };
-  if (t.isNull()) return { type: "null", nullable: true, confidence: "repository-type" };
+  if (t.isNull()) return { type: "null", nullable: true, confidence: conf };
   if (t.isUndefined() || t.isVoid()) return { type: "unknown", confidence: "unknown" };
-  if (t.isBooleanLiteral() || t.isBoolean()) return { type: "boolean", confidence: "repository-type" };
-  if (t.isNumberLiteral() || t.isNumber()) return { type: "number", confidence: "repository-type" };
-  if (t.isStringLiteral() || t.isString()) return { type: "string", confidence: "repository-type" };
+  if (t.isBooleanLiteral() || t.isBoolean()) return { type: "boolean", confidence: conf };
+  if (t.isNumberLiteral() || t.isNumber()) return { type: "number", confidence: conf };
+  if (t.isStringLiteral() || t.isString()) return { type: "string", confidence: conf };
 
   if (t.isUnion()) {
     const variants = t.getUnionTypes();
     const nullable = variants.some((v) => v.isUndefined() || v.isNull());
     const rest = variants.filter((v) => !v.isUndefined() && !v.isNull());
     if (rest.length === 1) {
-      const inner = schemaFromType(rest[0], ctx, depth);
+      const inner = schemaFromType(rest[0], ctx, depth, conf);
       return nullable ? { ...inner, nullable: true } : inner;
     }
     // All-string-literal union -> enum
@@ -261,7 +271,7 @@ function schemaFromType(type: Type, ctx: AnalysisContext, depth: number): Schema
       return {
         type: "string",
         enumValues: rest.map((v) => String(v.getLiteralValue())),
-        confidence: "repository-type",
+        confidence: conf,
         ...(nullable ? { nullable: true } : {}),
       };
     }
@@ -269,12 +279,12 @@ function schemaFromType(type: Type, ctx: AnalysisContext, depth: number): Schema
   }
 
   if (t.isArray()) {
-    return { type: "array", items: schemaFromType(t.getArrayElementTypeOrThrow(), ctx, depth + 1), confidence: "repository-type" };
+    return { type: "array", items: schemaFromType(t.getArrayElementTypeOrThrow(), ctx, depth + 1, conf), confidence: conf };
   }
 
   const named = aliasSymbol?.getName();
   if (named && ctx.recordSchemaNames.has(named)) {
-    return { ref: named, confidence: "repository-type" };
+    return { ref: named, confidence: conf };
   }
 
   if (depth >= 3) return { type: "object", confidence: "inferred", note: "object type, depth limit reached" };
@@ -288,10 +298,10 @@ function schemaFromType(type: Type, ctx: AnalysisContext, depth: number): Schema
       const decl = p.getValueDeclaration() ?? p.getDeclarations()[0];
       if (!decl) continue;
       const propType = p.getTypeAtLocation(decl);
-      properties[p.getName()] = schemaFromType(propType, ctx, depth + 1);
+      properties[p.getName()] = schemaFromType(propType, ctx, depth + 1, conf);
       if (!p.isOptional()) required.push(p.getName());
     }
-    return { type: "object", properties, required, confidence: "repository-type" };
+    return { type: "object", properties, required, confidence: conf };
   }
 
   return { type: "unknown", confidence: "unknown" };
@@ -582,34 +592,107 @@ function fieldTypeFromValidators(fieldName: string, fnText: string): { type: Sch
   return { type, required, enumValues };
 }
 
-function extractBodyFields(fnNode: Node): { name: string; default?: SchemaNode["default"] }[] {
-  const fields = new Map<string, { name: string; default?: SchemaNode["default"] }>();
-  const isReqBodyExpr = (n: Node): boolean => {
-    let e = n;
-    while (true) {
-      if (Node.isAsExpression(e)) {
-        e = e.getExpression();
-        continue;
-      }
-      // `req.body ?? {}` / `req.body || {}` — a defensive fallback, still req.body underneath.
-      // Confirmed real case: POST /automations destructures exactly this way and was silently
-      // dropping all 5 of its body fields before this was added.
-      if (Node.isBinaryExpression(e) && (e.getOperatorToken().getText() === "??" || e.getOperatorToken().getText() === "||")) {
-        e = e.getLeft();
-        continue;
-      }
-      break;
+/** Peels `as X` casts and `?? {}` / `|| {}` defensive fallbacks down to the real expression. */
+function unwrapBodyExpr(n: Node): Node {
+  let e = n;
+  while (true) {
+    if (Node.isAsExpression(e)) {
+      e = e.getExpression();
+      continue;
     }
-    return Node.isPropertyAccessExpression(e) && e.getExpression().getText() === "req" && e.getName() === "body";
-  };
+    // `req.body ?? {}` / `req.body || {}` — a defensive fallback, still req.body underneath.
+    // Confirmed real case: POST /automations destructures exactly this way and was silently
+    // dropping all 5 of its body fields before this was added.
+    if (Node.isBinaryExpression(e) && (e.getOperatorToken().getText() === "??" || e.getOperatorToken().getText() === "||")) {
+      e = e.getLeft();
+      continue;
+    }
+    break;
+  }
+  return e;
+}
+
+function isReqBodyExpr(n: Node): boolean {
+  const e = unwrapBodyExpr(n);
+  return Node.isPropertyAccessExpression(e) && e.getExpression().getText() === "req" && e.getName() === "body";
+}
+
+interface DeclaredField {
+  schema: SchemaNode;
+  required: boolean;
+}
+
+/**
+ * E0 (docs/spec-generation-strategy-v2.md): `req.body as { name: string; enabled?: boolean }`
+ * or `req.body as Partial<{...}>` is the handler telling us the body's shape directly — no
+ * weaker a signal than an explicit validator call, just a different one. `initExpr` is a
+ * variable declaration's initializer (or an assignment's right-hand side); returns the
+ * per-field schema map when it resolves to `req.body` cast to an inline object type, `null`
+ * otherwise (e.g. no cast, or cast to a named type/interface — out of scope for E0, that's E3).
+ */
+/** Peels only `?? {}` / `|| {}` defensive fallbacks — unlike unwrapBodyExpr, keeps an `as` cast
+ *  intact, since extractDeclaredBodyFieldTypes needs that cast's own type node. */
+function peelDefensiveFallback(n: Node): Node {
+  let e = n;
+  while (Node.isBinaryExpression(e) && (e.getOperatorToken().getText() === "??" || e.getOperatorToken().getText() === "||")) {
+    e = e.getLeft();
+  }
+  return e;
+}
+
+function extractDeclaredBodyFieldTypes(initExpr: Node, ctx: AnalysisContext): Map<string, DeclaredField> | null {
+  const inner = peelDefensiveFallback(initExpr);
+  if (!Node.isAsExpression(inner)) return null;
+  const castedInner = peelDefensiveFallback(inner.getExpression());
+  const isBody = Node.isPropertyAccessExpression(castedInner) && castedInner.getExpression().getText() === "req" && castedInner.getName() === "body";
+  if (!isBody) return null;
+  // Only an inline object type (`{...}` or `Partial<{...}>`) is in scope for E0 — a cast to a
+  // named interface/type alias is E3's job (matching by name against src/types), not this one.
+  const typeNode = inner.getTypeNode();
+  const isPartialOfInline =
+    typeNode &&
+    Node.isTypeReference(typeNode) &&
+    typeNode.getTypeName().getText() === "Partial" &&
+    Node.isTypeLiteral(typeNode.getTypeArguments()[0]);
+  if (!typeNode || !(Node.isTypeLiteral(typeNode) || isPartialOfInline)) return null;
+
+  // Resolve through the type checker (`inner.getType()`) rather than walking the TypeLiteral's
+  // own AST members by hand — schemaFromType's existing object-type branch already does
+  // exactly what's needed (per-property optionality, nested objects/arrays/enums), so this
+  // reuses it instead of re-implementing object-shape parsing at the AST level. Confirmed:
+  // a `hostId: number | null` field comes back as plain `number`, with no `nullable` on
+  // either path — Termix's tsconfig.node.json has `strictNullChecks: false`, so `T | null`
+  // collapses to `T` before the checker ever represents it as a union at all. Not fixable
+  // here; the field's non-null type is still correct, `nullable` just can't be recovered.
+  const schema = schemaFromType(inner.getType(), ctx, 0, "handler-literal");
+  if (schema.type !== "object" || !schema.properties) return null;
+  const requiredNames = new Set(schema.required ?? []);
+  const out = new Map<string, DeclaredField>();
+  for (const [name, propSchema] of Object.entries(schema.properties)) {
+    out.set(name, { schema: propSchema, required: requiredNames.has(name) });
+  }
+  return out.size > 0 ? out : null;
+}
+
+function extractBodyFields(
+  fnNode: Node,
+  ctx: AnalysisContext,
+): { name: string; default?: SchemaNode["default"]; declared?: DeclaredField }[] {
+  const fields = new Map<string, { name: string; default?: SchemaNode["default"]; declared?: DeclaredField }>();
   const bodyAliases = new Set<string>();
+  // Field name -> declared schema, collected from every `req.body as {...}` cast seen in this
+  // handler (direct or through an alias). In this codebase a handler never casts req.body to
+  // an inline object type more than once, so a flat map (not one per alias) is enough.
+  const declaredTypes = new Map<string, DeclaredField>();
 
   for (const varDecl of fnNode.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
     const init = varDecl.getInitializer();
     if (!init) continue;
     const nameNode = varDecl.getNameNode();
-    if (isReqBodyExpr(init) && !Node.isObjectBindingPattern(nameNode)) {
-      bodyAliases.add(varDecl.getName());
+    if (isReqBodyExpr(init)) {
+      const declared = extractDeclaredBodyFieldTypes(init, ctx);
+      if (declared) for (const [name, field] of declared) declaredTypes.set(name, field);
+      if (!Node.isObjectBindingPattern(nameNode)) bodyAliases.add(varDecl.getName());
     }
   }
   // Also catch the common `let body: T; if (...) { body = req.body; } else { ... }` idiom,
@@ -654,6 +737,18 @@ function extractBodyFields(fnNode: Node): { name: string; default?: SchemaNode["
     }
   }
 
+  // Confirmed real case: PATCH /open-tabs/:id casts `req.body as Partial<{...}>` into a plain
+  // identifier that's never destructured or `.x`-accessed — it's forwarded whole to a
+  // repository call. Neither pass above finds a single field. When that happens and we do
+  // have a declared type, its own properties ARE the field list.
+  if (fields.size === 0 && declaredTypes.size > 0) {
+    for (const [name, declared] of declaredTypes) fields.set(name, { name, declared });
+  }
+
+  for (const field of fields.values()) {
+    if (!field.declared) field.declared = declaredTypes.get(field.name);
+  }
+
   return [...fields.values()];
 }
 
@@ -676,8 +771,8 @@ function typeFromDefaultLiteral(def: SchemaNode["default"]): JsonPrimitive | "bo
   }
 }
 
-function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[]): RequestBodyVariant[] {
-  const fields = extractBodyFields(fnNode);
+function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[], ctx: AnalysisContext): RequestBodyVariant[] {
+  const fields = extractBodyFields(fnNode, ctx);
   if (fields.length === 0) return [];
 
   const properties: Record<string, SchemaNode> = {};
@@ -685,6 +780,22 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[])
   for (const f of fields) {
     let { type, required: req, enumValues } = fieldTypeFromValidators(f.name, fnText);
     let confidence: Confidence = type === "unknown" ? "unknown" : "inferred";
+    let nullable: boolean | undefined;
+    let note: string | undefined;
+
+    // E0: an explicit validator in the handler's own control flow is still the strongest
+    // signal (it's what the server actually enforces at runtime) — only fall back to the
+    // declared cast type when the validator pass found nothing.
+    if (type === "unknown" && f.declared && f.declared.schema.type && f.declared.schema.type !== "unknown") {
+      type = f.declared.schema.type;
+      confidence = "handler-literal";
+      nullable = f.declared.schema.nullable;
+      if (f.declared.schema.enumValues) enumValues = f.declared.schema.enumValues.map(String);
+      note = "declared via `req.body as {...}`";
+    }
+
+    // E1: no explicit validator and no declared cast — the destructuring default's own
+    // literal type is the last resort before giving up.
     if (type === "unknown" && f.default !== undefined) {
       const defaultType = typeFromDefaultLiteral(f.default);
       if (defaultType) {
@@ -692,13 +803,16 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[])
         confidence = "inferred";
       }
     }
+
     properties[f.name] = {
       type,
       confidence,
       ...(f.default !== undefined ? { default: f.default } : {}),
       ...(enumValues && enumValues.length > 0 ? { enumValues } : {}),
+      ...(nullable ? { nullable } : {}),
+      ...(note ? { note } : {}),
     };
-    if (req || f.default !== undefined) required.push(f.name);
+    if (req || f.default !== undefined || (f.declared?.required && confidence === "handler-literal")) required.push(f.name);
   }
   const schema: SchemaNode = { type: "object", properties, required, confidence: "inferred" };
 
@@ -899,7 +1013,7 @@ export function analyzeRoute(
       p.name === "id" ? { ...p, type: "integer" as const } : p,
     );
     const requestBody = ["POST", "PUT", "PATCH"].includes(route.method)
-      ? analyzeRequestBody(managerCb, fnText, route.middlewares)
+      ? analyzeRequestBody(managerCb, fnText, route.middlewares, ctx)
       : [];
     return {
       routeId: route.id,
@@ -935,7 +1049,7 @@ export function analyzeRoute(
   collectResponseHits(fn, responseParam, 0, new Set(), hits);
   const responses = mergeResponses(hits.map((h) => responseHitToInfo(h, ctx)));
 
-  const requestBody = ["POST", "PUT", "PATCH"].includes(route.method) ? analyzeRequestBody(fn, fnText, route.middlewares) : [];
+  const requestBody = ["POST", "PUT", "PATCH"].includes(route.method) ? analyzeRequestBody(fn, fnText, route.middlewares, ctx) : [];
 
   return {
     routeId: route.id,
