@@ -9,6 +9,7 @@ import { discoverRoutes } from "./routes.js";
 import { extractDrizzleSchema } from "./drizzle.js";
 import { buildAnalysisContext, analyzeRoute } from "./handler-analysis.js";
 import { resolveRepositoryTables } from "./repository-tables.js";
+import { extractTypeInterfaces } from "./type-interfaces.js";
 import type { RouteAnalysis } from "./types.js";
 import { buildOpenApiDocument } from "./openapi.js";
 import { buildReport, lintOpenApi } from "./validate.js";
@@ -93,7 +94,12 @@ async function main(): Promise<void> {
     const transformersConfig = JSON.parse(readFileSync(transformersConfigPath, "utf8"));
     const repositoryTables = resolveRepositoryTables(project, clone.repoPath, drizzleIr.tables);
     console.error(`[spec-gen] E2: resolved ${repositoryTables.size} repository factories to their Drizzle table(s)`);
-    const analysisCtx = buildAnalysisContext(drizzleIr.tables, transformersConfig, repositoryTables);
+    // Loaded here (earlier than Phase 7 originally needed it) so E3 can match request-body
+    // fields against src/types/index.ts's own interfaces during Phases 2-4.
+    const frontendProject = loadFrontendProject(clone.repoPath);
+    const typeInterfaces = extractTypeInterfaces(frontendProject, clone.repoPath);
+    console.error(`[spec-gen] E3: indexed ${typeInterfaces.length} interface(s)/type(s) from src/types/index.ts`);
+    const analysisCtx = buildAnalysisContext(drizzleIr.tables, transformersConfig, repositoryTables, typeInterfaces);
 
     const serviceByKey = new Map(ir.services.map((s) => [s.key, s]));
     const analyses: RouteAnalysis[] = [];
@@ -116,7 +122,6 @@ async function main(): Promise<void> {
     writeFileSync(testExamplesOutPath, JSON.stringify(testExamples, null, 2) + "\n", "utf8");
     console.error(`[spec-gen] wrote ${testExamplesOutPath}`);
 
-    const frontendProject = loadFrontendProject(clone.repoPath);
     const frontendCrossChecks = extractFrontendCrossChecks(frontendProject, clone.repoPath, ir, analyses);
     console.error(`[spec-gen] Phase 7: cross-checked ${frontendCrossChecks.length} frontend call(s) against routes`);
     const frontendOutPath = join(outDir, "termix-frontend-crosscheck.json");

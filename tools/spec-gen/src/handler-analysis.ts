@@ -29,6 +29,7 @@ import type {
 } from "./types.js";
 import { applyKnownTransformer } from "./transformers.js";
 import type { RepositoryTables } from "./repository-tables.js";
+import { type TypeInterfaceEntry } from "./type-interfaces.js";
 
 export interface AnalysisContext {
   recordSchemaNames: Set<string>;
@@ -38,12 +39,15 @@ export interface AnalysisContext {
   /** E2 (docs/spec-generation-strategy-v2.md): factory function name -> the table(s) it
    *  operates on, e.g. "createCurrentHostRepository" -> { primary: hosts, secondary: [] }. */
   repositoryTables: Map<string, RepositoryTables>;
+  /** E3: every interface/inline-object type alias exported from src/types/index.ts. */
+  typeInterfaces: TypeInterfaceEntry[];
 }
 
 export function buildAnalysisContext(
   tables: TableSchema[],
   transformerConfig: { expanded: string[]; opaque: string[] },
   repositoryTables: Map<string, RepositoryTables> = new Map(),
+  typeInterfaces: TypeInterfaceEntry[] = [],
 ): AnalysisContext {
   return {
     recordSchemaNames: new Set(tables.map((t) => t.schemaName)),
@@ -51,6 +55,7 @@ export function buildAnalysisContext(
     expandedTransformers: new Set(transformerConfig.expanded),
     opaqueTransformers: new Set(transformerConfig.opaque),
     repositoryTables,
+    typeInterfaces,
   };
 }
 
@@ -886,11 +891,35 @@ function columnTypeFromCalledRepositories(
   return null;
 }
 
+/**
+ * E3 (docs/spec-generation-strategy-v2.md): a route's whole destructured field set (not just
+ * the still-unknown ones — overlap only means something measured against everything the
+ * route actually asked for) is compared against every src/types/index.ts interface. Needs
+ * >=5 fields and >=70% overlap, per the plan's mitigation against a small, generic route
+ * (`name`/`description`/`enabled`) coincidentally matching the wrong interface; picks the
+ * single highest-overlap interface rather than trying more than one.
+ */
+function findBestTypeInterfaceMatch(fieldNames: Set<string>, typeInterfaces: TypeInterfaceEntry[]): TypeInterfaceEntry | null {
+  if (fieldNames.size < 5) return null;
+  let best: TypeInterfaceEntry | null = null;
+  let bestRatio = 0;
+  for (const iface of typeInterfaces) {
+    const overlap = [...fieldNames].filter((n) => iface.fields.has(n)).length;
+    const ratio = overlap / fieldNames.size;
+    if (ratio >= 0.7 && ratio > bestRatio) {
+      best = iface;
+      bestRatio = ratio;
+    }
+  }
+  return best;
+}
+
 function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[], ctx: AnalysisContext): RequestBodyVariant[] {
   const fields = extractBodyFields(fnNode, ctx);
   if (fields.length === 0) return [];
 
   const calledFactories = calledRepositoryFactories(fnNode, ctx);
+  const typeMatch = findBestTypeInterfaceMatch(new Set(fields.map((f) => f.name)), ctx.typeInterfaces);
   const properties: Record<string, SchemaNode> = {};
   const required: string[] = [];
   for (const f of fields) {
@@ -932,6 +961,20 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
         confidence = "matched-type";
         if (match.nullable) nullable = true;
         note = `matched column \`${match.tableName}.${f.name}\``;
+      }
+    }
+
+    // E3: still nothing, and this field isn't a Drizzle column either — try src/types/
+    // index.ts's own interfaces. This is where string enums like `authType` live, since
+    // they never appear in a handler validator and the backing column is just `text`.
+    if (type === "unknown" && typeMatch) {
+      const matchedProp = typeMatch.properties.get(f.name);
+      if (matchedProp && matchedProp.type && matchedProp.type !== "unknown" && !(note === STRUCTURED_FIELD_NOTE && matchedProp.type === "string")) {
+        type = matchedProp.type;
+        confidence = "matched-type";
+        if (matchedProp.enumValues) enumValues = matchedProp.enumValues.map(String);
+        if (matchedProp.nullable) nullable = true;
+        note = `matched \`src/types/index.ts\`'s \`${typeMatch.name}\` interface`;
       }
     }
 
