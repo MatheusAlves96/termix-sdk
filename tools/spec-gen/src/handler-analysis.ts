@@ -553,13 +553,27 @@ function mergeResponses(hits: ResponseInfo[]): ResponseInfo[] {
  * (e.g. `isNonEmptyString(username)` must not be clobbered by an unrelated `!!username`
  * inside the same function's logging call, which is a real, confirmed false positive).
  */
-function fieldTypeFromValidators(fieldName: string, fnText: string): { type: SchemaNode["type"]; required: boolean; enumValues?: string[] } {
+/**
+ * E5 (docs/spec-generation-strategy-v2.md): field is serialized before storage (`JSON.
+ * stringify(x)` into a Drizzle `text` column, or `JSON.parse(x)` reading one back). Doesn't
+ * give a concrete type on its own — a serialized value is fine as `object` or `array` — but
+ * E2 needs to know a field is serialized so it doesn't naively inherit `string` from the
+ * `text` column that stores it. Recorded as a note on the field rather than a separate
+ * boolean so it survives the same way every other weak signal does.
+ */
+const STRUCTURED_FIELD_NOTE = "value is JSON-serialized into a `text` column before storage; shape not enumerated";
+
+function fieldTypeFromValidators(
+  fieldName: string,
+  fnText: string,
+): { type: SchemaNode["type"]; required: boolean; enumValues?: string[]; note?: string } {
   const esc = fieldName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   let required = false;
   let type: SchemaNode["type"] = "unknown";
+  let note: string | undefined;
 
   const enumMatch = new RegExp(`\\[([^\\]]*)\\]\\.includes\\(\\s*${esc}\\b`).exec(fnText);
-  const enumValues = enumMatch
+  let enumValues = enumMatch
     ? enumMatch[1]
         .split(",")
         .map((s) => s.trim().replace(/^["']|["']$/g, ""))
@@ -579,6 +593,44 @@ function fieldTypeFromValidators(fieldName: string, fnText: string): { type: Sch
     type = "array";
   } else if (new RegExp(`\\b(Number|parseInt)\\(\\s*${esc}\\b`).test(fnText)) {
     type = "integer";
+    // E5: patterns below are only tried once the pre-existing ones above found nothing —
+    // never allowed to override a signal that already worked before this plan.
+  } else if (
+    new RegExp(`typeof\\s+${esc}\\s*!==?\\s*["']string["']`).test(fnText) ||
+    new RegExp(`typeof\\s+${esc}\\s*===?\\s*["']string["']`).test(fnText)
+  ) {
+    type = "string";
+  } else if (new RegExp(`\\b${esc}\\s*\\?\\s*1\\s*:\\s*0\\b`).test(fnText)) {
+    // Confirmed real case: host.ts's create-host handler coerces every boolean flag this way
+    // (`useWarpgate ? 1 : 0`) into an `integer` Drizzle column that has no `mode: "boolean"` —
+    // the API-facing type is still boolean regardless of how the column stores it.
+    type = "boolean";
+  } else if (new RegExp(`typeof\\s+${esc}\\s*!==?\\s*["']boolean["']`).test(fnText)) {
+    type = "boolean";
+  } else if (new RegExp(`\\b${esc}\\s*[!=]==?\\s*(true|false)\\b`).test(fnText)) {
+    // `enableTerminalToolbar === false ? 0 : 1` — same int-as-boolean idiom as above, just
+    // with the comparison spelled out instead of using the field as a bare truthy condition.
+    type = "boolean";
+  } else if (new RegExp(`typeof\\s+${esc}\\s*!==?\\s*["']object["']`).test(fnText)) {
+    type = "object";
+  } else if (new RegExp(`JSON\\.parse\\(\\s*${esc}\\b`).test(fnText)) {
+    // The handler parses this field as JSON — so on the wire (what the API accepts) it's a
+    // string, whatever shape the parsed result takes.
+    type = "string";
+  } else {
+    // No `.includes()` enum and no other signal yet — a plain `x === "literal"` chain (e.g.
+    // `type !== "webhook" && type !== "ntfy" && type !== "discord"`) is the same enum shape
+    // `fieldTypeFromValidators` already recognizes via `.includes()`, just spelled out with
+    // separate comparisons instead. Collect every distinct string literal compared against
+    // this field; two or more is enough to be confident it's an enum, not a stray one-off check.
+    const literalMatches = [...fnText.matchAll(new RegExp(`\\b${esc}\\s*[!=]==?\\s*["']([^"']*)["']`, "g"))];
+    const literals = [...new Set(literalMatches.map((m) => m[1]))];
+    if (literals.length >= 2) {
+      type = "string";
+      enumValues = literals;
+    } else if (new RegExp(`JSON\\.stringify\\(\\s*${esc}\\b`).test(fnText)) {
+      note = STRUCTURED_FIELD_NOTE;
+    }
   }
 
   if (
@@ -589,7 +641,7 @@ function fieldTypeFromValidators(fieldName: string, fnText: string): { type: Sch
     required = true;
   }
 
-  return { type, required, enumValues };
+  return { type, required, enumValues, note };
 }
 
 /** Peels `as X` casts and `?? {}` / `|| {}` defensive fallbacks down to the real expression. */
@@ -778,10 +830,10 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
   const properties: Record<string, SchemaNode> = {};
   const required: string[] = [];
   for (const f of fields) {
-    let { type, required: req, enumValues } = fieldTypeFromValidators(f.name, fnText);
+    let { type, required: req, enumValues, note: validatorNote } = fieldTypeFromValidators(f.name, fnText);
     let confidence: Confidence = type === "unknown" ? "unknown" : "inferred";
     let nullable: boolean | undefined;
-    let note: string | undefined;
+    let note: string | undefined = validatorNote;
 
     // E0: an explicit validator in the handler's own control flow is still the strongest
     // signal (it's what the server actually enforces at runtime) — only fall back to the
@@ -801,6 +853,7 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
       if (defaultType) {
         type = defaultType;
         confidence = "inferred";
+        note = undefined;
       }
     }
 
