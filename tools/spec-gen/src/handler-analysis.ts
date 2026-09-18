@@ -28,23 +28,29 @@ import type {
   TableSchema,
 } from "./types.js";
 import { applyKnownTransformer } from "./transformers.js";
+import type { RepositoryTables } from "./repository-tables.js";
 
 export interface AnalysisContext {
   recordSchemaNames: Set<string>;
   hostsTable: TableSchema | undefined;
   expandedTransformers: Set<string>;
   opaqueTransformers: Set<string>;
+  /** E2 (docs/spec-generation-strategy-v2.md): factory function name -> the table(s) it
+   *  operates on, e.g. "createCurrentHostRepository" -> { primary: hosts, secondary: [] }. */
+  repositoryTables: Map<string, RepositoryTables>;
 }
 
 export function buildAnalysisContext(
   tables: TableSchema[],
   transformerConfig: { expanded: string[]; opaque: string[] },
+  repositoryTables: Map<string, RepositoryTables> = new Map(),
 ): AnalysisContext {
   return {
     recordSchemaNames: new Set(tables.map((t) => t.schemaName)),
     hostsTable: tables.find((t) => t.tsVarName === "hosts"),
     expandedTransformers: new Set(transformerConfig.expanded),
     opaqueTransformers: new Set(transformerConfig.opaque),
+    repositoryTables,
   };
 }
 
@@ -605,6 +611,13 @@ function fieldTypeFromValidators(
     // (`useWarpgate ? 1 : 0`) into an `integer` Drizzle column that has no `mode: "boolean"` —
     // the API-facing type is still boolean regardless of how the column stores it.
     type = "boolean";
+  } else if (new RegExp(`\\b${esc}\\s*\\?\\s*["']true["']\\s*:\\s*["']false["']`).test(fnText)) {
+    // Same idiom, into a `text` column instead of an `integer` one — confirmed real case:
+    // `forceKeyboardInteractive ? "true" : "false"` in host.ts, `enabled ? "true" : "false"`
+    // in user-settings-routes.ts. Without this, E2 would later match the `text` column and
+    // report `string`, which is wrong on the wire even though it's exactly how the column
+    // stores it.
+    type = "boolean";
   } else if (new RegExp(`typeof\\s+${esc}\\s*!==?\\s*["']boolean["']`).test(fnText)) {
     type = "boolean";
   } else if (new RegExp(`\\b${esc}\\s*[!=]==?\\s*(true|false)\\b`).test(fnText)) {
@@ -823,10 +836,61 @@ function typeFromDefaultLiteral(def: SchemaNode["default"]): JsonPrimitive | "bo
   }
 }
 
+/**
+ * E2 step 2 (docs/spec-generation-strategy-v2.md): which `createCurrentXRepository()`
+ * factories does this handler itself call? Scoped to the handler's own function body, not
+ * the whole file's imports — `host.ts` alone imports 14 different factories, `delete-user-
+ * data.ts` imports 39, so a file-wide match would blow the collision guard below wide open.
+ */
+function calledRepositoryFactories(fnNode: Node, ctx: AnalysisContext): string[] {
+  const out: string[] = [];
+  for (const call of fnNode.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    const callee = call.getExpression();
+    if (Node.isIdentifier(callee) && ctx.repositoryTables.has(callee.getText())) out.push(callee.getText());
+  }
+  return out;
+}
+
+/**
+ * E2 step 3: match `fieldName` against a column of a table the handler's own called
+ * factories resolved to. Primary tables (the one each repository "owns") are tried before
+ * any secondary table, and a name that resolves to conflicting column types within the same
+ * tier is left alone rather than guessed — this is deliberately scoped to just the 1-3 tables
+ * a single handler's own repository calls touch, not a global search across all 72 tables,
+ * which is what keeps common column names (`name`, `id`, `enabled`) from colliding.
+ */
+function columnTypeFromCalledRepositories(
+  fieldName: string,
+  calledFactories: string[],
+  ctx: AnalysisContext,
+): { jsonType: SchemaNode["type"]; nullable: boolean; tableName: string } | null {
+  const primaries: TableSchema[] = [];
+  const secondaries: TableSchema[] = [];
+  for (const factoryName of calledFactories) {
+    const rt = ctx.repositoryTables.get(factoryName);
+    if (!rt) continue;
+    if (rt.primary) primaries.push(rt.primary);
+    secondaries.push(...rt.secondary);
+  }
+  for (const tier of [primaries, secondaries]) {
+    const matches = tier.flatMap((table) => {
+      const col = table.columns.find((c) => c.tsName === fieldName);
+      return col ? [{ table, col }] : [];
+    });
+    if (matches.length === 0) continue;
+    const distinctTypes = new Set(matches.map((m) => m.col.jsonType));
+    if (distinctTypes.size > 1) return null; // conflicting types within the same tier — don't guess
+    const { table, col } = matches[0];
+    return { jsonType: col.jsonType, nullable: col.nullable, tableName: table.dbTableName };
+  }
+  return null;
+}
+
 function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[], ctx: AnalysisContext): RequestBodyVariant[] {
   const fields = extractBodyFields(fnNode, ctx);
   if (fields.length === 0) return [];
 
+  const calledFactories = calledRepositoryFactories(fnNode, ctx);
   const properties: Record<string, SchemaNode> = {};
   const required: string[] = [];
   for (const f of fields) {
@@ -854,6 +918,20 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
         type = defaultType;
         confidence = "inferred";
         note = undefined;
+      }
+    }
+
+    // E2: nothing in the handler itself signals a type — see if the field's name matches a
+    // column of a table the handler's own repository calls resolve to. A `text` column is
+    // not trusted for a field E5 already flagged as JSON-serialized (the column's storage
+    // type is `string`; the field's real shape is whatever got serialized into it).
+    if (type === "unknown" && calledFactories.length > 0) {
+      const match = columnTypeFromCalledRepositories(f.name, calledFactories, ctx);
+      if (match && !(note === STRUCTURED_FIELD_NOTE && match.jsonType === "string")) {
+        type = match.jsonType;
+        confidence = "matched-type";
+        if (match.nullable) nullable = true;
+        note = `matched column \`${match.tableName}.${f.name}\``;
       }
     }
 

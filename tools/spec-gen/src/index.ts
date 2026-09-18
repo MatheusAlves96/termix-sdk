@@ -8,6 +8,7 @@ import { loadBackendProject, loadFrontendProject } from "./project.js";
 import { discoverRoutes } from "./routes.js";
 import { extractDrizzleSchema } from "./drizzle.js";
 import { buildAnalysisContext, analyzeRoute } from "./handler-analysis.js";
+import { resolveRepositoryTables } from "./repository-tables.js";
 import type { RouteAnalysis } from "./types.js";
 import { buildOpenApiDocument } from "./openapi.js";
 import { buildReport, lintOpenApi } from "./validate.js";
@@ -90,7 +91,9 @@ async function main(): Promise<void> {
 
     const transformersConfigPath = join(__dirname, "..", "config", "transformers.json");
     const transformersConfig = JSON.parse(readFileSync(transformersConfigPath, "utf8"));
-    const analysisCtx = buildAnalysisContext(drizzleIr.tables, transformersConfig);
+    const repositoryTables = resolveRepositoryTables(project, clone.repoPath, drizzleIr.tables);
+    console.error(`[spec-gen] E2: resolved ${repositoryTables.size} repository factories to their Drizzle table(s)`);
+    const analysisCtx = buildAnalysisContext(drizzleIr.tables, transformersConfig, repositoryTables);
 
     const serviceByKey = new Map(ir.services.map((s) => [s.key, s]));
     const analyses: RouteAnalysis[] = [];
