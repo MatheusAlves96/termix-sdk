@@ -1,6 +1,6 @@
 # termix-sdk spec-gen report
 
-Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac126ffe6a98`) on 2026-09-18T21:23:15.389Z.
+Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac126ffe6a98`) on 2026-09-18T22:46:52.203Z.
 
 ## Route counts
 
@@ -30,12 +30,21 @@ Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac12
 - Routes with no documented 2xx/3xx response: **1**
 - Routes whose every response is `x-confidence: unknown`: **0**
 
-### Request body field confidence
+### Request body completeness (docs/spec-generation-strategy-v2.md)
+
+- POST/PUT/PATCH routes: **265**, of which **183** (69%) have an `application/json` body with every top-level field typed
+- Routes where no body field was found at all: **43**
+- Top-level `application/json` fields still `unknown`: **86**
+
+### Request body field confidence (all nodes, all content types — includes nested fields)
 
 | Confidence | Count |
 |---|---|
-| inferred | 374 |
-| unknown | 971 |
+| handler-literal | 77 |
+| frontend-type | 340 |
+| matched-type | 415 |
+| inferred | 671 |
+| unknown | 95 |
 
 ### Response field confidence
 
@@ -67,6 +76,10 @@ Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac12
 
 - `@openapi` JSDoc blocks parsed: **425**. Their `summary`/`description`/`tags`/parameter descriptions are reused verbatim when present; `requestBody`/`responses` from them are never used as a schema source.
 
+## Golden route regression check (docs/spec-generation-strategy-v2.md, Passo 0)
+
+No regressions: every field that already had a concrete type from an explicit validator (or other pre-plan signal) still has that exact type.
+
 ## Diff against the official spec (Phase 10, criterion 4)
 
 Official spec regenerated with `npm run generate:openapi` (Termix's own release process) rather than scraped from the docs site — see `official-diff.ts` for why.
@@ -83,7 +96,7 @@ Official spec regenerated with `npm run generate:openapi` (Termix's own release 
 ## OpenAPI lint (@redocly/cli)
 
 - Errors: **0**
-- Warnings: **723**
+- Warnings: **756**
 - Ignored: **0**
 
 Spec is structurally valid OpenAPI 3.1.

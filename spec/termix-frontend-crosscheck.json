@@ -241,10 +241,10 @@
           "status": {
             "type": "string",
             "enumValues": [
-              "running",
               "success",
-              "partial",
               "error",
+              "running",
+              "partial",
               "cancelled"
             ],
             "confidence": "frontend-type"
@@ -252,10 +252,10 @@
           "phase": {
             "type": "string",
             "enumValues": [
+              "verifying",
               "compressing",
               "transferring",
               "benchmarking",
-              "verifying",
               "extracting",
               "reconnecting"
             ],
@@ -448,10 +448,10 @@
                 "status": {
                   "type": "string",
                   "enumValues": [
-                    "running",
                     "success",
-                    "partial",
                     "error",
+                    "running",
+                    "partial",
                     "cancelled"
                   ],
                   "confidence": "frontend-type"
@@ -459,10 +459,10 @@
                 "phase": {
                   "type": "string",
                   "enumValues": [
+                    "verifying",
                     "compressing",
                     "transferring",
                     "benchmarking",
-                    "verifying",
                     "extracting",
                     "reconnecting"
                   ],
@@ -3421,9 +3421,9 @@
             "severity": {
               "type": "string",
               "enumValues": [
+                "critical",
                 "info",
-                "warning",
-                "critical"
+                "warning"
               ],
               "confidence": "frontend-type"
             },
@@ -3616,10 +3616,10 @@
             "last_run_status": {
               "type": "string",
               "enumValues": [
-                "running",
                 "success",
-                "cancelled",
                 "failed",
+                "running",
+                "cancelled",
                 "timeout",
                 "skipped"
               ],
@@ -3828,10 +3828,10 @@
           "last_run_status": {
             "type": "string",
             "enumValues": [
-              "running",
               "success",
-              "cancelled",
               "failed",
+              "running",
+              "cancelled",
               "timeout",
               "skipped"
             ],
@@ -4035,10 +4035,10 @@
           "last_run_status": {
             "type": "string",
             "enumValues": [
-              "running",
               "success",
-              "cancelled",
               "failed",
+              "running",
+              "cancelled",
               "timeout",
               "skipped"
             ],
@@ -4136,10 +4136,10 @@
           "status": {
             "type": "string",
             "enumValues": [
-              "running",
               "success",
-              "cancelled",
               "failed",
+              "running",
+              "cancelled",
               "timeout",
               "skipped"
             ],
@@ -4208,10 +4208,10 @@
             "status": {
               "type": "string",
               "enumValues": [
-                "running",
                 "success",
-                "cancelled",
                 "failed",
+                "running",
+                "cancelled",
                 "timeout",
                 "skipped"
               ],
@@ -4302,12 +4302,12 @@
             "step_type": {
               "type": "string",
               "enumValues": [
-                "notify",
                 "http",
-                "run_snippet",
-                "run_command",
                 "docker",
                 "tunnel",
+                "notify",
+                "run_snippet",
+                "run_command",
                 "wol",
                 "wait",
                 "set_var",
@@ -4320,10 +4320,10 @@
             "status": {
               "type": "string",
               "enumValues": [
-                "running",
                 "success",
-                "pending",
                 "failed",
+                "running",
+                "pending",
                 "skipped"
               ],
               "confidence": "frontend-type"
@@ -4540,8 +4540,8 @@
               "key": {
                 "type": "string",
                 "enumValues": [
-                  "manual",
                   "default",
+                  "manual",
                   "name-asc",
                   "name-desc",
                   "username-asc",
@@ -4667,8 +4667,8 @@
               "key": {
                 "type": "string",
                 "enumValues": [
-                  "manual",
                   "default",
+                  "manual",
                   "name-asc",
                   "name-desc",
                   "username-asc",
@@ -5587,14 +5587,14 @@
             "type": {
               "type": "string",
               "enumValues": [
-                "docker",
-                "tunnel",
-                "terminal",
-                "file_manager",
-                "server_stats",
-                "telnet",
+                "rdp",
                 "vnc",
-                "rdp"
+                "telnet",
+                "terminal",
+                "server_stats",
+                "file_manager",
+                "docker",
+                "tunnel"
               ],
               "confidence": "frontend-type"
             },
@@ -5642,14 +5642,14 @@
           "type": {
             "type": "string",
             "enumValues": [
-              "docker",
-              "tunnel",
-              "terminal",
-              "file_manager",
-              "server_stats",
-              "telnet",
+              "rdp",
               "vnc",
-              "rdp"
+              "telnet",
+              "terminal",
+              "server_stats",
+              "file_manager",
+              "docker",
+              "tunnel"
             ],
             "confidence": "frontend-type"
           },
@@ -6384,8 +6384,8 @@
             "state": {
               "type": "string",
               "enumValues": [
-                "running",
                 "created",
+                "running",
                 "paused",
                 "restarting",
                 "removing",
@@ -6476,8 +6476,8 @@
           "state": {
             "type": "string",
             "enumValues": [
-              "running",
               "created",
+              "running",
               "paused",
               "restarting",
               "removing",
@@ -9535,12 +9535,12 @@
                     "confidence": "frontend-type",
                     "note": "object type, depth limit reached"
                   },
-                  "__@iterator@20620": {
+                  "__@iterator@4967": {
                     "type": "object",
                     "confidence": "frontend-type",
                     "note": "object type, depth limit reached"
                   },
-                  "__@unscopables@20622": {
+                  "__@unscopables@4969": {
                     "type": "object",
                     "confidence": "frontend-type",
                     "note": "object type, depth limit reached"
@@ -9585,8 +9585,8 @@
                   "toSorted",
                   "toSpliced",
                   "with",
-                  "__@iterator@20620",
-                  "__@unscopables@20622"
+                  "__@iterator@4967",
+                  "__@unscopables@4969"
                 ],
                 "confidence": "frontend-type"
               }
@@ -10223,8 +10223,8 @@
               "key": {
                 "type": "string",
                 "enumValues": [
-                  "manual",
                   "default",
+                  "manual",
                   "name-asc",
                   "name-desc",
                   "ip-asc",
@@ -10278,9 +10278,9 @@
                   "type": "string",
                   "enumValues": [
                     "password",
-                    "none",
                     "key",
                     "credential",
+                    "none",
                     "opkssh"
                   ],
                   "confidence": "frontend-type"
@@ -10292,10 +10292,10 @@
                 "items": {
                   "type": "string",
                   "enumValues": [
-                    "telnet",
-                    "vnc",
+                    "ssh",
                     "rdp",
-                    "ssh"
+                    "vnc",
+                    "telnet"
                   ],
                   "confidence": "frontend-type"
                 },
@@ -10306,9 +10306,9 @@
                 "items": {
                   "type": "string",
                   "enumValues": [
+                    "terminal",
                     "docker",
                     "tunnel",
-                    "terminal",
                     "fileManager"
                   ],
                   "confidence": "frontend-type"
@@ -10425,8 +10425,8 @@
               "key": {
                 "type": "string",
                 "enumValues": [
-                  "manual",
                   "default",
+                  "manual",
                   "name-asc",
                   "name-desc",
                   "ip-asc",
@@ -10480,9 +10480,9 @@
                   "type": "string",
                   "enumValues": [
                     "password",
-                    "none",
                     "key",
                     "credential",
+                    "none",
                     "opkssh"
                   ],
                   "confidence": "frontend-type"
@@ -10494,10 +10494,10 @@
                 "items": {
                   "type": "string",
                   "enumValues": [
-                    "telnet",
-                    "vnc",
+                    "ssh",
                     "rdp",
-                    "ssh"
+                    "vnc",
+                    "telnet"
                   ],
                   "confidence": "frontend-type"
                 },
@@ -10508,9 +10508,9 @@
                 "items": {
                   "type": "string",
                   "enumValues": [
+                    "terminal",
                     "docker",
                     "tunnel",
-                    "terminal",
                     "fileManager"
                   ],
                   "confidence": "frontend-type"
@@ -12113,10 +12113,10 @@
           "protocol": {
             "type": "string",
             "enumValues": [
-              "telnet",
-              "vnc",
+              "ssh",
               "rdp",
-              "ssh"
+              "vnc",
+              "telnet"
             ],
             "confidence": "frontend-type"
           },
@@ -12167,10 +12167,10 @@
           "protocol": {
             "type": "string",
             "enumValues": [
-              "telnet",
-              "vnc",
+              "ssh",
               "rdp",
-              "ssh"
+              "vnc",
+              "telnet"
             ],
             "confidence": "frontend-type"
           },
@@ -12587,18 +12587,18 @@
           "protocol": {
             "type": "string",
             "enumValues": [
-              "telnet",
-              "vnc",
+              "ssh",
               "rdp",
-              "ssh"
+              "vnc",
+              "telnet"
             ],
             "confidence": "frontend-type"
           },
           "shareType": {
             "type": "string",
             "enumValues": [
-              "user",
-              "link"
+              "link",
+              "user"
             ],
             "confidence": "frontend-type"
           },
@@ -12688,10 +12688,10 @@
                 "protocol": {
                   "type": "string",
                   "enumValues": [
-                    "telnet",
-                    "vnc",
+                    "ssh",
                     "rdp",
-                    "ssh"
+                    "vnc",
+                    "telnet"
                   ],
                   "confidence": "frontend-type"
                 },
@@ -12706,8 +12706,8 @@
                 "shareType": {
                   "type": "string",
                   "enumValues": [
-                    "user",
-                    "link"
+                    "link",
+                    "user"
                   ],
                   "confidence": "frontend-type"
                 },
@@ -13359,8 +13359,8 @@
           "mode": {
             "type": "string",
             "enumValues": [
-              "auto",
               "local",
+              "auto",
               "remote-sftp"
             ],
             "confidence": "frontend-type"
@@ -13415,8 +13415,8 @@
           "mode": {
             "type": "string",
             "enumValues": [
-              "auto",
               "local",
+              "auto",
               "remote-sftp"
             ],
             "confidence": "frontend-type"
@@ -13451,8 +13451,8 @@
           "mode": {
             "type": "string",
             "enumValues": [
-              "auto",
               "local",
+              "auto",
               "remote-sftp"
             ],
             "confidence": "frontend-type"
@@ -13520,8 +13520,8 @@
           "mode": {
             "type": "string",
             "enumValues": [
-              "auto",
               "local",
+              "auto",
               "remote-sftp"
             ],
             "confidence": "frontend-type"
@@ -14787,8 +14787,8 @@
                 "connectionType": {
                   "type": "string",
                   "enumValues": [
-                    "rdp",
-                    "ssh"
+                    "ssh",
+                    "rdp"
                   ],
                   "confidence": "frontend-type"
                 },
@@ -15952,10 +15952,10 @@
                 "priority": {
                   "type": "string",
                   "enumValues": [
-                    "critical",
                     "low",
                     "medium",
-                    "high"
+                    "high",
+                    "critical"
                   ],
                   "confidence": "frontend-type"
                 },
