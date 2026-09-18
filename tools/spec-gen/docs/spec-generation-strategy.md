@@ -398,3 +398,23 @@ Implemented and tested against the real tag:
 - **Phase 10, criterion 4** (`official-diff.ts`): rather than scraping `docs.termix.site/api/termix-api` (a Docusaurus site that bakes the spec into static HTML at *its own* build time, with no stable raw-JSON URL to fetch), the diff runs `npm run generate:openapi` — the same command Termix itself uses to produce the official spec — inside the clone the generator already has, and compares the result. Run against the real tag: **413 official operations, 410 matched** what we generated. Of the 3 left over, **all 3 turned out to be errors in the official docs, not gaps in our extraction**: `GET/DELETE /host/opkssh/token/{hostId}` (the `@openapi` comment is missing the `/ssh/` segment — the real registered path is `/host/ssh/opkssh/token/{hostId}`) and `GET /automations/runs` (the `@openapi` comment documents it without a suffix, but the registered route is `/automations/runs/history` — the same finding already noted in an earlier, private coverage audit as "undocumented," except it turns out the official spec *does* have an entry for it, just at the wrong path). The diff also **found and fixed a real Phase 1 bug**: `registerHostMetricsViewerRoutes` is called from two call sites (one direct, with the default `"metrics"` prefix; one through `registerProxmoxStatsRoutes`, which overrides it to `"proxmox-stats"`) — `pathPrefix` resolution only ever looked at the *first* call site it found, so `/metrics/heartbeat`, `/metrics/register-viewer`, and `/metrics/unregister-viewer` were missing entirely. Fixed by generalizing `resolveStringLiteral` to return every value it can resolve to (a fan-out), not just one — the route count went from 491 to 494 from that fix alone.
 
 With this, all 10 of Phase 10's validation criteria and all 8 extraction phases are implemented and verified against the real tag. Nothing from the original design is left outstanding.
+
+## Real completeness: how many routes, and how much of each is typed
+
+"The tool runs end to end" is not the same claim as "every route is 100% documented on both sides." Exact numbers from the run against `release-2.7.1-tag`, taken from `spec/report.md` and `spec/termix-openapi.json` itself:
+
+| Metric | Result |
+|---|---|
+| `paths` in the final OpenAPI document | 395 |
+| Operations (method+path pairs) | 491 |
+| Catch-all routes (`x-any-method-routes`, outside `paths`) | 3 |
+| Total routes discovered | 494 |
+| Handler resolved (not opaque) | 494/494 |
+| At least one success response documented | 490/494 |
+| **Response fully typed** (zero `unknown` at any depth) | 395/494 (80%) |
+| **Request body fully typed** (POST/PUT/PATCH routes, every field with a concrete type) | 34/265 (13%) |
+| **Both sides fully typed at once** | 215/494 (44%) |
+
+The request body drags the average down the most, and by design: Phase 3 almost always gets **which fields exist** right (destructuring and `req.body.x` access are cheap to find), but only assigns a field a **concrete type** when it finds explicit evidence in the code — `isNonEmptyString(x)`, `Number(x)`, an enum comparison, and so on. A field with no such signal is deliberately left `x-confidence: unknown`, because the rule since the very first draft of this document has been to never invent a type without proof in the source (see "What this changes for the SDK plan" in the earlier private audits). Responses do better (80%) because most of them come straight from a Drizzle repository's return type or an object literal in the handler — the two cases Phase 4 resolves with high confidence.
+
+Decision: document this number honestly here rather than force it to 100% right now, and revisit the field-typing heuristic (Phase 3) later if a real consumer of the spec (the Python SDK generator) actually needs a specific field that's currently untyped.
