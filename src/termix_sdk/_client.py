@@ -23,9 +23,15 @@ from ._response import TermixResponse
 
 # --- generated resource imports start ---
 
+from .resources import audit as _audit
 from .resources import credentials as _credentials
+from .resources import network_topology as _network_topology
+from .resources import open_tabs as _open_tabs
 from .resources import snippets as _snippets
 from .resources import system as _system
+from .resources import tailscale as _tailscale
+from .resources import tunnel_presets as _tunnel_presets
+from .resources import workspaces as _workspaces
 
 # --- generated resource imports end ---
 
@@ -67,9 +73,15 @@ class TermixClient:
 
         # --- generated resource attributes start ---
 
+        self.audit = _audit.AuditService(self._requestor)
         self.credentials = _credentials.CredentialsService(self._requestor)
+        self.network_topology = _network_topology.NetworkTopologyService(self._requestor)
+        self.open_tabs = _open_tabs.OpenTabsService(self._requestor)
         self.snippets = _snippets.SnippetsService(self._requestor)
         self.system = _system.SystemService(self._requestor)
+        self.tailscale = _tailscale.TailscaleService(self._requestor)
+        self.tunnel_presets = _tunnel_presets.TunnelPresetsService(self._requestor)
+        self.workspaces = _workspaces.WorkspacesService(self._requestor)
 
         # --- generated resource attributes end ---
 

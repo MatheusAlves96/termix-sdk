@@ -31,7 +31,10 @@ class SystemService(TermixService):
         )
 
     def version(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SystemVersionParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SystemVersionParams],
     ) -> TermixObject:
         """Get version information
 
@@ -44,7 +47,10 @@ class SystemService(TermixService):
         )
 
     def list_releases(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SystemListReleasesParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SystemListReleasesParams],
     ) -> SystemListReleasesResult:
         """Get releases in RSS format
 
@@ -74,7 +80,10 @@ class AsyncSystemService(AsyncTermixService):
         )
 
     async def version(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SystemVersionParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SystemVersionParams],
     ) -> TermixObject:
         """Get version information
 
@@ -89,7 +98,10 @@ class AsyncSystemService(AsyncTermixService):
         )
 
     async def list_releases(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SystemListReleasesParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SystemListReleasesParams],
     ) -> SystemListReleasesResult:
         """Get releases in RSS format
 

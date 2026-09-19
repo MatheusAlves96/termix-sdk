@@ -90,6 +90,23 @@ def test_2xx_returns_parsed_response(mock_http_client: MockHTTPClient):
     assert resp.status_code == 200
 
 
+def test_non_json_2xx_body_does_not_crash(mock_http_client: MockHTTPClient):
+    # GET /audit-logs/export (and similar) can answer 200 with a real
+    # CSV/text body and no application/json content-type. This used to
+    # crash with an uncaught JSONDecodeError inside TermixResponse's own
+    # constructor — see _response.py's docstring on TermixResponse.
+    req = _requestor(mock_http_client)
+    mock_http_client.queue_response(
+        status_code=200,
+        body=b"action,username\nlogin,alice",
+        headers={"content-type": "text/csv"},
+    )
+    resp = req.request("GET", "/audit-logs/export")
+    assert resp is not None
+    assert resp.data is None
+    assert resp.body == b"action,username\nlogin,alice"
+
+
 def test_204_returns_none(mock_http_client: MockHTTPClient):
     req = _requestor(mock_http_client)
     mock_http_client.queue_response(status_code=204, body=None)

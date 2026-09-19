@@ -56,7 +56,10 @@ class CredentialsService(TermixService):
         return response.data if response else []
 
     def create(
-        self, *, options: RequestOptions | None = None, **params: Unpack[CredentialsCreateParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[CredentialsCreateParams],
     ) -> CredentialsCreateResult:
         """Create a new credential
 
@@ -98,7 +101,10 @@ class CredentialsService(TermixService):
         )
 
     def reorder(
-        self, *, options: RequestOptions | None = None, **params: Unpack[CredentialsReorderParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[CredentialsReorderParams],
     ) -> CredentialsReorderResult:
         """Reorder credentials
 
@@ -215,7 +221,10 @@ class CredentialsService(TermixService):
         )
 
     def retrieve(
-        self, id: str, *, options: RequestOptions | None = None
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> CredentialsRetrieveResult:
         """Get a specific credential
 
@@ -246,7 +255,12 @@ class CredentialsService(TermixService):
             response.data if response else None, last_response=response
         )
 
-    def delete(self, id: str, *, options: RequestOptions | None = None) -> CredentialsDeleteResult:
+    def delete(
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
+    ) -> CredentialsDeleteResult:
         """Delete a credential
 
         DELETE /credentials/{id}
@@ -258,7 +272,11 @@ class CredentialsService(TermixService):
         )
 
     def apply_to_host(
-        self, id: str, host_id: str, *, options: RequestOptions | None = None
+        self,
+        id: str,
+        host_id: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> CredentialsApplyToHostResult:
         """Apply a credential to a host
 
@@ -336,7 +354,10 @@ class AsyncCredentialsService(AsyncTermixService):
         return response.data if response else []
 
     async def create(
-        self, *, options: RequestOptions | None = None, **params: Unpack[CredentialsCreateParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[CredentialsCreateParams],
     ) -> CredentialsCreateResult:
         """Create a new credential
 
@@ -350,7 +371,11 @@ class AsyncCredentialsService(AsyncTermixService):
             response.data if response else None, last_response=response
         )
 
-    async def list_folders(self, *, options: RequestOptions | None = None) -> builtins.list[Any]:
+    async def list_folders(
+        self,
+        *,
+        options: RequestOptions | None = None,
+    ) -> builtins.list[Any]:
         """Get credential folders
 
         GET /credentials/folders
@@ -378,7 +403,10 @@ class AsyncCredentialsService(AsyncTermixService):
         )
 
     async def reorder(
-        self, *, options: RequestOptions | None = None, **params: Unpack[CredentialsReorderParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[CredentialsReorderParams],
     ) -> CredentialsReorderResult:
         """Reorder credentials
 
@@ -495,7 +523,10 @@ class AsyncCredentialsService(AsyncTermixService):
         )
 
     async def retrieve(
-        self, id: str, *, options: RequestOptions | None = None
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> CredentialsRetrieveResult:
         """Get a specific credential
 
@@ -527,7 +558,10 @@ class AsyncCredentialsService(AsyncTermixService):
         )
 
     async def delete(
-        self, id: str, *, options: RequestOptions | None = None
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> CredentialsDeleteResult:
         """Delete a credential
 
@@ -540,7 +574,11 @@ class AsyncCredentialsService(AsyncTermixService):
         )
 
     async def apply_to_host(
-        self, id: str, host_id: str, *, options: RequestOptions | None = None
+        self,
+        id: str,
+        host_id: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> CredentialsApplyToHostResult:
         """Apply a credential to a host
 
@@ -595,7 +633,12 @@ class AsyncCredentialsService(AsyncTermixService):
             response.data if response else None, last_response=response
         )
 
-    async def hosts(self, id: str, *, options: RequestOptions | None = None) -> builtins.list[Any]:
+    async def hosts(
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
+    ) -> builtins.list[Any]:
         """Get hosts using a credential
 
         GET /credentials/{id}/hosts

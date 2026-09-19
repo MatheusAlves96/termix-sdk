@@ -159,7 +159,7 @@ class APIRequestor:
             except ValueError:
                 if status_code >= 400:
                     self._raise_for_status(status_code, {}, content, headers)
-                return TermixResponse(content, status_code, headers)
+                return TermixResponse(content, None, status_code, headers)
         else:
             try:
                 data = _json.loads(content)
@@ -174,7 +174,7 @@ class APIRequestor:
             body = data if isinstance(data, dict) else {}
             self._raise_for_status(status_code, body, content, headers)
 
-        return TermixResponse(content, status_code, headers)
+        return TermixResponse(content, data, status_code, headers)
 
     def _raise_for_status(
         self,

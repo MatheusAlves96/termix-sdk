@@ -47,6 +47,57 @@
         "database_post_credentials_by-id_duplicate": { "method": "duplicate" },
         "database_get_credentials_by-id_hosts": { "method": "hosts" }
       }
+    },
+    "workspaces": {
+      "ops": {
+        "database_post_workspaces": {},
+        "database_get_workspaces": { "method": "list" },
+        "database_get_workspaces_last-session": { "method": "get_last_session" },
+        "database_put_workspaces_last-session": { "method": "save_last_session" },
+        "database_patch_workspaces_by-id": {},
+        "database_delete_workspaces_by-id": {},
+        "database_put_workspaces_by-id_content": { "method": "set_content" },
+        "database_post_workspaces_by-id_duplicate": {},
+        "database_post_workspaces_by-id_set-default": {},
+        "database_post_workspaces_by-id_unset-default": {},
+        "database_post_workspaces_by-id_apply": {}
+      }
+    },
+    "open_tabs": {
+      "ops": {
+        "database_post_open-tabs": { "method": "upsert" },
+        "database_put_open-tabs": { "method": "replace_all" },
+        "database_get_open-tabs": { "method": "list" },
+        "database_patch_open-tabs_by-id": {},
+        "database_delete_open-tabs_by-id": {},
+        "database_get_open-tabs_active-sessions": { "method": "list_active_sessions" }
+      }
+    },
+    "audit": {
+      "ops": {
+        "database_get_audit-logs_actions": { "method": "list_actions" },
+        "database_get_audit-logs_export": {},
+        "database_get_audit-logs": { "method": "list" }
+      }
+    },
+    "tunnel_presets": {
+      "ops": {
+        "database_post_c2s-tunnel-presets": {},
+        "database_get_c2s-tunnel-presets": { "method": "list" },
+        "database_put_c2s-tunnel-presets_by-id": {},
+        "database_delete_c2s-tunnel-presets_by-id": {}
+      }
+    },
+    "network_topology": {
+      "ops": {
+        "database_post_network-topology": { "method": "save" },
+        "database_get_network-topology": { "method": "get" }
+      }
+    },
+    "tailscale": {
+      "ops": {
+        "database_get_tailscale_devices": { "method": "list_devices" }
+      }
     }
   }
 }

@@ -128,6 +128,26 @@ def schema_to_type(schema: dict[str, Any] | None) -> str:
     return "Any"
 
 
+def schema_allows_null(schema: dict[str, Any] | None) -> bool:
+    """True when `schema` can legitimately produce a JSON `null` (and so
+    `construct_from` will legitimately return `None`) — a plain `type:
+    "null"` variant, a `type` list containing `"null"`, or any `oneOf`/
+    `anyOf` branch that does. `GET /network-topology`'s `oneOf: [{unknown},
+    {type: "null"}]` is the concrete case this was written for: without
+    it, the generated return type promised `TermixObject` unconditionally
+    even though `None` is a real, spec-documented outcome.
+    """
+    if not schema:
+        return False
+    t = schema.get("type")
+    if t == "null" or (isinstance(t, list) and "null" in t):
+        return True
+    for key in ("oneOf", "anyOf"):
+        if any(schema_allows_null(v) for v in schema.get(key, [])):
+            return True
+    return False
+
+
 # --------------------------------------------------------------------------
 # JSON Schema -> synthetic example value (for tests/contract/, not runtime)
 # --------------------------------------------------------------------------
@@ -319,9 +339,37 @@ class GeneratedOp:
             path_expr = path_expr.replace("{" + raw + "}", "{" + py_name + "}")
         path_literal = f'f"{path_expr}"' if path_args else f'"{path_expr}"'
 
-        lines = [
-            f"    {async_kw}def {self.method_name}({signature}) -> {return_type}:",
-        ]
+        one_line_def = f"    {async_kw}def {self.method_name}({signature}) -> {return_type}:"
+        # Measure against the *worst case* width, not today's: ruff's own
+        # later UP035 pass may still rewrite `List[X]`/`Dict[X]` here into
+        # `builtins.list[X]`/`builtins.dict[X]` (+9/+9 chars) to dodge a
+        # same-named `list`/`dict` method — see the `builtins.list`
+        # disambiguation this project relies on (F3 pilot commit). If we
+        # measure only the pre-substitution string, a line that fits *now*
+        # can silently overflow once ruff grows the return type later,
+        # since ruff format's own heuristic won't retroactively re-wrap a
+        # short parameter list just because a lint fix made it longer.
+        worst_case_len = len(
+            one_line_def.replace("List[", "builtins.list[").replace("Dict[", "builtins.dict[")
+        )
+        if worst_case_len <= 95:
+            lines = [one_line_def]
+        else:
+            # ruff format's own line-splitting heuristic won't break a
+            # short parameter list just because the *return type* is what
+            # makes the line too long (e.g. `builtins.list[FooItem]` after
+            # the `list`-method-name disambiguation) — so long
+            # signatures are pre-wrapped here rather than left for it.
+            # A trailing comma is Black/ruff format's "magic trailing
+            # comma": it's what actually keeps this exploded across
+            # `ruff format` runs — without it ruff collapses a short
+            # parameter list back onto one line regardless of the
+            # resulting width, undoing the wrap on every regeneration.
+            lines = [
+                f"    {async_kw}def {self.method_name}(",
+                f"        {signature},",
+                f"    ) -> {return_type}:",
+            ]
         doc = op.summary or op.description
         if doc:
             src = op.source
@@ -386,7 +434,8 @@ class GeneratedOp:
                 f"last_response={response_var})"
             )
 
-        return "TermixObject", (
+        object_type = "TermixObject | None" if schema_allows_null(schema) else "TermixObject"
+        return object_type, (
             f"TermixObject.construct_from({response_var}.data if {response_var} else None, "
             f"last_response={response_var})"
         )

@@ -21,15 +21,27 @@ class TermixResponseBase:
 
 
 class TermixResponse(TermixResponseBase):
-    """A parsed `application/json` response."""
+    """A response `_api_requestor.py` has already decided the outcome for.
+
+    `data` is passed in already parsed (or `None` when the body isn't
+    JSON) — this class does not parse JSON itself. It used to
+    (`json.loads(body) if body else None` in `__init__`), which meant a
+    genuinely non-JSON body (real CSV/RSS/HTML — see
+    `_api_requestor.py`'s comment on why some endpoints fall through to
+    this) crashed with an uncaught `JSONDecodeError` right in the
+    constructor, in the exact branch whose whole point was to hand back
+    the raw body gracefully instead of raising.
+    """
 
     body: bytes
     data: Any
 
-    def __init__(self, body: bytes, status_code: int, headers: Mapping[str, str]) -> None:
+    def __init__(
+        self, body: bytes, data: Any, status_code: int, headers: Mapping[str, str]
+    ) -> None:
         super().__init__(status_code, headers)
         self.body = body
-        self.data = json.loads(body) if body else None
+        self.data = data
 
 
 class TermixStreamResponse(TermixResponseBase):

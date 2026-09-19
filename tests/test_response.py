@@ -5,15 +5,25 @@ import pytest
 from termix_sdk._response import SSEEvent, TermixResponse, TermixStreamResponse
 
 
-def test_termix_response_parses_json_body():
-    resp = TermixResponse(b'{"id": 1, "name": "web-1"}', 200, {"content-type": "application/json"})
+def test_termix_response_carries_already_parsed_data():
+    resp = TermixResponse(
+        b'{"id": 1, "name": "web-1"}',
+        {"id": 1, "name": "web-1"},
+        200,
+        {"content-type": "application/json"},
+    )
     assert resp.data == {"id": 1, "name": "web-1"}
     assert resp.status_code == 200
 
 
-def test_termix_response_empty_body_is_none_data():
-    resp = TermixResponse(b"", 204, {})
+def test_termix_response_non_json_body_keeps_raw_bytes_with_none_data():
+    # This is the real-CSV/RSS/HTML fallback in _api_requestor.py's
+    # _interpret_response: TermixResponse no longer parses `body` itself
+    # (it used to, and crashed with an uncaught JSONDecodeError right
+    # here for exactly this case — see _response.py's docstring).
+    resp = TermixResponse(b"not,json,at,all", None, 200, {"content-type": "text/csv"})
     assert resp.data is None
+    assert resp.body == b"not,json,at,all"
 
 
 def test_stream_response_read_concatenates_chunks():

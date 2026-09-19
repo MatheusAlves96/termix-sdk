@@ -50,7 +50,10 @@ class SnippetsService(TermixService):
         return response.data if response else []
 
     def create(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsCreateParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsCreateParams],
     ) -> SnippetsCreateResult:
         """Create a new snippet
 
@@ -64,7 +67,12 @@ class SnippetsService(TermixService):
             response.data if response else None, last_response=response
         )
 
-    def retrieve(self, id: str, *, options: RequestOptions | None = None) -> SnippetsRetrieveResult:
+    def retrieve(
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
+    ) -> SnippetsRetrieveResult:
         """Get a specific snippet
 
         GET /snippets/{id}
@@ -75,7 +83,12 @@ class SnippetsService(TermixService):
             response.data if response else None, last_response=response
         )
 
-    def update(self, id: str, *, options: RequestOptions | None = None) -> SnippetsUpdateResult:
+    def update(
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
+    ) -> SnippetsUpdateResult:
         """Update a snippet
 
         PUT /snippets/{id}
@@ -86,7 +99,12 @@ class SnippetsService(TermixService):
             response.data if response else None, last_response=response
         )
 
-    def delete(self, id: str, *, options: RequestOptions | None = None) -> SnippetsDeleteResult:
+    def delete(
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
+    ) -> SnippetsDeleteResult:
         """Delete a snippet
 
         DELETE /snippets/{id}
@@ -107,7 +125,10 @@ class SnippetsService(TermixService):
         return response.data if response else []
 
     def create_folder(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsCreateFolderParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsCreateFolderParams],
     ) -> SnippetsCreateFolderResult:
         """Create a new snippet folder
 
@@ -144,7 +165,10 @@ class SnippetsService(TermixService):
         )
 
     def rename_folder(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsRenameFolderParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsRenameFolderParams],
     ) -> SnippetsRenameFolderResult:
         """Rename a snippet folder
 
@@ -159,7 +183,10 @@ class SnippetsService(TermixService):
         )
 
     def delete_folder(
-        self, name: str, *, options: RequestOptions | None = None
+        self,
+        name: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> SnippetsDeleteFolderResult:
         """Delete a snippet folder
 
@@ -172,7 +199,10 @@ class SnippetsService(TermixService):
         )
 
     def reorder(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsReorderParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsReorderParams],
     ) -> SnippetsReorderResult:
         """Reorder snippets
 
@@ -187,7 +217,10 @@ class SnippetsService(TermixService):
         )
 
     def execute(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsExecuteParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsExecuteParams],
     ) -> SnippetsExecuteResult:
         """Execute a snippet on a host
 
@@ -213,7 +246,10 @@ class SnippetsService(TermixService):
         )
 
     def bulk_import(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsBulkImportParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsBulkImportParams],
     ) -> SnippetsBulkImportResult:
         """Bulk import snippets and folders from JSON
 
@@ -241,7 +277,10 @@ class AsyncSnippetsService(AsyncTermixService):
         return response.data if response else []
 
     async def create(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsCreateParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsCreateParams],
     ) -> SnippetsCreateResult:
         """Create a new snippet
 
@@ -256,7 +295,10 @@ class AsyncSnippetsService(AsyncTermixService):
         )
 
     async def retrieve(
-        self, id: str, *, options: RequestOptions | None = None
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> SnippetsRetrieveResult:
         """Get a specific snippet
 
@@ -269,7 +311,10 @@ class AsyncSnippetsService(AsyncTermixService):
         )
 
     async def update(
-        self, id: str, *, options: RequestOptions | None = None
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> SnippetsUpdateResult:
         """Update a snippet
 
@@ -282,7 +327,10 @@ class AsyncSnippetsService(AsyncTermixService):
         )
 
     async def delete(
-        self, id: str, *, options: RequestOptions | None = None
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> SnippetsDeleteResult:
         """Delete a snippet
 
@@ -294,7 +342,11 @@ class AsyncSnippetsService(AsyncTermixService):
             response.data if response else None, last_response=response
         )
 
-    async def list_folders(self, *, options: RequestOptions | None = None) -> builtins.list[Any]:
+    async def list_folders(
+        self,
+        *,
+        options: RequestOptions | None = None,
+    ) -> builtins.list[Any]:
         """Get all snippet folders
 
         GET /snippets/folders
@@ -304,7 +356,10 @@ class AsyncSnippetsService(AsyncTermixService):
         return response.data if response else []
 
     async def create_folder(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsCreateFolderParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsCreateFolderParams],
     ) -> SnippetsCreateFolderResult:
         """Create a new snippet folder
 
@@ -341,7 +396,10 @@ class AsyncSnippetsService(AsyncTermixService):
         )
 
     async def rename_folder(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsRenameFolderParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsRenameFolderParams],
     ) -> SnippetsRenameFolderResult:
         """Rename a snippet folder
 
@@ -356,7 +414,10 @@ class AsyncSnippetsService(AsyncTermixService):
         )
 
     async def delete_folder(
-        self, name: str, *, options: RequestOptions | None = None
+        self,
+        name: str,
+        *,
+        options: RequestOptions | None = None,
     ) -> SnippetsDeleteFolderResult:
         """Delete a snippet folder
 
@@ -369,7 +430,10 @@ class AsyncSnippetsService(AsyncTermixService):
         )
 
     async def reorder(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsReorderParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsReorderParams],
     ) -> SnippetsReorderResult:
         """Reorder snippets
 
@@ -384,7 +448,10 @@ class AsyncSnippetsService(AsyncTermixService):
         )
 
     async def execute(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsExecuteParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsExecuteParams],
     ) -> SnippetsExecuteResult:
         """Execute a snippet on a host
 
@@ -410,7 +477,10 @@ class AsyncSnippetsService(AsyncTermixService):
         )
 
     async def bulk_import(
-        self, *, options: RequestOptions | None = None, **params: Unpack[SnippetsBulkImportParams]
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[SnippetsBulkImportParams],
     ) -> SnippetsBulkImportResult:
         """Bulk import snippets and folders from JSON
 
