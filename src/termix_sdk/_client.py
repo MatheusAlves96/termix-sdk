@@ -28,13 +28,18 @@ from .resources import api_keys as _api_keys
 from .resources import audit as _audit
 from .resources import automations as _automations
 from .resources import credentials as _credentials
+from .resources import dashboard as _dashboard
 from .resources import database as _database
 from .resources import encryption as _encryption
+from .resources import fleets as _fleets
 from .resources import guacamole as _guacamole
+from .resources import homepage as _homepage
 from .resources import instance_settings as _instance_settings
 from .resources import network_topology as _network_topology
 from .resources import open_tabs as _open_tabs
 from .resources import preferences as _preferences
+from .resources import proxmox as _proxmox
+from .resources import proxmox_stats as _proxmox_stats
 from .resources import rbac as _rbac
 from .resources import session_logs as _session_logs
 from .resources import session_sharing as _session_sharing
@@ -43,7 +48,10 @@ from .resources import sso as _sso
 from .resources import sync as _sync
 from .resources import system as _system
 from .resources import tailscale as _tailscale
+from .resources import terminal as _terminal
 from .resources import termix_id as _termix_id
+from .resources import tmux as _tmux
+from .resources import tunnel as _tunnel
 from .resources import tunnel_presets as _tunnel_presets
 from .resources import user_admin as _user_admin
 from .resources import users as _users
@@ -96,13 +104,18 @@ class TermixClient:
         self.audit = _audit.AuditService(self._requestor)
         self.automations = _automations.AutomationsService(self._requestor)
         self.credentials = _credentials.CredentialsService(self._requestor)
+        self.dashboard = _dashboard.DashboardService(self._requestor)
         self.database = _database.DatabaseService(self._requestor)
         self.encryption = _encryption.EncryptionService(self._requestor)
+        self.fleets = _fleets.FleetsService(self._requestor)
         self.guacamole = _guacamole.GuacamoleService(self._requestor)
+        self.homepage = _homepage.HomepageService(self._requestor)
         self.instance_settings = _instance_settings.InstanceSettingsService(self._requestor)
         self.network_topology = _network_topology.NetworkTopologyService(self._requestor)
         self.open_tabs = _open_tabs.OpenTabsService(self._requestor)
         self.preferences = _preferences.PreferencesService(self._requestor)
+        self.proxmox = _proxmox.ProxmoxService(self._requestor)
+        self.proxmox_stats = _proxmox_stats.ProxmoxStatsService(self._requestor)
         self.rbac = _rbac.RbacService(self._requestor)
         self.session_logs = _session_logs.SessionLogsService(self._requestor)
         self.session_sharing = _session_sharing.SessionSharingService(self._requestor)
@@ -111,7 +124,10 @@ class TermixClient:
         self.sync = _sync.SyncService(self._requestor)
         self.system = _system.SystemService(self._requestor)
         self.tailscale = _tailscale.TailscaleService(self._requestor)
+        self.terminal = _terminal.TerminalService(self._requestor)
         self.termix_id = _termix_id.TermixIdService(self._requestor)
+        self.tmux = _tmux.TmuxService(self._requestor)
+        self.tunnel = _tunnel.TunnelService(self._requestor)
         self.tunnel_presets = _tunnel_presets.TunnelPresetsService(self._requestor)
         self.user_admin = _user_admin.UserAdminService(self._requestor)
         self.users = _users.UsersService(self._requestor)

@@ -23,13 +23,18 @@ from .resources import api_keys as _api_keys
 from .resources import audit as _audit
 from .resources import automations as _automations
 from .resources import credentials as _credentials
+from .resources import dashboard as _dashboard
 from .resources import database as _database
 from .resources import encryption as _encryption
+from .resources import fleets as _fleets
 from .resources import guacamole as _guacamole
+from .resources import homepage as _homepage
 from .resources import instance_settings as _instance_settings
 from .resources import network_topology as _network_topology
 from .resources import open_tabs as _open_tabs
 from .resources import preferences as _preferences
+from .resources import proxmox as _proxmox
+from .resources import proxmox_stats as _proxmox_stats
 from .resources import rbac as _rbac
 from .resources import session_logs as _session_logs
 from .resources import session_sharing as _session_sharing
@@ -38,7 +43,10 @@ from .resources import sso as _sso
 from .resources import sync as _sync
 from .resources import system as _system
 from .resources import tailscale as _tailscale
+from .resources import terminal as _terminal
 from .resources import termix_id as _termix_id
+from .resources import tmux as _tmux
+from .resources import tunnel as _tunnel
 from .resources import tunnel_presets as _tunnel_presets
 from .resources import user_admin as _user_admin
 from .resources import users as _users
@@ -91,13 +99,18 @@ class AsyncTermixClient:
         self.audit = _audit.AsyncAuditService(self._requestor)
         self.automations = _automations.AsyncAutomationsService(self._requestor)
         self.credentials = _credentials.AsyncCredentialsService(self._requestor)
+        self.dashboard = _dashboard.AsyncDashboardService(self._requestor)
         self.database = _database.AsyncDatabaseService(self._requestor)
         self.encryption = _encryption.AsyncEncryptionService(self._requestor)
+        self.fleets = _fleets.AsyncFleetsService(self._requestor)
         self.guacamole = _guacamole.AsyncGuacamoleService(self._requestor)
+        self.homepage = _homepage.AsyncHomepageService(self._requestor)
         self.instance_settings = _instance_settings.AsyncInstanceSettingsService(self._requestor)
         self.network_topology = _network_topology.AsyncNetworkTopologyService(self._requestor)
         self.open_tabs = _open_tabs.AsyncOpenTabsService(self._requestor)
         self.preferences = _preferences.AsyncPreferencesService(self._requestor)
+        self.proxmox = _proxmox.AsyncProxmoxService(self._requestor)
+        self.proxmox_stats = _proxmox_stats.AsyncProxmoxStatsService(self._requestor)
         self.rbac = _rbac.AsyncRbacService(self._requestor)
         self.session_logs = _session_logs.AsyncSessionLogsService(self._requestor)
         self.session_sharing = _session_sharing.AsyncSessionSharingService(self._requestor)
@@ -106,7 +119,10 @@ class AsyncTermixClient:
         self.sync = _sync.AsyncSyncService(self._requestor)
         self.system = _system.AsyncSystemService(self._requestor)
         self.tailscale = _tailscale.AsyncTailscaleService(self._requestor)
+        self.terminal = _terminal.AsyncTerminalService(self._requestor)
         self.termix_id = _termix_id.AsyncTermixIdService(self._requestor)
+        self.tmux = _tmux.AsyncTmuxService(self._requestor)
+        self.tunnel = _tunnel.AsyncTunnelService(self._requestor)
         self.tunnel_presets = _tunnel_presets.AsyncTunnelPresetsService(self._requestor)
         self.user_admin = _user_admin.AsyncUserAdminService(self._requestor)
         self.users = _users.AsyncUsersService(self._requestor)

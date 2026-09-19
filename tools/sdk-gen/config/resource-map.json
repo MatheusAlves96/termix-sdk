@@ -834,6 +834,176 @@
           "method": "get_oidc_config_admin"
         }
       }
+    },
+    "dashboard": {
+      "ops": {
+        "dashboard_delete_service-links_by-id": {
+          "method": "delete_service_link"
+        },
+        "dashboard_put_service-links_by-id": {
+          "method": "update_service_link"
+        },
+        "dashboard_get_service-links": {
+          "method": "list_service_links"
+        },
+        "dashboard_post_service-links": {
+          "method": "create_service_link"
+        },
+        "dashboard_get_activity_recent": {
+          "method": "list_recent_activity"
+        },
+        "dashboard_post_activity_log": {
+          "method": "log_activity"
+        },
+        "dashboard_delete_activity_reset": {
+          "method": "reset_activity"
+        },
+        "dashboard_get_uptime": {}
+      }
+    },
+    "homepage": {
+      "ops": {
+        "homepage_get_homepage_favicon": {
+          "method": "get_favicon"
+        },
+        "homepage_put_homepage_items_by-id": {
+          "method": "update_item"
+        },
+        "homepage_delete_homepage_items_by-id": {
+          "method": "delete_item"
+        },
+        "homepage_get_homepage_items": {
+          "method": "list_items"
+        },
+        "homepage_post_homepage_items": {
+          "method": "create_item"
+        },
+        "homepage_get_homepage_layout": {
+          "method": "get_layout"
+        },
+        "homepage_put_homepage_layout": {
+          "method": "set_layout"
+        },
+        "homepage_get_homepage_ping": {},
+        "homepage_get_homepage_proxy": {},
+        "homepage_get_homepage_rss": {}
+      }
+    },
+    "tmux": {
+      "ops": {
+        "tmux_get_tmux_monitor_by-hostId_overview": {
+          "method": "get_overview"
+        },
+        "tmux_post_tmux_monitor_by-hostId_focus": {},
+        "tmux_post_tmux_monitor_by-hostId_sessions": {
+          "method": "list_sessions"
+        },
+        "tmux_post_tmux_monitor_by-hostId_windows": {
+          "method": "list_windows"
+        },
+        "tmux_post_tmux_monitor_by-hostId_rename": {},
+        "tmux_post_tmux_monitor_by-hostId_kill": {},
+        "tmux_post_tmux_monitor_by-hostId_kill-window": {},
+        "tmux_post_tmux_monitor_by-hostId_kill-pane": {},
+        "tmux_post_tmux_monitor_by-hostId_split": {},
+        "tmux_get_tmux_monitor_by-hostId_search": {},
+        "tmux_get_tmux_monitor_by-hostId_metrics": {},
+        "tmux_put_tmux_monitor_by-hostId_tags": {
+          "method": "set_tags"
+        }
+      }
+    },
+    "terminal": {
+      "ops": {
+        "database_post_terminal_image-upload": {},
+        "database_post_terminal_command_history": {
+          "method": "log_command"
+        },
+        "database_get_terminal_command_history_by-hostId": {
+          "method": "list_command_history"
+        },
+        "database_delete_terminal_command_history_by-hostId": {
+          "method": "clear_command_history"
+        },
+        "database_post_terminal_command_history_delete": {
+          "method": "delete_command_history_entries"
+        },
+        "database_get_terminal_session_settings": {
+          "method": "get_session_settings"
+        },
+        "database_post_terminal_session_settings": {
+          "method": "set_session_settings"
+        }
+      }
+    },
+    "proxmox": {
+      "ops": {
+        "database_post_proxmox_discover": {},
+        "database_post_proxmox_sync": {}
+      }
+    },
+    "proxmox_stats": {
+      "ops": {
+        "metrics_get_proxmox-stats_history_by-hostId": {
+          "method": "get_history"
+        },
+        "metrics_post_proxmox-stats_start_by-id": {},
+        "metrics_post_proxmox-stats_stop_by-id": {},
+        "metrics_get_proxmox-stats_by-id": {
+          "method": "retrieve"
+        },
+        "metrics_post_proxmox-stats_register-viewer": {},
+        "metrics_post_proxmox-stats_unregister-viewer": {},
+        "metrics_post_proxmox-stats_heartbeat": {}
+      }
+    },
+    "fleets": {
+      "_note": "POST /fleets/{id}/transfer/push is multipart/form-data — excluded, deferred to F6 multipart support.",
+      "ops": {
+        "database_post_fleets_by-id_transfer_pull": {
+          "method": "transfer_pull"
+        },
+        "database_get_fleets_by-id_inventory": {
+          "method": "get_inventory"
+        },
+        "database_post_fleets_by-id_inventory": {
+          "method": "refresh_inventory"
+        },
+        "database_post_fleets_by-id_packages": {
+          "method": "packages_action"
+        },
+        "database_post_fleets": {},
+        "database_get_fleets": {
+          "method": "list"
+        },
+        "database_patch_fleets_by-id": {},
+        "database_delete_fleets_by-id": {},
+        "database_get_fleets_by-id_members": {
+          "method": "list_members"
+        },
+        "database_post_fleets_by-id_members": {
+          "method": "add_member"
+        },
+        "database_delete_fleets_by-id_members_by-hostId": {
+          "method": "remove_member"
+        },
+        "database_post_fleets_by-id_share": {},
+        "database_post_fleets_by-id_execute": {}
+      }
+    },
+    "tunnel": {
+      "_note": "GET /ssh/tunnel/status/stream is SSE — excluded, deferred to F6 SSE support.",
+      "ops": {
+        "tunnel_get_ssh_tunnel_status_by-tunnelName": {
+          "method": "get_status_by_name"
+        },
+        "tunnel_post_ssh_tunnel_connect": {},
+        "tunnel_post_ssh_tunnel_disconnect": {},
+        "tunnel_get_ssh_tunnel_status": {
+          "method": "get_status"
+        },
+        "tunnel_post_ssh_tunnel_cancel": {}
+      }
     }
   }
 }
