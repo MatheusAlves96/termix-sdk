@@ -599,6 +599,241 @@
           "method": "update_touch_input_settings"
         }
       }
+    },
+    "users": {
+      "_note": "POST /users/login and POST /users/totp/verify-login are deliberately excluded — handled by TermixClient.login()/PendingTOTP.verify() (F2, _auth.py), which sends the required native-app header to get a usable JWT back.",
+      "ops": {
+        "database_get_users_me": {
+          "method": "get_me"
+        },
+        "database_post_users_logout": {
+          "method": "logout"
+        },
+        "database_get_users_me_token": {
+          "method": "get_token"
+        },
+        "database_post_users_me_dismiss-donation-modal": {
+          "method": "dismiss_donation_modal"
+        },
+        "database_post_users_change-password": {
+          "method": "change_password"
+        },
+        "database_delete_users_delete-account": {
+          "method": "delete_account"
+        },
+        "database_post_users_unlock-data": {
+          "method": "unlock_data"
+        },
+        "database_get_users_data-status": {
+          "method": "get_data_status"
+        },
+        "database_post_users_totp_setup": {
+          "method": "setup_totp"
+        },
+        "database_post_users_totp_enable": {
+          "method": "enable_totp"
+        },
+        "database_post_users_totp_disable": {
+          "method": "disable_totp"
+        },
+        "database_post_users_totp_backup-codes": {
+          "method": "get_totp_backup_codes"
+        },
+        "database_post_users_proxy-login": {
+          "method": "proxy_login"
+        },
+        "database_post_users_unlink-oidc-from-password": {
+          "method": "unlink_oidc_from_password"
+        },
+        "database_post_users_link-oidc-to-password": {
+          "method": "link_oidc_to_password"
+        },
+        "database_post_users_initiate-reset": {
+          "method": "initiate_reset"
+        },
+        "database_post_users_verify-reset-code": {
+          "method": "verify_reset_code"
+        },
+        "database_post_users_complete-reset": {
+          "method": "complete_reset"
+        },
+        "database_get_users_sessions": {
+          "method": "list_sessions"
+        },
+        "database_delete_users_sessions_by-sessionId": {
+          "method": "revoke_session"
+        },
+        "database_post_users_sessions_revoke-all": {
+          "method": "revoke_all_sessions"
+        },
+        "database_get_users_terminal-image-storage-settings": {
+          "method": "get_terminal_image_storage_settings"
+        },
+        "database_patch_users_terminal-image-storage-settings": {
+          "method": "update_terminal_image_storage_settings"
+        },
+        "database_post_users_terminal-image-storage-settings_test": {
+          "method": "test_terminal_image_storage_settings"
+        },
+        "database_post_users_create": {
+          "method": "register"
+        }
+      }
+    },
+    "user_admin": {
+      "ops": {
+        "database_post_users_make-admin": {
+          "method": "make_admin"
+        },
+        "database_post_users_remove-admin": {
+          "method": "remove_admin"
+        },
+        "database_post_users_admin-create": {
+          "method": "create_user"
+        },
+        "database_post_users_admin_reset-password": {
+          "method": "reset_user_password"
+        },
+        "database_post_users_admin_totp_disable": {
+          "method": "disable_user_totp"
+        },
+        "database_get_users_list": {
+          "method": "list"
+        },
+        "database_get_users_admin_export_by-userId": {
+          "method": "export_user"
+        },
+        "database_get_users_count": {
+          "method": "count"
+        },
+        "database_get_users_db-health": {
+          "method": "get_db_health"
+        },
+        "database_delete_users_delete-user": {
+          "method": "delete_user"
+        }
+      }
+    },
+    "instance_settings": {
+      "ops": {
+        "database_get_users_acme-ssl-settings": {
+          "method": "get_acme_ssl_settings"
+        },
+        "database_patch_users_acme-ssl-settings": {
+          "method": "update_acme_ssl_settings"
+        },
+        "database_post_users_acme-ssl-request": {
+          "method": "acme_ssl_request"
+        },
+        "database_post_users_manual-ssl-upload": {
+          "method": "manual_ssl_upload"
+        },
+        "database_get_users_host-defaults": {
+          "method": "get_host_defaults"
+        },
+        "database_patch_users_host-defaults": {
+          "method": "update_host_defaults"
+        },
+        "database_get_users_guacamole-settings": {
+          "method": "get_guacamole_settings"
+        },
+        "database_patch_users_guacamole-settings": {
+          "method": "update_guacamole_settings"
+        },
+        "database_get_users_log-level": {
+          "method": "get_log_level"
+        },
+        "database_patch_users_log-level": {
+          "method": "update_log_level"
+        },
+        "database_get_users_session-timeout": {
+          "method": "get_session_timeout"
+        },
+        "database_patch_users_session-timeout": {
+          "method": "update_session_timeout"
+        },
+        "database_get_users_tailscale-settings": {
+          "method": "get_tailscale_settings"
+        },
+        "database_patch_users_tailscale-settings": {
+          "method": "update_tailscale_settings"
+        },
+        "database_get_users_command-history-enabled": {
+          "method": "get_command_history_enabled"
+        },
+        "database_patch_users_command-history-enabled": {
+          "method": "update_command_history_enabled"
+        },
+        "database_get_users_analytics-enabled": {
+          "method": "get_analytics_enabled"
+        },
+        "database_patch_users_analytics-enabled": {
+          "method": "update_analytics_enabled"
+        },
+        "database_get_users_session-sharing-enabled": {
+          "method": "get_session_sharing_enabled"
+        },
+        "database_patch_users_session-sharing-enabled": {
+          "method": "update_session_sharing_enabled"
+        },
+        "database_get_users_ai-enabled": {
+          "method": "get_ai_enabled"
+        },
+        "database_patch_users_ai-enabled": {
+          "method": "update_ai_enabled"
+        },
+        "database_get_users_ai-private-endpoints": {
+          "method": "get_ai_private_endpoints"
+        },
+        "database_patch_users_ai-private-endpoints": {
+          "method": "update_ai_private_endpoints"
+        },
+        "database_get_users_setup-required": {
+          "method": "get_setup_required"
+        },
+        "database_get_users_registration-allowed": {
+          "method": "get_registration_allowed"
+        },
+        "database_patch_users_registration-allowed": {
+          "method": "update_registration_allowed"
+        },
+        "database_get_users_oidc-auto-provision": {
+          "method": "get_oidc_auto_provision"
+        },
+        "database_patch_users_oidc-auto-provision": {
+          "method": "update_oidc_auto_provision"
+        },
+        "database_get_users_oidc-silent-login-default": {
+          "method": "get_oidc_silent_login_default"
+        },
+        "database_patch_users_oidc-silent-login-default": {
+          "method": "update_oidc_silent_login_default"
+        },
+        "database_get_users_password-login-allowed": {
+          "method": "get_password_login_allowed"
+        },
+        "database_patch_users_password-login-allowed": {
+          "method": "update_password_login_allowed"
+        },
+        "database_get_users_password-reset-allowed": {
+          "method": "get_password_reset_allowed"
+        },
+        "database_patch_users_password-reset-allowed": {
+          "method": "update_password_reset_allowed"
+        },
+        "database_post_users_oidc-config": {
+          "method": "set_oidc_config"
+        },
+        "database_delete_users_oidc-config": {
+          "method": "delete_oidc_config"
+        },
+        "database_get_users_oidc-config": {
+          "method": "get_oidc_config"
+        },
+        "database_get_users_oidc-config_admin": {
+          "method": "get_oidc_config_admin"
+        }
+      }
     }
   }
 }

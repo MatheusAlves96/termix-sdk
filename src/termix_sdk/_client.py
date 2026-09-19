@@ -31,6 +31,7 @@ from .resources import credentials as _credentials
 from .resources import database as _database
 from .resources import encryption as _encryption
 from .resources import guacamole as _guacamole
+from .resources import instance_settings as _instance_settings
 from .resources import network_topology as _network_topology
 from .resources import open_tabs as _open_tabs
 from .resources import preferences as _preferences
@@ -44,6 +45,8 @@ from .resources import system as _system
 from .resources import tailscale as _tailscale
 from .resources import termix_id as _termix_id
 from .resources import tunnel_presets as _tunnel_presets
+from .resources import user_admin as _user_admin
+from .resources import users as _users
 from .resources import vault as _vault
 from .resources import webauthn as _webauthn
 from .resources import workspaces as _workspaces
@@ -96,6 +99,7 @@ class TermixClient:
         self.database = _database.DatabaseService(self._requestor)
         self.encryption = _encryption.EncryptionService(self._requestor)
         self.guacamole = _guacamole.GuacamoleService(self._requestor)
+        self.instance_settings = _instance_settings.InstanceSettingsService(self._requestor)
         self.network_topology = _network_topology.NetworkTopologyService(self._requestor)
         self.open_tabs = _open_tabs.OpenTabsService(self._requestor)
         self.preferences = _preferences.PreferencesService(self._requestor)
@@ -109,6 +113,8 @@ class TermixClient:
         self.tailscale = _tailscale.TailscaleService(self._requestor)
         self.termix_id = _termix_id.TermixIdService(self._requestor)
         self.tunnel_presets = _tunnel_presets.TunnelPresetsService(self._requestor)
+        self.user_admin = _user_admin.UserAdminService(self._requestor)
+        self.users = _users.UsersService(self._requestor)
         self.vault = _vault.VaultService(self._requestor)
         self.webauthn = _webauthn.WebauthnService(self._requestor)
         self.workspaces = _workspaces.WorkspacesService(self._requestor)

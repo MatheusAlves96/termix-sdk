@@ -26,6 +26,7 @@ from .resources import credentials as _credentials
 from .resources import database as _database
 from .resources import encryption as _encryption
 from .resources import guacamole as _guacamole
+from .resources import instance_settings as _instance_settings
 from .resources import network_topology as _network_topology
 from .resources import open_tabs as _open_tabs
 from .resources import preferences as _preferences
@@ -39,6 +40,8 @@ from .resources import system as _system
 from .resources import tailscale as _tailscale
 from .resources import termix_id as _termix_id
 from .resources import tunnel_presets as _tunnel_presets
+from .resources import user_admin as _user_admin
+from .resources import users as _users
 from .resources import vault as _vault
 from .resources import webauthn as _webauthn
 from .resources import workspaces as _workspaces
@@ -91,6 +94,7 @@ class AsyncTermixClient:
         self.database = _database.AsyncDatabaseService(self._requestor)
         self.encryption = _encryption.AsyncEncryptionService(self._requestor)
         self.guacamole = _guacamole.AsyncGuacamoleService(self._requestor)
+        self.instance_settings = _instance_settings.AsyncInstanceSettingsService(self._requestor)
         self.network_topology = _network_topology.AsyncNetworkTopologyService(self._requestor)
         self.open_tabs = _open_tabs.AsyncOpenTabsService(self._requestor)
         self.preferences = _preferences.AsyncPreferencesService(self._requestor)
@@ -104,6 +108,8 @@ class AsyncTermixClient:
         self.tailscale = _tailscale.AsyncTailscaleService(self._requestor)
         self.termix_id = _termix_id.AsyncTermixIdService(self._requestor)
         self.tunnel_presets = _tunnel_presets.AsyncTunnelPresetsService(self._requestor)
+        self.user_admin = _user_admin.AsyncUserAdminService(self._requestor)
+        self.users = _users.AsyncUsersService(self._requestor)
         self.vault = _vault.AsyncVaultService(self._requestor)
         self.webauthn = _webauthn.AsyncWebauthnService(self._requestor)
         self.workspaces = _workspaces.AsyncWorkspacesService(self._requestor)
