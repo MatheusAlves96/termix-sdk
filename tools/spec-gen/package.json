@@ -16,7 +16,7 @@
     "@redocly/cli": "^2.53.3",
     "@types/node": "^26.5.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^7.0.2"
   },
   "allowScripts": {
     "esbuild@0.28.2": true
