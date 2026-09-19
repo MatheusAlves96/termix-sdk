@@ -1057,8 +1057,15 @@ def format_generated_files(module_names: list[str]) -> None:
         for kind in ("resources", "models", "types")
         for m in module_names
     ] + [str(CONTRACT_TESTS_ROOT / f"test_{m}.py") for m in module_names]
+    # format -> fix -> format. The first pass makes the raw output lintable
+    # (`check` on unformatted text reports errors only `format` resolves).
+    # `--fix` can then delete a line (the unused TermixObject import in a
+    # module with no models/params), and only a format pass that runs
+    # afterwards collapses the blank lines it leaves behind; without the
+    # last pass `ruff format --check` rejected three generated files.
     subprocess.run([ruff, "format", *targets], check=True)
     subprocess.run([ruff, "check", "--fix", *targets], check=True)
+    subprocess.run([ruff, "format", *targets], check=True)
 
 
 if __name__ == "__main__":

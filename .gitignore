@@ -10,3 +10,6 @@ build/
 .ruff_cache/
 /docs/
 node_modules/
+.coverage
+coverage.xml
+htmlcov/

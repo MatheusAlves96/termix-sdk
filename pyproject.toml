@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "termix-sdk"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Unofficial Python client SDK for the Termix REST API"
 readme = "README.md"
 license = "MIT"
@@ -35,6 +35,7 @@ dev = [
     "pytest-asyncio>=0.24",
     "mypy>=1.10",
     "ruff>=0.6",
+    "pytest-cov>=6.0",
 ]
 
 [project.urls]
@@ -42,12 +43,24 @@ Homepage = "https://github.com/MatheusAlves96/termix-sdk"
 Issues = "https://github.com/MatheusAlves96/termix-sdk/issues"
 Changelog = "https://github.com/MatheusAlves96/termix-sdk/blob/main/CHANGELOG.md"
 
+[tool.hatch.version]
+path = "src/termix_sdk/_version.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/termix_sdk"]
+
+[tool.hatch.build.targets.sdist]
+# spec/ (multi-MB IR dumps) and tools/ (the generators) are inputs to the
+# build, not part of the distributed package.
+only-include = ["src", "tests", "examples", "CHANGELOG.md", "CONTRIBUTING.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["termix_sdk"]
+branch = true
 
 [tool.ruff]
 line-length = 100
@@ -67,6 +80,6 @@ select = ["E", "F", "I", "UP"]
 
 [tool.mypy]
 python_version = "3.10"
-packages = ["termix_sdk"]
+files = ["src/termix_sdk", "examples"]
 mypy_path = "src"
 ignore_missing_imports = true
