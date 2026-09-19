@@ -18,6 +18,7 @@ from ._response import TermixResponse
 
 # --- generated resource imports start ---
 
+from .resources import ai as _ai
 from .resources import alerts as _alerts
 from .resources import api_keys as _api_keys
 from .resources import audit as _audit
@@ -32,6 +33,7 @@ from .resources import fleets as _fleets
 from .resources import guacamole as _guacamole
 from .resources import homepage as _homepage
 from .resources import host_file_manager as _host_file_manager
+from .resources import hosts as _hosts
 from .resources import instance_settings as _instance_settings
 from .resources import metrics as _metrics
 from .resources import network_topology as _network_topology
@@ -98,6 +100,7 @@ class AsyncTermixClient:
 
         # --- generated resource attributes start ---
 
+        self.ai = _ai.AsyncAiService(self._requestor)
         self.alerts = _alerts.AsyncAlertsService(self._requestor)
         self.api_keys = _api_keys.AsyncApiKeysService(self._requestor)
         self.audit = _audit.AsyncAuditService(self._requestor)
@@ -112,6 +115,7 @@ class AsyncTermixClient:
         self.guacamole = _guacamole.AsyncGuacamoleService(self._requestor)
         self.homepage = _homepage.AsyncHomepageService(self._requestor)
         self.host_file_manager = _host_file_manager.AsyncHostFileManagerService(self._requestor)
+        self.hosts = _hosts.AsyncHostsService(self._requestor)
         self.instance_settings = _instance_settings.AsyncInstanceSettingsService(self._requestor)
         self.metrics = _metrics.AsyncMetricsService(self._requestor)
         self.network_topology = _network_topology.AsyncNetworkTopologyService(self._requestor)

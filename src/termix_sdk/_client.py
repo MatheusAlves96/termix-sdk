@@ -23,6 +23,7 @@ from ._response import TermixResponse
 
 # --- generated resource imports start ---
 
+from .resources import ai as _ai
 from .resources import alerts as _alerts
 from .resources import api_keys as _api_keys
 from .resources import audit as _audit
@@ -37,6 +38,7 @@ from .resources import fleets as _fleets
 from .resources import guacamole as _guacamole
 from .resources import homepage as _homepage
 from .resources import host_file_manager as _host_file_manager
+from .resources import hosts as _hosts
 from .resources import instance_settings as _instance_settings
 from .resources import metrics as _metrics
 from .resources import network_topology as _network_topology
@@ -103,6 +105,7 @@ class TermixClient:
 
         # --- generated resource attributes start ---
 
+        self.ai = _ai.AiService(self._requestor)
         self.alerts = _alerts.AlertsService(self._requestor)
         self.api_keys = _api_keys.ApiKeysService(self._requestor)
         self.audit = _audit.AuditService(self._requestor)
@@ -117,6 +120,7 @@ class TermixClient:
         self.guacamole = _guacamole.GuacamoleService(self._requestor)
         self.homepage = _homepage.HomepageService(self._requestor)
         self.host_file_manager = _host_file_manager.HostFileManagerService(self._requestor)
+        self.hosts = _hosts.HostsService(self._requestor)
         self.instance_settings = _instance_settings.InstanceSettingsService(self._requestor)
         self.metrics = _metrics.MetricsService(self._requestor)
         self.network_topology = _network_topology.NetworkTopologyService(self._requestor)

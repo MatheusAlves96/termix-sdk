@@ -1291,6 +1291,119 @@
           "method": "metrics_heartbeat"
         }
       }
+    },
+    "ai": {
+      "_note": "POST /ai/chat/stream is SSE — excluded, deferred to F6 SSE support.",
+      "ops": {
+        "database_post_ai_providers": {
+          "method": "create_provider"
+        },
+        "database_get_ai_providers": {
+          "method": "list_providers"
+        },
+        "database_patch_ai_providers_by-id": {
+          "method": "update_provider"
+        },
+        "database_delete_ai_providers_by-id": {
+          "method": "delete_provider"
+        },
+        "database_post_ai_probe-models": {},
+        "database_get_ai_providers_by-id_models": {
+          "method": "list_provider_models"
+        },
+        "database_get_ai_conversations": {
+          "method": "list_conversations"
+        },
+        "database_get_ai_conversations_by-id": {
+          "method": "get_conversation"
+        },
+        "database_delete_ai_conversations_by-id": {
+          "method": "delete_conversation"
+        },
+        "database_get_ai_status": {
+          "method": "get_status"
+        },
+        "database_post_ai_proposals_by-id_apply": {
+          "method": "apply_proposal"
+        },
+        "database_post_ai_proposals_by-id_reject": {
+          "method": "reject_proposal"
+        }
+      }
+    },
+    "hosts": {
+      "_note": "POST /host/db/host, POST /host/enroll, PUT /host/db/host/{id} are multipart — excluded, deferred to F6 multipart support. GET /host/db/host/internal(/all) (internal-auth) and GET /host/opkssh-callback (browser redirect) are out of scope per docs/sdk-plan.md section 2 item 10.",
+      "ops": {
+        "database_delete_host_autostart_disable": {
+          "method": "disable_autostart"
+        },
+        "database_get_host_autostart_status": {
+          "method": "get_autostart_status"
+        },
+        "database_post_host_autostart_enable": {
+          "method": "enable_autostart"
+        },
+        "database_patch_host_bulk-update": {},
+        "database_put_host_reorder": {},
+        "database_post_host_bulk-import": {},
+        "database_post_host_ssh-config-import": {},
+        "database_get_host_command-history_by-hostId": {
+          "method": "get_command_history"
+        },
+        "database_delete_host_command-history": {
+          "method": "clear_command_history"
+        },
+        "database_get_host_folders": {
+          "method": "list_folders"
+        },
+        "database_put_host_folders_metadata": {
+          "method": "update_folder_metadata"
+        },
+        "database_put_host_folders_reorder": {
+          "method": "reorder_folders"
+        },
+        "database_delete_host_folders_by-name_hosts": {
+          "method": "remove_hosts_from_folder"
+        },
+        "database_put_host_folders_rename": {
+          "method": "rename_folder"
+        },
+        "database_post_host_db_proxy_test": {
+          "method": "test_proxy"
+        },
+        "database_post_host_db_host_by-id_wake": {},
+        "database_get_host_db_host": {
+          "method": "list"
+        },
+        "database_get_host_db_host_by-id": {
+          "method": "retrieve"
+        },
+        "database_delete_host_db_host_by-id": {
+          "method": "delete"
+        },
+        "database_get_host_db_host_by-id_password": {
+          "method": "get_password"
+        },
+        "database_get_host_db_host_by-id_export": {
+          "method": "export"
+        },
+        "database_get_host_db_hosts_export": {
+          "method": "export_all"
+        },
+        "database_get_host_transfer_recent": {
+          "method": "get_recent_transfer"
+        },
+        "database_post_host_transfer_recent": {
+          "method": "record_recent_transfer"
+        },
+        "database_get_host_ssh_opkssh_token_by-hostId": {
+          "method": "get_opkssh_token"
+        },
+        "database_delete_host_ssh_opkssh_token_by-hostId": {
+          "method": "delete_opkssh_token"
+        },
+        "database_post_host_quick-connect": {}
+      }
     }
   }
 }
