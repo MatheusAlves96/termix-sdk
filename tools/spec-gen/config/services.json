@@ -1,0 +1,11 @@
+{
+  "_comment": "Known Termix backend services, keyed by the express()/Router() root file's path relative to src/backend/. Used by Phase 1 to name/port-tag a resolved route when the file's own PORT/HTTP_PORT constant can't be found by scanning (e.g. it's computed, or the file was renamed upstream). Auto-scan always wins when it succeeds; this is the fallback.",
+  "database/database.ts": { "service": "database", "port": 30001 },
+  "hosts/tunnel/index.ts": { "service": "tunnel", "port": 30003 },
+  "hosts/file-manager/index.ts": { "service": "file-manager", "port": 30004 },
+  "hosts/metrics/index.ts": { "service": "metrics", "port": 30005 },
+  "services/dashboard.ts": { "service": "dashboard", "port": 30006 },
+  "hosts/docker/index.ts": { "service": "docker", "port": 30007 },
+  "hosts/tmux/index.ts": { "service": "tmux", "port": 30010 },
+  "services/homepage.ts": { "service": "homepage", "port": 30012 }
+}

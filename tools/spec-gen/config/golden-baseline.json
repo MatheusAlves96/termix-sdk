@@ -1,0 +1,404 @@
+{
+  "POST /host/db/host": {
+    "connectionType": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "name": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "folder": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "parentHostId": {
+      "type": "integer",
+      "confidence": "inferred"
+    },
+    "tags": {
+      "type": "array",
+      "confidence": "inferred"
+    },
+    "ip": {
+      "type": "string",
+      "confidence": "inferred"
+    },
+    "port": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "username": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "password": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "authMethod": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "authType": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "useWarpgate": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "shareSshAuth": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "credentialId": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "vaultProfileId": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "key": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "keyPassword": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "keyType": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "sudoPassword": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "pin": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableTerminal": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableCommandHistory": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableTunnel": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableFileManager": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "scpLegacy": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableDocker": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableProxmox": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableTmuxMonitor": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableTerminalToolbar": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "allowSessionSharing": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "showTerminalInSidebar": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "showFileManagerInSidebar": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "showTunnelInSidebar": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "showDockerInSidebar": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "showServerStatsInSidebar": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "defaultPath": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "tunnelConnections": {
+      "type": "array",
+      "confidence": "inferred"
+    },
+    "jumpHosts": {
+      "type": "array",
+      "confidence": "inferred"
+    },
+    "quickActions": {
+      "type": "array",
+      "confidence": "inferred"
+    },
+    "statsConfig": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "dockerConfig": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "proxmoxConfig": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableProxmoxStats": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "proxmoxStatsConfig": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "terminalConfig": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "forceKeyboardInteractive": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "domain": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "security": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "ignoreCert": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "guacamoleConfig": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "notes": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "useSocks5": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "socks5Host": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "socks5Port": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "socks5Username": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "socks5Password": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "socks5ProxyChain": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "connectionOrigin": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "portKnockSequence": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "overrideCredentialUsername": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "macAddress": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "wolBroadcastAddress": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableSsh": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableRdp": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableVnc": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enableTelnet": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "sshPort": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "rdpPort": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "vncPort": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "telnetPort": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "rdpAuthType": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "rdpCredentialId": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "rdpUser": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "rdpPassword": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "rdpDomain": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "rdpSecurity": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "rdpIgnoreCert": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "vncAuthType": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "vncCredentialId": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "vncPassword": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "vncUser": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "telnetAuthType": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "telnetCredentialId": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "telnetUser": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "telnetPassword": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "data": {
+      "type": "unknown",
+      "confidence": "unknown"
+    }
+  },
+  "PATCH /open-tabs/:id": {},
+  "POST /notification-channels": {
+    "name": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "type": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "config": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enabled": {
+      "type": "unknown",
+      "confidence": "unknown"
+    }
+  },
+  "POST /users/sso-providers": {
+    "name": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "type": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "enabled": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "displayOrder": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "config": {
+      "type": "unknown",
+      "confidence": "unknown"
+    }
+  },
+  "PUT /snippets/reorder": {},
+  "POST /ssh/file_manager/ssh/createFile": {
+    "sessionId": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "path": {
+      "type": "unknown",
+      "confidence": "unknown"
+    },
+    "fileName": {
+      "type": "unknown",
+      "confidence": "unknown"
+    }
+  }
+}
