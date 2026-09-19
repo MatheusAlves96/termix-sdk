@@ -19,6 +19,7 @@ from ._response import TermixResponse
 # --- generated resource imports start ---
 
 from .resources import credentials as _credentials
+from .resources import snippets as _snippets
 from .resources import system as _system
 
 # --- generated resource imports end ---
@@ -62,6 +63,7 @@ class AsyncTermixClient:
         # --- generated resource attributes start ---
 
         self.credentials = _credentials.AsyncCredentialsService(self._requestor)
+        self.snippets = _snippets.AsyncSnippetsService(self._requestor)
         self.system = _system.AsyncSystemService(self._requestor)
 
         # --- generated resource attributes end ---

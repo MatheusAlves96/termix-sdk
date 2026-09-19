@@ -24,6 +24,7 @@ from ._response import TermixResponse
 # --- generated resource imports start ---
 
 from .resources import credentials as _credentials
+from .resources import snippets as _snippets
 from .resources import system as _system
 
 # --- generated resource imports end ---
@@ -67,6 +68,7 @@ class TermixClient:
         # --- generated resource attributes start ---
 
         self.credentials = _credentials.CredentialsService(self._requestor)
+        self.snippets = _snippets.SnippetsService(self._requestor)
         self.system = _system.SystemService(self._requestor)
 
         # --- generated resource attributes end ---

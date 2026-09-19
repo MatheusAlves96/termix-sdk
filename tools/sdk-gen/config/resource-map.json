@@ -1,12 +1,30 @@
 {
   "_comment": "operationId -> generated method name, grouped by the SDK module/attribute it belongs to (docs/sdk-plan.md section 4). Method names not overridden here fall back to generate.py's default naming rule (section 8): GET no id -> list, GET with trailing {id} -> retrieve, POST no extra segment -> create, PUT/PATCH with trailing {id} -> update, DELETE with trailing {id} -> delete, anything else -> snake_case of the trailing path segment(s). generate.py fails if an operationId in the spec under one of `services` below is missing from its module's `ops`, and fails if `ops` names an operationId the spec doesn't have.",
-  "_pilot_scope_note": "F3 pilot (2026-09-19): only `system` and `credentials` are populated — both are pure JSON (no multipart), which keeps the pilot's risk down per docs/sdk-plan.md phase F3. `hosts` and the rest of the 491 operations are F4 work.",
+  "_pilot_scope_note": "F3 pilot (2026-09-19): `system`, `credentials`, `snippets` are populated so far — all pure JSON (no multipart), which keeps the pilot's risk down per docs/sdk-plan.md phase F3. `hosts` (multipart on 3 ops) and the rest of the 491 operations are F4 work.",
   "modules": {
     "system": {
       "ops": {
         "database_get_health": {},
         "database_get_version": {},
         "database_get_releases_rss": { "method": "list_releases" }
+      }
+    },
+    "snippets": {
+      "ops": {
+        "database_get_snippets": { "method": "list" },
+        "database_post_snippets": { "method": "create" },
+        "database_get_snippets_by-id": { "method": "retrieve" },
+        "database_put_snippets_by-id": { "method": "update" },
+        "database_delete_snippets_by-id": { "method": "delete" },
+        "database_get_snippets_folders": { "method": "list_folders" },
+        "database_post_snippets_folders": { "method": "create_folder" },
+        "database_put_snippets_folders_by-name_metadata": { "method": "update_folder_metadata" },
+        "database_put_snippets_folders_rename": { "method": "rename_folder" },
+        "database_delete_snippets_folders_by-name": { "method": "delete_folder" },
+        "database_put_snippets_reorder": { "method": "reorder" },
+        "database_post_snippets_execute": { "method": "execute" },
+        "database_get_snippets_export": { "method": "export" },
+        "database_post_snippets_bulk-import": { "method": "bulk_import" }
       }
     },
     "credentials": {

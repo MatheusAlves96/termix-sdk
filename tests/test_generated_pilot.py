@@ -106,3 +106,58 @@ async def test_async_credentials_retrieve(
     result = await async_client.credentials.retrieve("7")
     assert result.id == 7
     assert mock_async_http_client.requests[0].url.endswith("/credentials/7")
+
+
+def test_snippets_list_uses_bare_builtin_list_return_type(
+    client: TermixClient, mock_http_client: MockHTTPClient
+):
+    # SnippetsService defines a `list` method itself — this only compiles
+    # and type-checks because the generator's List/Dict + ruff's later
+    # `builtins.list` disambiguation actually worked (see the F3 pilot
+    # commit message for the bug this guards against).
+    mock_http_client.queue_response(status_code=200, body=[{"id": 1}])
+    assert client.snippets.list() == [{"id": 1}]
+
+
+def test_snippets_folder_path_param_plus_body(
+    client: TermixClient, mock_http_client: MockHTTPClient
+):
+    mock_http_client.queue_response(status_code=200, body={})
+    client.snippets.update_folder_metadata("work", color="#fff")
+    sent = mock_http_client.requests[0]
+    assert sent.url.endswith("/snippets/folders/work/metadata")
+    assert sent.json == {"color": "#fff"}
+
+
+def test_snippets_delete_folder_path_param_no_body(
+    client: TermixClient, mock_http_client: MockHTTPClient
+):
+    mock_http_client.queue_response(status_code=200, body={"success": True})
+    client.snippets.delete_folder("work")
+    sent = mock_http_client.requests[0]
+    assert sent.url.endswith("/snippets/folders/work")
+    assert sent.method == "DELETE"
+    assert sent.json is None
+
+
+def test_snippets_execute_sends_all_body_fields(
+    client: TermixClient, mock_http_client: MockHTTPClient
+):
+    mock_http_client.queue_response(status_code=200, body={"success": True, "output": "ok"})
+    client.snippets.execute(snippetId=1, hostId=2, inputValues={"x": "y"})
+    assert mock_http_client.requests[0].json == {
+        "snippetId": 1,
+        "hostId": 2,
+        "inputValues": {"x": "y"},
+    }
+
+
+def test_snippets_update_with_no_request_body_in_spec_sends_no_body(
+    client: TermixClient, mock_http_client: MockHTTPClient
+):
+    # PUT /snippets/{id} has no requestBody in the spec at all (a real gap
+    # — see docs/api-schema-validation.md) — the generated method
+    # faithfully reflects that rather than inventing a body.
+    mock_http_client.queue_response(status_code=200, body={})
+    client.snippets.update("3")
+    assert mock_http_client.requests[0].json is None
