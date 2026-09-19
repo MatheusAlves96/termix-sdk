@@ -266,6 +266,36 @@ class Operation:
         return json_body.get("schema")
 
     @property
+    def multipart_file_fields(self) -> list[str]:
+        """Field names that exist only in this op's `multipart/form-data`
+        body, not in its `application/json` alternative (`body_schema`
+        above prefers JSON precisely because it's usually the identical
+        schema under both — see docs/sdk-plan.md's F3 hosts.create/
+        enroll/update note). `POST /fleets/{id}/transfer/push` is the
+        one op currently in scope where they differ: multipart's `file`
+        (`format: "binary"`) has no JSON equivalent, since a file upload
+        has no sensible JSON encoding. Each name here becomes its own
+        keyword parameter (bytes or a file-like object), sent via the
+        request's `files=` rather than folded into `**params`.
+        """
+        rb = self.op.get("requestBody")
+        if not rb:
+            return []
+        content = rb.get("content", {})
+        multipart = content.get("multipart/form-data")
+        if multipart is None:
+            return []
+        json_props = set(
+            (content.get("application/json", {}).get("schema", {}) or {}).get("properties", {})
+        )
+        multipart_props = (multipart.get("schema", {}) or {}).get("properties", {})
+        return [
+            name
+            for name, schema in multipart_props.items()
+            if schema.get("format") == "binary" and name not in json_props
+        ]
+
+    @property
     def response_schema(self) -> dict[str, Any] | None:
         responses = self.op.get("responses", {})
         for code in ("200", "201"):
@@ -381,11 +411,14 @@ class GeneratedOp:
         body_names = set((body_schema or {}).get("properties", {})) if body_schema else set()
 
         path_args = self.python_path_args()
-        # **params (if any) must be the last parameter — options is a
-        # named keyword-only arg with a default, so it has to come before
-        # it, not after.
+        file_fields = op.multipart_file_fields
+        # **params (if any) must be the last parameter — options and the
+        # file fields are named keyword-only args with a default/no
+        # default, so they have to come before it, not after.
         sig_parts = ["self"] + [f"{a}: str" for a in path_args]
         sig_parts.append("*")
+        for field in file_fields:
+            sig_parts.append(f"{python_param_name(field)}: bytes | BinaryIO")
         sig_parts.append("options: RequestOptions | None = None")
         if self.has_params():
             sig_parts.append(f"**params: Unpack[{self.params_class_name}]")
@@ -464,6 +497,14 @@ class GeneratedOp:
             )
         else:
             call_kwargs = ""
+
+        if file_fields:
+            files_literal = (
+                "{" + ", ".join(f'"{f}": {python_param_name(f)}' for f in file_fields) + "}"
+            )
+            call_kwargs = (
+                f"{call_kwargs}, files={files_literal}" if call_kwargs else f"files={files_literal}"
+            )
 
         if op.is_octet_stream:
             request_call = (
@@ -622,9 +663,15 @@ class GeneratedOp:
         fixture = "async_client" if is_async else "client"
         mock_fixture = "mock_async_http_client" if is_async else "mock_http_client"
 
+        file_fields = op.multipart_file_fields
+        file_placeholder = b"file-content-placeholder"
+        file_arg_strs = [f"{python_param_name(f)}={file_placeholder!r}" for f in file_fields]
+
         call_args = [repr(path_values[a]) for a in self.python_path_args()]
         call_kwargs = {**query_kwargs, **body_kwargs}
-        call_args_str = ", ".join([*call_args, *(f"{k}={v!r}" for k, v in call_kwargs.items())])
+        call_args_str = ", ".join(
+            [*call_args, *file_arg_strs, *(f"{k}={v!r}" for k, v in call_kwargs.items())]
+        )
 
         path_literal = op.path
         for raw, py_name in zip(
@@ -693,7 +740,15 @@ class GeneratedOp:
         lines.append(f'    assert sent.url.endswith("{path_literal}")')
         if query_kwargs:
             lines.append(f"    assert sent.params == {query_kwargs!r}")
-        if body_kwargs:
+        if file_fields:
+            # httpx (and _api_requestor.py) route the body through `data=`
+            # instead of `json=` once any `files=` are present — both
+            # form fields and the file(s) end up in one multipart body.
+            if body_kwargs:
+                lines.append(f"    assert sent.data == {body_kwargs!r}")
+            files_expected = {f: file_placeholder for f in file_fields}
+            lines.append(f"    assert sent.files == {files_expected!r}")
+        elif body_kwargs:
             lines.append(f"    assert sent.json == {body_kwargs!r}")
         if op.is_204:
             lines.append("    assert result is None")
@@ -835,6 +890,7 @@ def write_resources_module(
     param_names = sorted({g.params_class_name for g in generated_ops if g.has_params()})
     has_octet_stream = any(g.op.is_octet_stream for g in generated_ops)
     has_sse = any(g.is_sse for g in generated_ops)
+    has_files = any(g.op.multipart_file_fields for g in generated_ops)
 
     lines = [
         GENERATED_HEADER.format(spec_version=spec_version),
@@ -842,7 +898,9 @@ def write_resources_module(
         "",
         "from __future__ import annotations",
         "",
-        "from typing import Any, Dict, List, Literal  # noqa: F401, UP035",
+        "from typing import Any, BinaryIO, Dict, List, Literal  # noqa: F401, UP035"
+        if has_files
+        else "from typing import Any, Dict, List, Literal  # noqa: F401, UP035",
         "",
         "from typing_extensions import Unpack",
         "",

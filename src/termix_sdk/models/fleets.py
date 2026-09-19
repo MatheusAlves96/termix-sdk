@@ -69,3 +69,7 @@ class FleetsShareResult(TermixObject):
 
 class FleetsExecuteResult(TermixObject):
     results: list[dict[str, Any]]
+
+
+class FleetsTransferPushResult(TermixObject):
+    results: list[dict[str, Any]]

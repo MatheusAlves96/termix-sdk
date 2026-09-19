@@ -212,6 +212,27 @@ def test_execute_contract(client, mock_http_client):
     }
 
 
+def test_transfer_push_contract(client, mock_http_client):
+    """Generated from POST /fleets/{id}/transfer/push in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200,
+        body={
+            "results": [
+                {"hostId": 1.0, "hostName": "x", "success": True, "output": "x", "error": "x"}
+            ]
+        },
+    )
+    result = client.fleets.transfer_push("x", file=b"file-content-placeholder", remotePath="x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/fleets/x/transfer/push")
+    assert sent.data == {"remotePath": "x"}
+    assert sent.files == {"file": b"file-content-placeholder"}
+    assert result.to_dict() == {
+        "results": [{"hostId": 1.0, "hostName": "x", "success": True, "output": "x", "error": "x"}]
+    }
+
+
 @pytest.mark.asyncio
 async def test_async_transfer_pull_contract(async_client, mock_async_http_client):
     """Generated from POST /fleets/{id}/transfer/pull in spec/termix-openapi.json."""
@@ -431,6 +452,30 @@ async def test_async_execute_contract(async_client, mock_async_http_client):
     assert sent.method == "POST"
     assert sent.url.endswith("/fleets/x/execute")
     assert sent.json == {"command": "x", "inputValues": {}}
+    assert result.to_dict() == {
+        "results": [{"hostId": 1.0, "hostName": "x", "success": True, "output": "x", "error": "x"}]
+    }
+
+
+@pytest.mark.asyncio
+async def test_async_transfer_push_contract(async_client, mock_async_http_client):
+    """Generated from POST /fleets/{id}/transfer/push in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200,
+        body={
+            "results": [
+                {"hostId": 1.0, "hostName": "x", "success": True, "output": "x", "error": "x"}
+            ]
+        },
+    )
+    result = await async_client.fleets.transfer_push(
+        "x", file=b"file-content-placeholder", remotePath="x"
+    )
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/fleets/x/transfer/push")
+    assert sent.data == {"remotePath": "x"}
+    assert sent.files == {"file": b"file-content-placeholder"}
     assert result.to_dict() == {
         "results": [{"hostId": 1.0, "hostName": "x", "success": True, "output": "x", "error": "x"}]
     }

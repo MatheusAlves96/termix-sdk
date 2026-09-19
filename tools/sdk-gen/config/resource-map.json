@@ -962,7 +962,7 @@
       }
     },
     "fleets": {
-      "_note": "POST /fleets/{id}/transfer/push's multipart/form-data body has a `file` field with no application/json equivalent (unlike the three /host/db/host ops - see the hosts module note) - the JSON alternative is missing exactly the field the operation exists for, so this one stays excluded pending real multipart support (F6).",
+      "_note": "POST /fleets/{id}/transfer/push's `file` field (F6 multipart support) has no application/json equivalent, unlike the /host/db/host ops - generated with a dedicated file=... keyword parameter sent via files=.",
       "ops": {
         "database_post_fleets_by-id_transfer_pull": {
           "method": "transfer_pull"
@@ -992,7 +992,10 @@
           "method": "remove_member"
         },
         "database_post_fleets_by-id_share": {},
-        "database_post_fleets_by-id_execute": {}
+        "database_post_fleets_by-id_execute": {},
+        "database_post_fleets_by-id_transfer_push": {
+          "method": "transfer_push"
+        }
       }
     },
     "tunnel": {

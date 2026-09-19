@@ -47,3 +47,7 @@ class FleetsShareParams(TypedDict, total=False):
 class FleetsExecuteParams(TypedDict, total=False):
     command: str
     inputValues: dict[str, Any]
+
+
+class FleetsTransferPushParams(TypedDict, total=False):
+    remotePath: str

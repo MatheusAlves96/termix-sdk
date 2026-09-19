@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import builtins
-from typing import Any, Dict, List, Literal  # noqa: F401, UP035
+from typing import Any, BinaryIO, Dict, List, Literal  # noqa: F401, UP035
 
 from typing_extensions import Unpack
 
@@ -25,6 +25,7 @@ from ..models.fleets import (
     FleetsRefreshInventoryResult,
     FleetsRemoveMemberResult,
     FleetsShareResult,
+    FleetsTransferPushResult,
     FleetsUpdateResult,
 )
 from ..types.fleets import (
@@ -34,6 +35,7 @@ from ..types.fleets import (
     FleetsPackagesActionParams,
     FleetsShareParams,
     FleetsTransferPullParams,
+    FleetsTransferPushParams,
     FleetsUpdateParams,
 )
 
@@ -252,6 +254,30 @@ class FleetsService(TermixService):
             "POST", f"/fleets/{id}/execute", json_body=dict(params) or None, options=options
         )
         return FleetsExecuteResult.construct_from(
+            response.data if response else None, last_response=response
+        )
+
+    def transfer_push(
+        self,
+        id: str,
+        *,
+        file: bytes | BinaryIO,
+        options: RequestOptions | None = None,
+        **params: Unpack[FleetsTransferPushParams],
+    ) -> FleetsTransferPushResult:
+        """Push an uploaded file to the same remote path on every host in a fleet
+
+        POST /fleets/{id}/transfer/push
+        Source: src/backend/database/routes/fleet-routes.ts:985
+        """
+        response = self._request(
+            "POST",
+            f"/fleets/{id}/transfer/push",
+            json_body=dict(params) or None,
+            files={"file": file},
+            options=options,
+        )
+        return FleetsTransferPushResult.construct_from(
             response.data if response else None, last_response=response
         )
 
@@ -481,5 +507,29 @@ class AsyncFleetsService(AsyncTermixService):
             "POST", f"/fleets/{id}/execute", json_body=dict(params) or None, options=options
         )
         return FleetsExecuteResult.construct_from(
+            response.data if response else None, last_response=response
+        )
+
+    async def transfer_push(
+        self,
+        id: str,
+        *,
+        file: bytes | BinaryIO,
+        options: RequestOptions | None = None,
+        **params: Unpack[FleetsTransferPushParams],
+    ) -> FleetsTransferPushResult:
+        """Push an uploaded file to the same remote path on every host in a fleet
+
+        POST /fleets/{id}/transfer/push
+        Source: src/backend/database/routes/fleet-routes.ts:985
+        """
+        response = await self._request(
+            "POST",
+            f"/fleets/{id}/transfer/push",
+            json_body=dict(params) or None,
+            files={"file": file},
+            options=options,
+        )
+        return FleetsTransferPushResult.construct_from(
             response.data if response else None, last_response=response
         )
