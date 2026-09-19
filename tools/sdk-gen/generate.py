@@ -129,6 +129,53 @@ def schema_to_type(schema: dict[str, Any] | None) -> str:
 
 
 # --------------------------------------------------------------------------
+# JSON Schema -> synthetic example value (for tests/contract/, not runtime)
+# --------------------------------------------------------------------------
+
+
+def example_for_schema(schema: dict[str, Any] | None) -> Any:
+    """A minimal, deterministic JSON-shaped value matching `schema`, used
+    to fill request bodies/query params and canned mock responses in the
+    generated contract tests (docs/sdk-plan.md's testing-decision note).
+    These are placeholders picked for shape, not realism — a contract
+    test cares that the right field names round-trip, not that
+    `password` looks like a real password.
+    """
+    if not schema:
+        return "x"
+    if schema.get("x-confidence") == "unknown":
+        return "x"
+    if "const" in schema:
+        return schema["const"]
+    if "enum" in schema:
+        return schema["enum"][0]
+    if "oneOf" in schema:
+        return example_for_schema(schema["oneOf"][0])
+    if "anyOf" in schema:
+        return example_for_schema(schema["anyOf"][0])
+
+    t = schema.get("type")
+    if isinstance(t, list):
+        non_null = [x for x in t if x != "null"]
+        return example_for_schema({**schema, "type": non_null[0]}) if non_null else None
+
+    if t == "object":
+        return {k: example_for_schema(v) for k, v in (schema.get("properties") or {}).items()}
+    if t == "array":
+        items = schema.get("items")
+        return [example_for_schema(items)] if items else []
+    if t == "string":
+        return "x"
+    if t == "integer":
+        return 1
+    if t == "number":
+        return 1.0
+    if t == "boolean":
+        return True
+    return "x"
+
+
+# --------------------------------------------------------------------------
 # spec loading
 # --------------------------------------------------------------------------
 
@@ -209,10 +256,13 @@ class GeneratedOp:
     TypedDict + its contribution to the module's response model(s).
     """
 
-    def __init__(self, op: Operation, method_name: str, class_prefix: str) -> None:
+    def __init__(
+        self, op: Operation, method_name: str, class_prefix: str, module_name: str
+    ) -> None:
         self.op = op
         self.method_name = method_name
         self.class_prefix = class_prefix  # PascalCase resource name, e.g. "Credentials"
+        self.module_name = module_name  # client attribute name, e.g. "credentials"
 
     @property
     def params_class_name(self) -> str:
@@ -386,6 +436,118 @@ class GeneratedOp:
                 lines.append(f"    {prop_name}: {schema_to_type(prop_schema)}")
         return "\n".join(lines)
 
+    # -- contract-test support (docs/sdk-plan.md testing-decision note) ---
+
+    def example_path_values(self) -> dict[str, Any]:
+        return {
+            python_param_name(p["name"]): example_for_schema(p.get("schema"))
+            for p in self.op.path_params
+        }
+
+    def example_query_kwargs(self) -> dict[str, Any]:
+        return {p["name"]: example_for_schema(p.get("schema")) for p in self.op.query_params}
+
+    def example_body_kwargs(self) -> dict[str, Any]:
+        body_schema = self.op.body_schema
+        if not body_schema or body_schema.get("type") != "object":
+            return {}
+        return {
+            name: example_for_schema(prop_schema)
+            for name, prop_schema in (body_schema.get("properties") or {}).items()
+        }
+
+    def example_response_body(self) -> Any:
+        if self.op.is_204:
+            return None
+        schema = self.op.response_schema
+        if schema is None:
+            # No documented schema at all: a non-empty placeholder so the
+            # method still gets a real object back to assert isinstance
+            # on, instead of the `None` an empty mock body would produce.
+            return {"x-contract-test-placeholder": True}
+        return example_for_schema(schema)
+
+    def emit_contract_test(self, *, is_async: bool) -> str:
+        """One pytest test per operation: feeds the method a synthetic
+        example of every param the spec documents, queues a synthetic
+        example of the documented response, and asserts the SDK sent the
+        right method/path/query/body and parsed the response into the
+        right shape. Data is synthetic (docs/sdk-plan.md's
+        testing-decision note) — this is a contract test against the
+        spec, not a live call against a real Termix instance.
+        """
+        op = self.op
+        path_values = self.example_path_values()
+        query_kwargs = self.example_query_kwargs()
+        body_kwargs = self.example_body_kwargs()
+        response_body = self.example_response_body()
+
+        prefix = "async_" if is_async else ""
+        await_ = "await " if is_async else ""
+        async_def = "async def" if is_async else "def"
+        fixture = "async_client" if is_async else "client"
+        mock_fixture = "mock_async_http_client" if is_async else "mock_http_client"
+
+        call_args = [repr(path_values[a]) for a in self.python_path_args()]
+        call_kwargs = {**query_kwargs, **body_kwargs}
+        call_args_str = ", ".join([*call_args, *(f"{k}={v!r}" for k, v in call_kwargs.items())])
+
+        path_literal = op.path
+        for raw, py_name in zip(
+            [p["name"] for p in op.path_params], self.python_path_args(), strict=True
+        ):
+            path_literal = path_literal.replace("{" + raw + "}", str(path_values[py_name]))
+
+        lines: list[str] = []
+        if is_async:
+            lines.append("@pytest.mark.asyncio")
+        lines.append(
+            f"{async_def} test_{prefix}{self.method_name}_contract({fixture}, {mock_fixture}):"
+        )
+        lines.append(f'    """Generated from {op.method} {op.path} in spec/termix-openapi.json."""')
+        lines.append(f"    {mock_fixture}.queue_response(status_code=200, body={response_body!r})")
+        lines.append(
+            f"    result = {await_}{fixture}.{self.module_name}.{self.method_name}({call_args_str})"
+        )
+        lines.append(f"    sent = {mock_fixture}.requests[0]")
+        lines.append(f'    assert sent.method == "{op.method}"')
+        lines.append(f'    assert sent.url.endswith("{path_literal}")')
+        if query_kwargs:
+            lines.append(f"    assert sent.params == {query_kwargs!r}")
+        if body_kwargs:
+            lines.append(f"    assert sent.json == {body_kwargs!r}")
+        if op.is_204:
+            lines.append("    assert result is None")
+        else:
+            schema = op.response_schema
+            items_have_dedicated_model = bool(
+                schema
+                and schema.get("type") == "array"
+                and (schema.get("items") or {}).get("type") == "object"
+                and (schema.get("items") or {}).get("properties")
+            )
+            if isinstance(response_body, list) and items_have_dedicated_model:
+                # result is a list of a generated model, not raw dicts — a
+                # nested object/array field on that model is itself a
+                # TermixObject at runtime regardless of its static type
+                # annotation (see _object.py's construct_from), so compare
+                # via to_dict() rather than the model instances directly.
+                lines.append(f"    assert len(result) == {len(response_body)}")
+                if response_body:
+                    lines.append(f"    assert result[0].to_dict() == {response_body[0]!r}")
+            elif isinstance(response_body, list):
+                # A bare List[Any] response is never wrapped — result is
+                # the raw list exactly as the mock returned it.
+                lines.append(f"    assert result == {response_body!r}")
+            elif isinstance(response_body, dict) and response_body:
+                lines.append(f"    assert result.to_dict() == {response_body!r}")
+            else:
+                # A scalar response, or a dict with no fields at all —
+                # still confirm the method didn't swallow a non-empty
+                # response into `None`.
+                lines.append("    assert result is not None")
+        return "\n".join(lines) + "\n"
+
 
 def _pascal(snake: str) -> str:
     return "".join(part.capitalize() for part in snake.split("_") if part)
@@ -411,7 +573,7 @@ def build_generated_ops(
             )
         op = operations[operation_id]
         method_name = cfg.get("method") or default_method_name(op.method, op.path)
-        generated.append(GeneratedOp(op, method_name, class_prefix))
+        generated.append(GeneratedOp(op, method_name, class_prefix, module_name))
     return generated
 
 
@@ -521,6 +683,34 @@ def write_resources_module(
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+CONTRACT_TESTS_ROOT = REPO_ROOT / "tests" / "contract"
+
+
+def write_contract_test_module(module_name: str, generated_ops: list[GeneratedOp]) -> None:
+    """tests/contract/test_<module>.py: docs/sdk-plan.md's testing-decision
+    note. One test per generated op (sync) plus one more (async), using
+    synthetic data — verifies the SDK's request/response handling against
+    what the spec documents, not against a live Termix instance.
+    """
+    lines = [
+        '"""Generated by tools/sdk-gen/generate.py. Do not edit by hand —',
+        f' see docs/sdk-plan.md phases F3/F4. Covers termix_sdk.resources.{module_name}."""',
+        "",
+        "from __future__ import annotations",
+        "",
+        "import pytest",
+        "",
+        "",
+    ]
+    for g in generated_ops:
+        lines.append(g.emit_contract_test(is_async=False))
+    for g in generated_ops:
+        lines.append(g.emit_contract_test(is_async=True))
+
+    path = CONTRACT_TESTS_ROOT / f"test_{module_name}.py"
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
 REGION_RE_TEMPLATE = r"( *# --- {label} start ---\n).*?(\n *# --- {label} end ---)"
 
 
@@ -569,6 +759,7 @@ def main() -> None:
         write_models_module(module_name, generated_ops, spec_version)
         write_types_module(module_name, generated_ops, spec_version)
         write_resources_module(module_name, generated_ops, service_default, spec_version)
+        write_contract_test_module(module_name, generated_ops)
         print(f"generated {module_name}: {len(generated_ops)} operations")
 
     wire_client(module_names)
@@ -603,7 +794,7 @@ def format_generated_files(module_names: list[str]) -> None:
         str(SRC / kind / f"{m}.py")
         for kind in ("resources", "models", "types")
         for m in module_names
-    ]
+    ] + [str(CONTRACT_TESTS_ROOT / f"test_{m}.py") for m in module_names]
     subprocess.run([ruff, "format", *targets], check=True)
     subprocess.run([ruff, "check", "--fix", *targets], check=True)
 
