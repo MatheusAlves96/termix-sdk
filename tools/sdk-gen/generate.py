@@ -281,6 +281,27 @@ class Operation:
         responses = self.op.get("responses", {})
         return "204" in responses and not any(c in responses for c in ("200", "201"))
 
+    @property
+    def is_octet_stream(self) -> bool:
+        """True for the handful of ops whose success response is a raw
+        binary/text download (`application/octet-stream`) rather than
+        JSON — `GET /termix-id/u/{handle}` (serving a raw SSH public key),
+        `GET /session_logs/{id}/content`, `GET /homepage/favicon`,
+        `POST /fleets/{id}/transfer/pull`. These get `_request_stream()`
+        and a `TermixStreamResponse` return type instead of the normal
+        parse-as-JSON path — calling the normal path on one of these
+        doesn't crash (the non-JSON-body fallback in _api_requestor.py
+        handles that gracefully), it just silently discards the real
+        response body, which is worse.
+        """
+        for code, r in self.op.get("responses", {}).items():
+            if not code.startswith("2"):
+                continue
+            content = r.get("content") or {}
+            if "application/octet-stream" in content and "application/json" not in content:
+                return True
+        return False
+
 
 def load_spec() -> dict[str, Any]:
     return json.loads(SPEC_PATH.read_text(encoding="utf-8"))
@@ -359,7 +380,11 @@ class GeneratedOp:
             sig_parts.append(f"**params: Unpack[{self.params_class_name}]")
         signature = ", ".join(sig_parts)
 
-        return_type, construct_expr = self._return_type_and_constructor("response")
+        if op.is_octet_stream:
+            return_type = "AsyncTermixStreamResponse" if is_async else "TermixStreamResponse"
+            construct_expr = ""  # unused in this branch — see below
+        else:
+            return_type, construct_expr = self._return_type_and_constructor("response")
 
         awaited = "await " if is_async else ""
         async_kw = "async " if is_async else ""
@@ -426,13 +451,21 @@ class GeneratedOp:
         else:
             call_kwargs = ""
 
-        request_call = (
-            f'{awaited}self._request("{op.method}", {path_literal}'
-            + (f", {call_kwargs}" if call_kwargs else "")
-            + ", options=options)"
-        )
-        lines.append(f"        response = {request_call}")
-        lines.append(f"        return {construct_expr}")
+        if op.is_octet_stream:
+            request_call = (
+                f'{awaited}self._request_stream("{op.method}", {path_literal}'
+                + (f", {call_kwargs}" if call_kwargs else "")
+                + ", options=options)"
+            )
+            lines.append(f"        return {request_call}")
+        else:
+            request_call = (
+                f'{awaited}self._request("{op.method}", {path_literal}'
+                + (f", {call_kwargs}" if call_kwargs else "")
+                + ", options=options)"
+            )
+            lines.append(f"        response = {request_call}")
+            lines.append(f"        return {construct_expr}")
         lines.append("")
         return "\n".join(lines)
 
@@ -585,6 +618,29 @@ class GeneratedOp:
             f"{async_def} test_{prefix}{self.method_name}_contract({fixture}, {mock_fixture}):"
         )
         lines.append(f'    """Generated from {op.method} {op.path} in spec/termix-openapi.json."""')
+
+        if op.is_octet_stream:
+            # A raw binary/text download — _request_stream(), not the
+            # normal JSON path. See Operation.is_octet_stream.
+            placeholder = b"binary-content-placeholder"
+            lines.append(
+                f"    {mock_fixture}.queue_response(status_code=200, body={placeholder!r})"
+            )
+            lines.append(
+                f"    result = {await_}{fixture}.{self.module_name}."
+                f"{self.method_name}({call_args_str})"
+            )
+            lines.append(f"    sent = {mock_fixture}.requests[0]")
+            lines.append(f'    assert sent.method == "{op.method}"')
+            lines.append(f'    assert sent.url.endswith("{path_literal}")')
+            if query_kwargs:
+                lines.append(f"    assert sent.params == {query_kwargs!r}")
+            if body_kwargs:
+                lines.append(f"    assert sent.json == {body_kwargs!r}")
+            read = "await result.read()" if is_async else "result.read()"
+            lines.append(f"    assert {read} == {placeholder!r}")
+            return "\n".join(lines) + "\n"
+
         lines.append(f"    {mock_fixture}.queue_response(status_code=200, body={response_body!r})")
         lines.append(
             f"    result = {await_}{fixture}.{self.module_name}.{self.method_name}({call_args_str})"
@@ -732,6 +788,7 @@ def write_resources_module(
     }
     model_names = sorted(plain_model_names_str | array_item_model_names)
     param_names = sorted({g.params_class_name for g in generated_ops if g.has_params()})
+    has_octet_stream = any(g.op.is_octet_stream for g in generated_ops)
 
     lines = [
         GENERATED_HEADER.format(spec_version=spec_version),
@@ -747,6 +804,8 @@ def write_resources_module(
         "from .._request_options import RequestOptions",
         "from .._service import AsyncTermixService, TermixService",
     ]
+    if has_octet_stream:
+        lines.append("from .._response import AsyncTermixStreamResponse, TermixStreamResponse")
     if model_names:
         lines.append(f"from ..models.{module_name} import {', '.join(model_names)}")
     if param_names:

@@ -60,12 +60,12 @@ def test_delete_contract(client, mock_http_client):
 
 def test_get_content_contract(client, mock_http_client):
     """Generated from GET /session_logs/{id}/content in spec/termix-openapi.json."""
-    mock_http_client.queue_response(status_code=200, body={"x-contract-test-placeholder": True})
+    mock_http_client.queue_response(status_code=200, body=b"binary-content-placeholder")
     result = client.session_logs.get_content("x")
     sent = mock_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/session_logs/x/content")
-    assert result.to_dict() == {"x-contract-test-placeholder": True}
+    assert result.read() == b"binary-content-placeholder"
 
 
 @pytest.mark.asyncio
@@ -127,11 +127,9 @@ async def test_async_delete_contract(async_client, mock_async_http_client):
 @pytest.mark.asyncio
 async def test_async_get_content_contract(async_client, mock_async_http_client):
     """Generated from GET /session_logs/{id}/content in spec/termix-openapi.json."""
-    mock_async_http_client.queue_response(
-        status_code=200, body={"x-contract-test-placeholder": True}
-    )
+    mock_async_http_client.queue_response(status_code=200, body=b"binary-content-placeholder")
     result = await async_client.session_logs.get_content("x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/session_logs/x/content")
-    assert result.to_dict() == {"x-contract-test-placeholder": True}
+    assert await result.read() == b"binary-content-placeholder"

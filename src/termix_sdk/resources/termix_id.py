@@ -11,6 +11,7 @@ from typing_extensions import Unpack
 
 from .._object import TermixObject
 from .._request_options import RequestOptions
+from .._response import AsyncTermixStreamResponse, TermixStreamResponse
 from .._service import AsyncTermixService, TermixService
 from ..models.termix_id import (
     TermixIdCheckHandleResult,
@@ -160,16 +161,13 @@ class TermixIdService(TermixService):
         handle: str,
         *,
         options: RequestOptions | None = None,
-    ) -> TermixObject | None:
+    ) -> TermixStreamResponse:
         """Get termix id u
 
         GET /termix-id/u/{handle}
         Source: src/backend/database/routes/termix-id.ts:273
         """
-        response = self._request("GET", f"/termix-id/u/{handle}", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return self._request_stream("GET", f"/termix-id/u/{handle}", options=options)
 
     def get_public_key(
         self,
@@ -177,16 +175,13 @@ class TermixIdService(TermixService):
         algo: str,
         *,
         options: RequestOptions | None = None,
-    ) -> TermixObject | None:
+    ) -> TermixStreamResponse:
         """Get termix id u
 
         GET /termix-id/u/{handle}/{algo}
         Source: src/backend/database/routes/termix-id.ts:274
         """
-        response = self._request("GET", f"/termix-id/u/{handle}/{algo}", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return self._request_stream("GET", f"/termix-id/u/{handle}/{algo}", options=options)
 
     def get_me(self, *, options: RequestOptions | None = None) -> TermixIdGetMeResult:
         """Get current user's Termix ID and keys
@@ -457,16 +452,13 @@ class AsyncTermixIdService(AsyncTermixService):
         handle: str,
         *,
         options: RequestOptions | None = None,
-    ) -> TermixObject | None:
+    ) -> AsyncTermixStreamResponse:
         """Get termix id u
 
         GET /termix-id/u/{handle}
         Source: src/backend/database/routes/termix-id.ts:273
         """
-        response = await self._request("GET", f"/termix-id/u/{handle}", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return await self._request_stream("GET", f"/termix-id/u/{handle}", options=options)
 
     async def get_public_key(
         self,
@@ -474,16 +466,13 @@ class AsyncTermixIdService(AsyncTermixService):
         algo: str,
         *,
         options: RequestOptions | None = None,
-    ) -> TermixObject | None:
+    ) -> AsyncTermixStreamResponse:
         """Get termix id u
 
         GET /termix-id/u/{handle}/{algo}
         Source: src/backend/database/routes/termix-id.ts:274
         """
-        response = await self._request("GET", f"/termix-id/u/{handle}/{algo}", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return await self._request_stream("GET", f"/termix-id/u/{handle}/{algo}", options=options)
 
     async def get_me(self, *, options: RequestOptions | None = None) -> TermixIdGetMeResult:
         """Get current user's Termix ID and keys

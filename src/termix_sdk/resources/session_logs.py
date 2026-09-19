@@ -9,8 +9,8 @@ from typing import Any, Dict, List, Literal  # noqa: F401, UP035
 
 from typing_extensions import Unpack
 
-from .._object import TermixObject
 from .._request_options import RequestOptions
+from .._response import AsyncTermixStreamResponse, TermixStreamResponse
 from .._service import AsyncTermixService, TermixService
 from ..models.session_logs import (
     SessionLogsDeleteResult,
@@ -106,16 +106,13 @@ class SessionLogsService(TermixService):
         id: str,
         *,
         options: RequestOptions | None = None,
-    ) -> TermixObject | None:
+    ) -> TermixStreamResponse:
         """Get session log content
 
         GET /session_logs/{id}/content
         Source: src/backend/database/routes/session-log-routes.ts:246
         """
-        response = self._request("GET", f"/session_logs/{id}/content", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return self._request_stream("GET", f"/session_logs/{id}/content", options=options)
 
 
 class AsyncSessionLogsService(AsyncTermixService):
@@ -202,13 +199,10 @@ class AsyncSessionLogsService(AsyncTermixService):
         id: str,
         *,
         options: RequestOptions | None = None,
-    ) -> TermixObject | None:
+    ) -> AsyncTermixStreamResponse:
         """Get session log content
 
         GET /session_logs/{id}/content
         Source: src/backend/database/routes/session-log-routes.ts:246
         """
-        response = await self._request("GET", f"/session_logs/{id}/content", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return await self._request_stream("GET", f"/session_logs/{id}/content", options=options)

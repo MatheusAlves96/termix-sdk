@@ -10,7 +10,7 @@ on.
 from __future__ import annotations
 
 import json as _json
-from collections.abc import Iterator, Mapping
+from collections.abc import AsyncIterator, Iterator, Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -107,6 +107,18 @@ class MockAsyncHTTPClient(AsyncHTTPClient):
         if response.raise_connection_error:
             raise _ConnectionFailure(response.raise_connection_error)
         return response.as_content(), response.status_code, response.headers
+
+    async def request_stream(self, method, url, *, headers, params=None, json=None, timeout=None):
+        content, status_code, headers_out = await self.request(
+            method, url, headers=headers, params=params, json=json, timeout=timeout
+        )
+
+        async def aiterator() -> AsyncIterator[bytes]:
+            chunk_size = 8192
+            for i in range(0, len(content), chunk_size):
+                yield content[i : i + chunk_size]
+
+        return aiterator(), status_code, headers_out
 
     async def close(self) -> None:
         pass

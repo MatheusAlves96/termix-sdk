@@ -103,22 +103,22 @@ def test_get_public_ca_contract(client, mock_http_client):
 
 def test_get_public_identity_contract(client, mock_http_client):
     """Generated from GET /termix-id/u/{handle} in spec/termix-openapi.json."""
-    mock_http_client.queue_response(status_code=200, body={"x-contract-test-placeholder": True})
+    mock_http_client.queue_response(status_code=200, body=b"binary-content-placeholder")
     result = client.termix_id.get_public_identity("x")
     sent = mock_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/termix-id/u/x")
-    assert result.to_dict() == {"x-contract-test-placeholder": True}
+    assert result.read() == b"binary-content-placeholder"
 
 
 def test_get_public_key_contract(client, mock_http_client):
     """Generated from GET /termix-id/u/{handle}/{algo} in spec/termix-openapi.json."""
-    mock_http_client.queue_response(status_code=200, body={"x-contract-test-placeholder": True})
+    mock_http_client.queue_response(status_code=200, body=b"binary-content-placeholder")
     result = client.termix_id.get_public_key("x", "x")
     sent = mock_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/termix-id/u/x/x")
-    assert result.to_dict() == {"x-contract-test-placeholder": True}
+    assert result.read() == b"binary-content-placeholder"
 
 
 def test_get_me_contract(client, mock_http_client):
@@ -328,27 +328,23 @@ async def test_async_get_public_ca_contract(async_client, mock_async_http_client
 @pytest.mark.asyncio
 async def test_async_get_public_identity_contract(async_client, mock_async_http_client):
     """Generated from GET /termix-id/u/{handle} in spec/termix-openapi.json."""
-    mock_async_http_client.queue_response(
-        status_code=200, body={"x-contract-test-placeholder": True}
-    )
+    mock_async_http_client.queue_response(status_code=200, body=b"binary-content-placeholder")
     result = await async_client.termix_id.get_public_identity("x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/termix-id/u/x")
-    assert result.to_dict() == {"x-contract-test-placeholder": True}
+    assert await result.read() == b"binary-content-placeholder"
 
 
 @pytest.mark.asyncio
 async def test_async_get_public_key_contract(async_client, mock_async_http_client):
     """Generated from GET /termix-id/u/{handle}/{algo} in spec/termix-openapi.json."""
-    mock_async_http_client.queue_response(
-        status_code=200, body={"x-contract-test-placeholder": True}
-    )
+    mock_async_http_client.queue_response(status_code=200, body=b"binary-content-placeholder")
     result = await async_client.termix_id.get_public_key("x", "x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/termix-id/u/x/x")
-    assert result.to_dict() == {"x-contract-test-placeholder": True}
+    assert await result.read() == b"binary-content-placeholder"
 
 
 @pytest.mark.asyncio
