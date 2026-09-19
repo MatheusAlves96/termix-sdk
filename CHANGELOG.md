@@ -39,6 +39,14 @@ Generated against Termix `release-2.7.1-tag`.
   no JSON equivalent.
 - `tools/sdk-gen/generate.py`: the OpenAPI-spec-to-Python-client
   generator, plus `tests/contract/`, one generated test per operation.
+- `py.typed` marker, so mypy/pyright pick up the package's inline types.
+
+### Fixed
+
+- `ssh_session()`/`async_ssh_session()` now type-check when passed a
+  generated service (`client.file_manager`, `client.docker`): the
+  session protocol accepted only `**params: Any` methods, which the
+  generated `Unpack[TypedDict]` signatures don't satisfy.
 
 ### Known gaps
 

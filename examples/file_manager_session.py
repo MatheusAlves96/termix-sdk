@@ -7,7 +7,6 @@ host's id) — see examples/README.md.
 from __future__ import annotations
 
 import os
-import sys
 
 from termix_sdk import TermixClient, ssh_session
 
@@ -37,4 +36,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
