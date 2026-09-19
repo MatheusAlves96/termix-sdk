@@ -98,6 +98,28 @@
       "ops": {
         "database_get_tailscale_devices": { "method": "list_devices" }
       }
+    },
+    "automations": {
+      "ops": {
+        "database_get_automations": { "method": "list" },
+        "database_post_automations": {},
+        "database_get_automations_by-id": {},
+        "database_put_automations_by-id": {},
+        "database_delete_automations_by-id": {},
+        "database_post_automations_by-id_run": {},
+        "database_get_automations_runs_history": { "method": "list_run_history" },
+        "database_get_automations_runs_by-runId_steps": { "method": "list_run_steps" },
+        "database_post_automations_webhook_by-token": { "method": "trigger_webhook" }
+      }
+    },
+    "vault": {
+      "_note": "GET /vault/oidc/callback is a browser-redirect OIDC flow, out of scope per docs/sdk-plan.md section 2 item 10 — deliberately omitted, not generated.",
+      "ops": {
+        "database_get_vault_profiles": { "method": "list_profiles" },
+        "database_post_vault_profiles": { "method": "create_profile" },
+        "database_put_vault_profiles_by-id": { "method": "update_profile" },
+        "database_delete_vault_profiles_by-id": { "method": "delete_profile" }
+      }
     }
   }
 }
