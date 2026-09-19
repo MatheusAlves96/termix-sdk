@@ -86,3 +86,270 @@ class HostsQuickConnectParams(TypedDict, total=False):
     keyType: str | None
     credentialId: int
     overrideCredentialUsername: bool | None
+
+
+class HostsCreateParams(TypedDict, total=False):
+    connectionType: str
+    name: str | None
+    folder: str | None
+    parentHostId: int
+    tags: list[Any]
+    ip: str
+    port: int
+    username: str
+    password: str | None
+    authMethod: Any
+    authType: str
+    useWarpgate: bool
+    shareSshAuth: bool
+    credentialId: int | None
+    vaultProfileId: int | None
+    key: str
+    keyPassword: str
+    keyType: str | None
+    sudoPassword: str | None
+    pin: bool
+    enableTerminal: bool
+    enableCommandHistory: bool
+    enableTunnel: bool
+    enableFileManager: bool
+    scpLegacy: bool
+    enableDocker: bool
+    enableProxmox: bool
+    enableTmuxMonitor: bool
+    enableTerminalToolbar: bool
+    allowSessionSharing: bool
+    showTerminalInSidebar: bool
+    showFileManagerInSidebar: bool
+    showTunnelInSidebar: bool
+    showDockerInSidebar: bool
+    showServerStatsInSidebar: bool
+    defaultPath: str | None
+    tunnelConnections: list[Any]
+    jumpHosts: list[Any]
+    quickActions: list[Any]
+    statsConfig: str
+    dockerConfig: str
+    proxmoxConfig: str
+    enableProxmoxStats: bool
+    proxmoxStatsConfig: str
+    terminalConfig: str
+    forceKeyboardInteractive: bool
+    domain: str | None
+    security: str | None
+    ignoreCert: bool
+    guacamoleConfig: Any
+    notes: str | None
+    useSocks5: bool
+    socks5Host: str | None
+    socks5Port: int | None
+    socks5Username: str | None
+    socks5Password: str | None
+    socks5ProxyChain: list[Any]
+    connectionOrigin: Literal["local"] | Literal["remote"]
+    portKnockSequence: list[Any]
+    overrideCredentialUsername: bool
+    macAddress: str | None
+    wolBroadcastAddress: str | None
+    enableSsh: bool
+    enableRdp: bool
+    enableVnc: bool
+    enableTelnet: bool
+    sshPort: int | None
+    rdpPort: int | None
+    vncPort: int | None
+    telnetPort: int | None
+    rdpAuthType: str | None
+    rdpCredentialId: int | None
+    rdpUser: str | None
+    rdpPassword: str | None
+    rdpDomain: str | None
+    rdpSecurity: str | None
+    rdpIgnoreCert: bool
+    vncAuthType: str | None
+    vncCredentialId: int | None
+    vncPassword: str | None
+    vncUser: str | None
+    telnetAuthType: str | None
+    telnetCredentialId: int | None
+    telnetUser: str | None
+    telnetPassword: str | None
+    data: Any
+
+
+class HostsEnrollParams(TypedDict, total=False):
+    connectionType: str
+    name: str | None
+    folder: str | None
+    parentHostId: int
+    tags: list[Any]
+    ip: str
+    port: int
+    username: str
+    password: str | None
+    authMethod: Any
+    authType: str
+    useWarpgate: bool
+    shareSshAuth: bool
+    credentialId: int | None
+    vaultProfileId: int | None
+    key: str
+    keyPassword: str
+    keyType: str | None
+    sudoPassword: str | None
+    pin: bool
+    enableTerminal: bool
+    enableCommandHistory: bool
+    enableTunnel: bool
+    enableFileManager: bool
+    scpLegacy: bool
+    enableDocker: bool
+    enableProxmox: bool
+    enableTmuxMonitor: bool
+    enableTerminalToolbar: bool
+    allowSessionSharing: bool
+    showTerminalInSidebar: bool
+    showFileManagerInSidebar: bool
+    showTunnelInSidebar: bool
+    showDockerInSidebar: bool
+    showServerStatsInSidebar: bool
+    defaultPath: str | None
+    tunnelConnections: list[Any]
+    jumpHosts: list[Any]
+    quickActions: list[Any]
+    statsConfig: str
+    dockerConfig: str
+    proxmoxConfig: str
+    enableProxmoxStats: bool
+    proxmoxStatsConfig: str
+    terminalConfig: str
+    forceKeyboardInteractive: bool
+    domain: str | None
+    security: str | None
+    ignoreCert: bool
+    guacamoleConfig: Any
+    notes: str | None
+    useSocks5: bool
+    socks5Host: str | None
+    socks5Port: int | None
+    socks5Username: str | None
+    socks5Password: str | None
+    socks5ProxyChain: list[Any]
+    connectionOrigin: Literal["local"] | Literal["remote"]
+    portKnockSequence: list[Any]
+    overrideCredentialUsername: bool
+    macAddress: str | None
+    wolBroadcastAddress: str | None
+    enableSsh: bool
+    enableRdp: bool
+    enableVnc: bool
+    enableTelnet: bool
+    sshPort: int | None
+    rdpPort: int | None
+    vncPort: int | None
+    telnetPort: int | None
+    rdpAuthType: str | None
+    rdpCredentialId: int | None
+    rdpUser: str | None
+    rdpPassword: str | None
+    rdpDomain: str | None
+    rdpSecurity: str | None
+    rdpIgnoreCert: bool
+    vncAuthType: str | None
+    vncCredentialId: int | None
+    vncPassword: str | None
+    vncUser: str | None
+    telnetAuthType: str | None
+    telnetCredentialId: int | None
+    telnetUser: str | None
+    telnetPassword: str | None
+    data: Any
+
+
+class HostsUpdateParams(TypedDict, total=False):
+    connectionType: str
+    name: str | None
+    folder: str | None
+    parentHostId: int
+    tags: list[Any]
+    ip: str
+    port: int
+    username: str
+    password: str | None
+    authMethod: Any
+    authType: str
+    useWarpgate: bool
+    shareSshAuth: bool
+    credentialId: int | None
+    vaultProfileId: int | None
+    key: str
+    keyPassword: str
+    keyType: str | None
+    sudoPassword: str | None
+    pin: bool
+    enableTerminal: bool
+    enableCommandHistory: bool
+    enableTunnel: bool
+    enableFileManager: bool
+    scpLegacy: bool
+    enableDocker: bool
+    enableProxmox: bool
+    enableTmuxMonitor: bool
+    enableTerminalToolbar: bool
+    allowSessionSharing: bool
+    showTerminalInSidebar: bool
+    showFileManagerInSidebar: bool
+    showTunnelInSidebar: bool
+    showDockerInSidebar: bool
+    showServerStatsInSidebar: bool
+    defaultPath: str | None
+    tunnelConnections: list[Any]
+    jumpHosts: list[Any]
+    quickActions: list[Any]
+    statsConfig: str
+    dockerConfig: str
+    proxmoxConfig: str
+    enableProxmoxStats: bool
+    proxmoxStatsConfig: str
+    terminalConfig: str
+    forceKeyboardInteractive: bool
+    domain: str | None
+    security: str | None
+    ignoreCert: bool
+    guacamoleConfig: Any
+    notes: str | None
+    useSocks5: bool
+    socks5Host: str | None
+    socks5Port: int | None
+    socks5Username: str | None
+    socks5Password: str | None
+    socks5ProxyChain: list[Any]
+    connectionOrigin: Literal["local"] | Literal["remote"]
+    portKnockSequence: list[Any]
+    overrideCredentialUsername: bool
+    macAddress: str | None
+    wolBroadcastAddress: str | None
+    enableSsh: bool
+    enableRdp: bool
+    enableVnc: bool
+    enableTelnet: bool
+    sshPort: int | None
+    rdpPort: int | None
+    vncPort: int | None
+    telnetPort: int | None
+    rdpAuthType: str | None
+    rdpCredentialId: int | None
+    rdpUser: str | None
+    rdpPassword: str | None
+    rdpDomain: str | None
+    rdpSecurity: str | None
+    rdpIgnoreCert: bool
+    vncAuthType: str | None
+    vncCredentialId: int | None
+    vncPassword: str | None
+    vncUser: str | None
+    telnetAuthType: str | None
+    telnetCredentialId: int | None
+    telnetUser: str | None
+    telnetPassword: str | None
+    data: Any

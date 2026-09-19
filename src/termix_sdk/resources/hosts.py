@@ -17,10 +17,12 @@ from ..models.hosts import (
     HostsBulkImportResult,
     HostsBulkUpdateResult,
     HostsClearCommandHistoryResult,
+    HostsCreateResult,
     HostsDeleteOpksshTokenResult,
     HostsDeleteResult,
     HostsDisableAutostartResult,
     HostsEnableAutostartResult,
+    HostsEnrollResult,
     HostsExportResult,
     HostsGetAutostartStatusResult,
     HostsGetOpksshTokenResult,
@@ -34,12 +36,15 @@ from ..models.hosts import (
     HostsSshConfigImportResult,
     HostsTestProxyResult,
     HostsUpdateFolderMetadataResult,
+    HostsUpdateResult,
     HostsWakeResult,
 )
 from ..types.hosts import (
     HostsBulkImportParams,
     HostsBulkUpdateParams,
+    HostsCreateParams,
     HostsEnableAutostartParams,
+    HostsEnrollParams,
     HostsExportAllParams,
     HostsGetPasswordParams,
     HostsGetRecentTransferParams,
@@ -51,6 +56,7 @@ from ..types.hosts import (
     HostsSshConfigImportParams,
     HostsTestProxyParams,
     HostsUpdateFolderMetadataParams,
+    HostsUpdateParams,
 )
 
 
@@ -476,6 +482,61 @@ class HostsService(TermixService):
             "POST", "/host/quick-connect", json_body=dict(params) or None, options=options
         )
         return HostsQuickConnectResult.construct_from(
+            response.data if response else None, last_response=response
+        )
+
+    def create(
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[HostsCreateParams],
+    ) -> HostsCreateResult:
+        """Create SSH host
+
+        POST /host/db/host
+        Source: src/backend/database/routes/host.ts:125
+        """
+        response = self._request(
+            "POST", "/host/db/host", json_body=dict(params) or None, options=options
+        )
+        return HostsCreateResult.construct_from(
+            response.data if response else None, last_response=response
+        )
+
+    def enroll(
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[HostsEnrollParams],
+    ) -> HostsEnrollResult:
+        """Enroll a host with an API key
+
+        POST /host/enroll
+        Source: src/backend/database/routes/host.ts:125
+        """
+        response = self._request(
+            "POST", "/host/enroll", json_body=dict(params) or None, options=options
+        )
+        return HostsEnrollResult.construct_from(
+            response.data if response else None, last_response=response
+        )
+
+    def update(
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[HostsUpdateParams],
+    ) -> HostsUpdateResult:
+        """Update SSH host
+
+        PUT /host/db/host/{id}
+        Source: src/backend/database/routes/host.ts:817
+        """
+        response = self._request(
+            "PUT", f"/host/db/host/{id}", json_body=dict(params) or None, options=options
+        )
+        return HostsUpdateResult.construct_from(
             response.data if response else None, last_response=response
         )
 
@@ -927,5 +988,60 @@ class AsyncHostsService(AsyncTermixService):
             "POST", "/host/quick-connect", json_body=dict(params) or None, options=options
         )
         return HostsQuickConnectResult.construct_from(
+            response.data if response else None, last_response=response
+        )
+
+    async def create(
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[HostsCreateParams],
+    ) -> HostsCreateResult:
+        """Create SSH host
+
+        POST /host/db/host
+        Source: src/backend/database/routes/host.ts:125
+        """
+        response = await self._request(
+            "POST", "/host/db/host", json_body=dict(params) or None, options=options
+        )
+        return HostsCreateResult.construct_from(
+            response.data if response else None, last_response=response
+        )
+
+    async def enroll(
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[HostsEnrollParams],
+    ) -> HostsEnrollResult:
+        """Enroll a host with an API key
+
+        POST /host/enroll
+        Source: src/backend/database/routes/host.ts:125
+        """
+        response = await self._request(
+            "POST", "/host/enroll", json_body=dict(params) or None, options=options
+        )
+        return HostsEnrollResult.construct_from(
+            response.data if response else None, last_response=response
+        )
+
+    async def update(
+        self,
+        id: str,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[HostsUpdateParams],
+    ) -> HostsUpdateResult:
+        """Update SSH host
+
+        PUT /host/db/host/{id}
+        Source: src/backend/database/routes/host.ts:817
+        """
+        response = await self._request(
+            "PUT", f"/host/db/host/{id}", json_body=dict(params) or None, options=options
+        )
+        return HostsUpdateResult.construct_from(
             response.data if response else None, last_response=response
         )

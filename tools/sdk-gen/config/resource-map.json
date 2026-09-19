@@ -958,7 +958,7 @@
       }
     },
     "fleets": {
-      "_note": "POST /fleets/{id}/transfer/push is multipart/form-data — excluded, deferred to F6 multipart support.",
+      "_note": "POST /fleets/{id}/transfer/push's multipart/form-data body has a `file` field with no application/json equivalent (unlike the three /host/db/host ops - see the hosts module note) - the JSON alternative is missing exactly the field the operation exists for, so this one stays excluded pending real multipart support (F6).",
       "ops": {
         "database_post_fleets_by-id_transfer_pull": {
           "method": "transfer_pull"
@@ -1332,7 +1332,7 @@
       }
     },
     "hosts": {
-      "_note": "POST /host/db/host, POST /host/enroll, PUT /host/db/host/{id} are multipart — excluded, deferred to F6 multipart support. GET /host/db/host/internal(/all) (internal-auth) and GET /host/opkssh-callback (browser redirect) are out of scope per docs/sdk-plan.md section 2 item 10.",
+      "_note": "POST /host/db/host, POST /host/enroll, PUT /host/db/host/{id} document multipart/form-data as an alternative to application/json (for uploading an SSH key as a file instead of pasting its text) - both variants have the identical 86-field schema, so these are generated against the JSON variant; multipart file upload for the key itself is not exposed. GET /host/db/host/internal(/all) (internal-auth) and GET /host/opkssh-callback (browser redirect) are out of scope per docs/sdk-plan.md section 2 item 10.",
       "ops": {
         "database_delete_host_autostart_disable": {
           "method": "disable_autostart"
@@ -1402,7 +1402,16 @@
         "database_delete_host_ssh_opkssh_token_by-hostId": {
           "method": "delete_opkssh_token"
         },
-        "database_post_host_quick-connect": {}
+        "database_post_host_quick-connect": {},
+        "database_post_host_db_host": {
+          "method": "create"
+        },
+        "database_post_host_enroll": {
+          "method": "enroll"
+        },
+        "database_put_host_db_host_by-id": {
+          "method": "update"
+        }
       }
     }
   }

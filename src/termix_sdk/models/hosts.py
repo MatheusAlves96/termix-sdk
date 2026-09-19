@@ -309,3 +309,300 @@ class HostsQuickConnectResult(TermixObject):
     notes: Literal[""]
     createdAt: str
     updatedAt: str
+
+
+class HostsCreateResult(TermixObject):
+    id: int
+    userId: str
+    connectionType: str
+    name: str | None
+    ip: str
+    port: int
+    username: str
+    folder: str | None
+    parentHostId: int | None
+    tags: list[str]
+    pin: bool
+    sortOrder: int | None
+    authType: str
+    useWarpgate: bool
+    shareSshAuth: bool
+    forceKeyboardInteractive: bool
+    keyType: str | None
+    credentialId: int | None
+    overrideCredentialUsername: bool | None
+    vaultProfileId: int | None
+    enableTerminal: bool
+    enableSessionLogging: bool
+    allowSessionSharing: bool
+    enableCommandHistory: bool
+    enableTunnel: bool
+    tunnelConnections: list[dict[str, Any]]
+    jumpHosts: list[dict[str, Any]]
+    enableFileManager: bool
+    scpLegacy: bool
+    enableDocker: bool
+    enableTmuxMonitor: bool
+    enableTerminalToolbar: bool
+    showTerminalInSidebar: bool
+    showFileManagerInSidebar: bool
+    showTunnelInSidebar: bool
+    showDockerInSidebar: bool
+    showServerStatsInSidebar: bool
+    defaultPath: str | None
+    statsConfig: dict[str, Any] | None
+    dockerConfig: dict[str, Any] | None
+    enableProxmox: bool
+    proxmoxConfig: dict[str, Any] | None
+    enableProxmoxStats: bool
+    proxmoxStatsConfig: dict[str, Any] | None
+    terminalConfig: dict[str, Any] | None
+    quickActions: list[dict[str, Any]]
+    notes: str | None
+    enableSsh: bool
+    enableRdp: bool
+    enableVnc: bool
+    enableTelnet: bool
+    sshPort: int | None
+    rdpPort: int | None
+    vncPort: int | None
+    telnetPort: int | None
+    rdpCredentialId: int | None
+    rdpUser: str | None
+    rdpDomain: str | None
+    rdpSecurity: str | None
+    rdpIgnoreCert: bool
+    vncCredentialId: int | None
+    vncUser: str | None
+    telnetUser: str | None
+    telnetCredentialId: int | None
+    rdpAuthType: str | None
+    vncAuthType: str | None
+    telnetAuthType: str | None
+    domain: str | None
+    security: str | None
+    ignoreCert: bool
+    guacamoleConfig: dict[str, Any] | None
+    useSocks5: bool | None
+    socks5Host: str | None
+    socks5Port: int | None
+    socks5Username: str | None
+    socks5ProxyChain: list[dict[str, Any]]
+    connectionOrigin: str | None
+    macAddress: str | None
+    wolBroadcastAddress: str | None
+    portKnockSequence: list[dict[str, Any]]
+    hostKeyFingerprint: str | None
+    hostKeyType: str | None
+    hostKeyAlgorithm: str | None
+    hostKeyFirstSeen: str | None
+    hostKeyLastVerified: str | None
+    hostKeyChangedCount: int | None
+    syncId: str | None
+    createdAt: str
+    updatedAt: str
+    hasKey: bool
+    hasKeyPassword: bool
+    hasPassword: bool
+    hasSudoPassword: bool
+    hasRdpPassword: bool
+    hasVncPassword: bool
+    hasTelnetPassword: bool
+
+
+class HostsEnrollResult(TermixObject):
+    id: int
+    userId: str
+    connectionType: str
+    name: str | None
+    ip: str
+    port: int
+    username: str
+    folder: str | None
+    parentHostId: int | None
+    tags: list[str]
+    pin: bool
+    sortOrder: int | None
+    authType: str
+    useWarpgate: bool
+    shareSshAuth: bool
+    forceKeyboardInteractive: bool
+    keyType: str | None
+    credentialId: int | None
+    overrideCredentialUsername: bool | None
+    vaultProfileId: int | None
+    enableTerminal: bool
+    enableSessionLogging: bool
+    allowSessionSharing: bool
+    enableCommandHistory: bool
+    enableTunnel: bool
+    tunnelConnections: list[dict[str, Any]]
+    jumpHosts: list[dict[str, Any]]
+    enableFileManager: bool
+    scpLegacy: bool
+    enableDocker: bool
+    enableTmuxMonitor: bool
+    enableTerminalToolbar: bool
+    showTerminalInSidebar: bool
+    showFileManagerInSidebar: bool
+    showTunnelInSidebar: bool
+    showDockerInSidebar: bool
+    showServerStatsInSidebar: bool
+    defaultPath: str | None
+    statsConfig: dict[str, Any] | None
+    dockerConfig: dict[str, Any] | None
+    enableProxmox: bool
+    proxmoxConfig: dict[str, Any] | None
+    enableProxmoxStats: bool
+    proxmoxStatsConfig: dict[str, Any] | None
+    terminalConfig: dict[str, Any] | None
+    quickActions: list[dict[str, Any]]
+    notes: str | None
+    enableSsh: bool
+    enableRdp: bool
+    enableVnc: bool
+    enableTelnet: bool
+    sshPort: int | None
+    rdpPort: int | None
+    vncPort: int | None
+    telnetPort: int | None
+    rdpCredentialId: int | None
+    rdpUser: str | None
+    rdpDomain: str | None
+    rdpSecurity: str | None
+    rdpIgnoreCert: bool
+    vncCredentialId: int | None
+    vncUser: str | None
+    telnetUser: str | None
+    telnetCredentialId: int | None
+    rdpAuthType: str | None
+    vncAuthType: str | None
+    telnetAuthType: str | None
+    domain: str | None
+    security: str | None
+    ignoreCert: bool
+    guacamoleConfig: dict[str, Any] | None
+    useSocks5: bool | None
+    socks5Host: str | None
+    socks5Port: int | None
+    socks5Username: str | None
+    socks5ProxyChain: list[dict[str, Any]]
+    connectionOrigin: str | None
+    macAddress: str | None
+    wolBroadcastAddress: str | None
+    portKnockSequence: list[dict[str, Any]]
+    hostKeyFingerprint: str | None
+    hostKeyType: str | None
+    hostKeyAlgorithm: str | None
+    hostKeyFirstSeen: str | None
+    hostKeyLastVerified: str | None
+    hostKeyChangedCount: int | None
+    syncId: str | None
+    createdAt: str
+    updatedAt: str
+    hasKey: bool
+    hasKeyPassword: bool
+    hasPassword: bool
+    hasSudoPassword: bool
+    hasRdpPassword: bool
+    hasVncPassword: bool
+    hasTelnetPassword: bool
+
+
+class HostsUpdateResult(TermixObject):
+    id: int
+    userId: str
+    connectionType: str
+    name: str | None
+    ip: str
+    port: int
+    username: str
+    folder: str | None
+    parentHostId: int | None
+    tags: list[str]
+    pin: bool
+    sortOrder: int | None
+    authType: str
+    useWarpgate: bool
+    shareSshAuth: bool
+    forceKeyboardInteractive: bool
+    keyType: str | None
+    credentialId: int | None
+    overrideCredentialUsername: bool | None
+    vaultProfileId: int | None
+    enableTerminal: bool
+    enableSessionLogging: bool
+    allowSessionSharing: bool
+    enableCommandHistory: bool
+    enableTunnel: bool
+    tunnelConnections: list[dict[str, Any]]
+    jumpHosts: list[dict[str, Any]]
+    enableFileManager: bool
+    scpLegacy: bool
+    enableDocker: bool
+    enableTmuxMonitor: bool
+    enableTerminalToolbar: bool
+    showTerminalInSidebar: bool
+    showFileManagerInSidebar: bool
+    showTunnelInSidebar: bool
+    showDockerInSidebar: bool
+    showServerStatsInSidebar: bool
+    defaultPath: str | None
+    statsConfig: dict[str, Any] | None
+    dockerConfig: dict[str, Any] | None
+    enableProxmox: bool
+    proxmoxConfig: dict[str, Any] | None
+    enableProxmoxStats: bool
+    proxmoxStatsConfig: dict[str, Any] | None
+    terminalConfig: dict[str, Any] | None
+    quickActions: list[dict[str, Any]]
+    notes: str | None
+    enableSsh: bool
+    enableRdp: bool
+    enableVnc: bool
+    enableTelnet: bool
+    sshPort: int | None
+    rdpPort: int | None
+    vncPort: int | None
+    telnetPort: int | None
+    rdpCredentialId: int | None
+    rdpUser: str | None
+    rdpDomain: str | None
+    rdpSecurity: str | None
+    rdpIgnoreCert: bool
+    vncCredentialId: int | None
+    vncUser: str | None
+    telnetUser: str | None
+    telnetCredentialId: int | None
+    rdpAuthType: str | None
+    vncAuthType: str | None
+    telnetAuthType: str | None
+    domain: str | None
+    security: str | None
+    ignoreCert: bool
+    guacamoleConfig: dict[str, Any] | None
+    useSocks5: bool | None
+    socks5Host: str | None
+    socks5Port: int | None
+    socks5Username: str | None
+    socks5ProxyChain: list[dict[str, Any]]
+    connectionOrigin: str | None
+    macAddress: str | None
+    wolBroadcastAddress: str | None
+    portKnockSequence: list[dict[str, Any]]
+    hostKeyFingerprint: str | None
+    hostKeyType: str | None
+    hostKeyAlgorithm: str | None
+    hostKeyFirstSeen: str | None
+    hostKeyLastVerified: str | None
+    hostKeyChangedCount: int | None
+    syncId: str | None
+    createdAt: str
+    updatedAt: str
+    hasKey: bool
+    hasKeyPassword: bool
+    hasPassword: bool
+    hasSudoPassword: bool
+    hasRdpPassword: bool
+    hasVncPassword: bool
+    hasTelnetPassword: bool
