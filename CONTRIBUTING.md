@@ -45,6 +45,25 @@ credentials). Actions are pinned by commit SHA; Dependabot
 (`.github/dependabot.yml`) opens weekly PRs to bump them, plus Python
 and `tools/spec-gen` npm dependencies.
 
+## Vulnerability scanning
+
+`.github/workflows/osv-scanner.yml` runs [OSV-Scanner](https://google.github.io/osv-scanner/)
+over `uv.lock` and `tools/spec-gen/package-lock.json` against the OSV
+database (PyPA, GitHub and npm advisories in one place):
+
+- on a PR it reports only vulnerabilities the PR introduces and fails
+  if there are any;
+- on push to `main` and weekly it does a full scan, fails on any known
+  vulnerability and uploads the results to Security > Code scanning.
+
+Dependabot alerts and security updates are enabled on the repository,
+so a newly published advisory for a dependency shows up as an alert
+and, when a fixed version exists, as a Dependabot PR. To check locally:
+
+```bash
+uvx osv-scanner -r .
+```
+
 ## Releasing
 
 Publishing is driven by a `vX.Y.Z` tag (`.github/workflows/release.yml`)
