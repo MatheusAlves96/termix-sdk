@@ -1,0 +1,82 @@
+name: Live smoke
+
+# The SDK against a real Termix instance (tests/live/). Never runs on a
+# pull request: a Termix that is down, or an upstream release that
+# changes a response shape, must not block a merge. It tracks `:latest`
+# on purpose, so the weekly run is what finds an upstream break before a
+# user does.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Monday 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      termix_image:
+        description: "Termix image to test against"
+        default: ghcr.io/lukegus/termix:latest
+
+permissions: {}
+
+concurrency:
+  group: live-smoke
+  cancel-in-progress: false
+
+env:
+  # Every `uv sync`/`uv run` fails if uv.lock is out of date with pyproject.toml.
+  UV_LOCKED: "1"
+
+jobs:
+  smoke:
+    name: smoke
+    # Forks inherit the schedule but not the point of it.
+    if: github.repository == 'MatheusAlves96/termix-sdk'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write # opens the failure issue below
+    env:
+      TERMIX_IMAGE: ${{ inputs.termix_image || 'ghcr.io/lukegus/termix:latest' }}
+      TERMIX_BASE_URL: http://localhost:8080
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --extra dev
+      - name: Start Termix
+        # The image ships a healthcheck, so --wait blocks until it serves.
+        run: docker compose -f docker/live/compose.yml up -d --wait
+      - name: Run the smoke suite
+        env:
+          TERMIX_LIVE: "1"
+          # The instance is created and thrown away inside this job; this
+          # password protects nothing that outlives the run.
+          TERMIX_LIVE_PASSWORD: Live-Smoke-Aa1-${{ github.run_id }}
+        run: uv run pytest tests/live -m live -q
+      - name: Termix logs
+        if: failure()
+        run: docker compose -f docker/live/compose.yml logs --no-color --tail=300
+      - name: Report the failure as an issue
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # Idempotent: the label has to exist before it can be filtered on or applied.
+          gh label create live-smoke --color B60205 --description "Weekly live smoke against a real Termix" || true
+          existing=$(gh issue list --label live-smoke --state open --limit 1 --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Another red run: $RUN_URL"
+            exit 0
+          fi
+          gh issue create \
+            --label live-smoke \
+            --title "Live smoke failed on the weekly schedule" \
+            --body "The smoke suite failed against the Termix image it tracks. Run: $RUN_URL"
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker/live/compose.yml down -v
