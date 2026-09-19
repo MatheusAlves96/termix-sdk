@@ -39,6 +39,17 @@ def test_service_urls_override_base_url():
     assert opts.base_url_for(None) == "http://gateway"
 
 
+def test_anonymous_options_have_no_bearer_token():
+    opts = ClientOptions.anonymous(base_url="http://x")
+    assert opts.bearer_token is None
+
+
+def test_anonymous_options_with_jwt_becomes_a_real_credential():
+    anon = ClientOptions.anonymous(base_url="http://x")
+    authed = anon.with_jwt("jwt_fresh")
+    assert authed.bearer_token == "jwt_fresh"
+
+
 def test_with_jwt_returns_new_options_without_mutating_original():
     opts = ClientOptions(base_url="http://x", api_key="tmx_a")
     swapped = opts.with_jwt("jwt_fresh")

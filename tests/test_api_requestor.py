@@ -36,6 +36,14 @@ def test_sends_bearer_auth_header(mock_http_client: MockHTTPClient):
     assert mock_http_client.requests[0].headers["Authorization"] == "Bearer tmx_test"
 
 
+def test_anonymous_options_send_no_authorization_header(mock_http_client: MockHTTPClient):
+    options = ClientOptions.anonymous(base_url="http://gateway")
+    req = APIRequestor(options, http_client=mock_http_client)
+    mock_http_client.queue_response(status_code=200, body={"ok": True})
+    req.request("POST", "/users/login", json_body={"username": "a", "password": "b"})
+    assert "Authorization" not in mock_http_client.requests[0].headers
+
+
 def test_impersonation_header_from_options(mock_http_client: MockHTTPClient):
     req = _requestor(mock_http_client)
     mock_http_client.queue_response(status_code=200, body={"ok": True})

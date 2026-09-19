@@ -5,6 +5,7 @@ as tools/sdk-gen generates resources on top of the core in this module).
 """
 
 from ._async_client import AsyncTermixClient
+from ._auth import AsyncPendingTOTP, PendingTOTP
 from ._client import TermixClient
 from ._error import (
     APIConnectionError,
@@ -30,6 +31,8 @@ __all__ = [
     "SPEC_VERSION",
     "TermixClient",
     "AsyncTermixClient",
+    "PendingTOTP",
+    "AsyncPendingTOTP",
     "TermixObject",
     "TermixResponse",
     "TermixStreamResponse",

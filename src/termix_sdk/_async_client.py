@@ -8,13 +8,16 @@ item 7). See `_client.py` for the sync twin this mirrors line for line.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ._api_requestor import AsyncAPIRequestor
 from ._client_options import ClientOptions
 from ._http_client import AsyncHTTPClient
 from ._request_options import RequestOptions
 from ._response import TermixResponse
+
+if TYPE_CHECKING:
+    from ._auth import AsyncPendingTOTP
 
 
 class AsyncTermixClient:
@@ -64,6 +67,39 @@ class AsyncTermixClient:
         instance._options = options
         instance._requestor = requestor
         return instance
+
+    @classmethod
+    async def login(
+        cls,
+        *,
+        base_url: str,
+        username: str,
+        password: str,
+        remember_me: bool = False,
+        service_urls: dict[str, str] | None = None,
+        timeout: float = 30.0,
+        verify: bool = True,
+        max_network_retries: int = 2,
+        default_headers: dict[str, str] | None = None,
+        _http_client: AsyncHTTPClient | None = None,
+    ) -> AsyncTermixClient | AsyncPendingTOTP:
+        """Async mirror of `TermixClient.login()` — see its docstring and
+        `_auth.py`.
+        """
+        from ._auth import login_async
+
+        return await login_async(
+            base_url=base_url,
+            username=username,
+            password=password,
+            remember_me=remember_me,
+            service_urls=service_urls,
+            timeout=timeout,
+            verify=verify,
+            max_network_retries=max_network_retries,
+            default_headers=default_headers,
+            _http_client=_http_client,
+        )
 
     async def request(
         self,

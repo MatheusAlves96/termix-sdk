@@ -35,8 +35,9 @@ class ClientOptions:
         verify: bool = True,
         max_network_retries: int = 2,
         default_headers: dict[str, str] | None = None,
+        _allow_anonymous: bool = False,
     ) -> None:
-        if api_key is None and jwt is None:
+        if api_key is None and jwt is None and not _allow_anonymous:
             raise ValueError(
                 "TermixClient needs either api_key (a 'tmx_...' API key, the "
                 "recommended way) or jwt (a bearer token obtained via "
@@ -58,15 +59,38 @@ class ClientOptions:
         self.default_headers = dict(default_headers or {})
 
     @property
-    def bearer_token(self) -> str:
-        """The value sent as `Authorization: Bearer <...>`.
-
-        Never both: `__init__` already rejected passing both `api_key` and
-        `jwt`, so exactly one of them is set here.
+    def bearer_token(self) -> str | None:
+        """The value sent as `Authorization: Bearer <...>`, or `None` for
+        the anonymous options `_auth.py` uses while a login/TOTP flow is
+        still in progress and there's no credential yet.
         """
-        token = self.api_key if self.api_key is not None else self.jwt
-        assert token is not None  # guaranteed by __init__
-        return token
+        return self.api_key if self.api_key is not None else self.jwt
+
+    @classmethod
+    def anonymous(
+        cls,
+        *,
+        base_url: str,
+        service_urls: dict[str, str] | None = None,
+        timeout: float = 30.0,
+        verify: bool = True,
+        max_network_retries: int = 2,
+        default_headers: dict[str, str] | None = None,
+    ) -> ClientOptions:
+        """Options with no credential at all — only valid for calling a
+        public endpoint. Used internally by `_auth.py` for `POST
+        /users/login` and `POST /users/totp/verify-login`, the two calls
+        that by definition happen before a credential exists.
+        """
+        return cls(
+            base_url=base_url,
+            service_urls=service_urls,
+            timeout=timeout,
+            verify=verify,
+            max_network_retries=max_network_retries,
+            default_headers=default_headers,
+            _allow_anonymous=True,
+        )
 
     def base_url_for(self, service: str | None) -> str:
         if service and service in self.service_urls:

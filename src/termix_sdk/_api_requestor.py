@@ -70,10 +70,12 @@ class APIRequestor:
 
     def _headers(self, options: RequestOptions | None) -> dict:
         headers = {
-            "Authorization": f"Bearer {self._options.bearer_token}",
             "Accept": "application/json",
             "User-Agent": USER_AGENT,
         }
+        bearer_token = self._options.bearer_token
+        if bearer_token is not None:
+            headers["Authorization"] = f"Bearer {bearer_token}"
         headers.update(self._options.default_headers)
         headers.update(request_headers(options))
         return headers
@@ -204,11 +206,24 @@ class AsyncAPIRequestor:
     """
 
     def __init__(self, options: ClientOptions, http_client: AsyncHTTPClient | None = None) -> None:
-        self._options = options
         self._http_client = http_client or AsyncHTTPXClient(
             verify=options.verify, timeout=options.timeout
         )
         self._sync_delegate = APIRequestor(options, http_client=_NullHTTPClient())
+
+    @property
+    def _options(self) -> ClientOptions:
+        # `self._sync_delegate._options` is the single source of truth —
+        # `_auth.py` swaps in a freshly-authenticated ClientOptions after
+        # login/TOTP by assigning `requestor._options = ...`, and that has
+        # to reach `_headers()`/`_url_for()` below, which read through the
+        # delegate. A plain instance attribute here would silently keep
+        # pointing at the pre-login (anonymous) options instead.
+        return self._sync_delegate._options
+
+    @_options.setter
+    def _options(self, value: ClientOptions) -> None:
+        self._sync_delegate._options = value
 
     async def close(self) -> None:
         await self._http_client.close()

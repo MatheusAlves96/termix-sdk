@@ -13,13 +13,16 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from types import TracebackType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ._api_requestor import APIRequestor
 from ._client_options import ClientOptions
 from ._http_client import HTTPClient
 from ._request_options import RequestOptions
 from ._response import TermixResponse
+
+if TYPE_CHECKING:
+    from ._auth import PendingTOTP
 
 
 class TermixClient:
@@ -71,6 +74,43 @@ class TermixClient:
         instance._options = options
         instance._requestor = requestor
         return instance
+
+    @classmethod
+    def login(
+        cls,
+        *,
+        base_url: str,
+        username: str,
+        password: str,
+        remember_me: bool = False,
+        service_urls: dict[str, str] | None = None,
+        timeout: float = 30.0,
+        verify: bool = True,
+        max_network_retries: int = 2,
+        default_headers: dict[str, str] | None = None,
+        _http_client: HTTPClient | None = None,
+    ) -> TermixClient | PendingTOTP:
+        """`POST /users/login`. Returns a ready, JWT-authenticated
+        `TermixClient` — or, if the account has TOTP enabled and this
+        device isn't already trusted, a `PendingTOTP`: call
+        `.verify(code)` on it with the 6-digit code to get the client.
+        See `_auth.py` for why this always behaves like a native app
+        request under the hood.
+        """
+        from ._auth import login as _login
+
+        return _login(
+            base_url=base_url,
+            username=username,
+            password=password,
+            remember_me=remember_me,
+            service_urls=service_urls,
+            timeout=timeout,
+            verify=verify,
+            max_network_retries=max_network_retries,
+            default_headers=default_headers,
+            _http_client=_http_client,
+        )
 
     def request(
         self,
