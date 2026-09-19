@@ -1,0 +1,43 @@
+termix-sdk includes code adapted from stripe-python
+(https://github.com/stripe/stripe-python), used under the MIT License:
+
+  The MIT License
+
+  Copyright (c) 2010-2018 Stripe (http://stripe.com)
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+
+Files adapted from stripe-python (each carries its own header pointing back
+here) as of 2026-09-19, per docs/sdk-plan.md section 5:
+
+  src/termix_sdk/_error.py            <- stripe/_error.py
+  src/termix_sdk/_object.py           <- stripe/_stripe_object.py
+  src/termix_sdk/_response.py         <- stripe/_stripe_response.py
+  src/termix_sdk/_client_options.py   <- stripe/_client_options.py, stripe/_requestor_options.py
+  src/termix_sdk/_request_options.py  <- stripe/_request_options.py
+  src/termix_sdk/_http_client.py      <- stripe/_http_client.py
+  src/termix_sdk/_api_requestor.py    <- stripe/_api_requestor.py
+  src/termix_sdk/_service.py          <- stripe/_stripe_service.py
+  src/termix_sdk/_client.py           <- stripe/_stripe_client.py
+  src/termix_sdk/_async_client.py     <- stripe/_stripe_client.py
+  src/termix_sdk/_util.py             <- stripe/_util.py
+
+None of this implies any endorsement by or affiliation with Stripe. Termix
+is a separate, unrelated project; termix-sdk is an independent, unofficial
+client for it.

@@ -5,15 +5,68 @@ build-backend = "hatchling.build"
 [project]
 name = "termix-sdk"
 version = "0.1.0"
-description = "Python client SDK for the Termix REST API"
+description = "Unofficial Python client SDK for the Termix REST API"
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Matheus Alves", email = "matheusalves965@gmail.com" }]
 requires-python = ">=3.10"
-dependencies = []
+keywords = ["termix", "ssh", "sdk", "api-client"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = [
+    "httpx>=0.27",
+    "typing-extensions>=4.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "mypy>=1.10",
+    "ruff>=0.6",
+]
 
 [project.urls]
 Homepage = "https://github.com/MatheusAlves96/termix-sdk"
+Issues = "https://github.com/MatheusAlves96/termix-sdk/issues"
+Changelog = "https://github.com/MatheusAlves96/termix-sdk/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/termix_sdk"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# tools/sdk-gen/generate.py rewrites a marked import region in these two
+# files in place (docs/sdk-plan.md phases F3/F4). Ruff's isort otherwise
+# wants to merge that region with the hand-written imports above it,
+# which would defeat rewrite_region()'s ability to re-target the marker
+# on the next run.
+"src/termix_sdk/_client.py" = ["I001"]
+"src/termix_sdk/_async_client.py" = ["I001"]
+
+[tool.mypy]
+python_version = "3.10"
+packages = ["termix_sdk"]
+mypy_path = "src"
+ignore_missing_imports = true
