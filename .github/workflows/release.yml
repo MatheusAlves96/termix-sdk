@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+permissions: {}
+
+jobs:
+  preflight:
+    name: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Tag matches __version__ and CHANGELOG has a section for it
+        id: version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="$(sed -n 's/^__version__ = "\([^"]*\)"/\1/p' src/termix_sdk/_version.py)"
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::Tag $TAG does not match __version__ = $version in src/termix_sdk/_version.py"
+            exit 1
+          fi
+          if ! grep -q "^## \[$version\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [$version]' section. Move [Unreleased] under a versioned heading first."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  ci:
+    name: ci
+    needs: preflight
+    uses: $/.github/workflows/ci.yml
+    permissions:
+      contents: read
+      id-token: write
+
+  publish:
+    name: publish
+    needs: [preflight, ci]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # The `pypi` environment carries a required-reviewer rule, so this job
+    # waits for a manual approval before it starts.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/termix-sdk/${{ needs.preflight.outputs.version }}/
+    permissions:
+      id-token: write # PyPI Trusted Publishing
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          packages-dir: dist/
+
+  github-release:
+    name: github-release
+    needs: [preflight, publish]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write # create the release and attach dist/
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist
+      - name: Extract this version's CHANGELOG section
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+        run: |
+          awk -v v="$VERSION" '
+            /^## \[/ { in_section = index($0, "## [" v "]") == 1; next }
+            in_section { print }
+          ' CHANGELOG.md > release-notes.md
+          cat release-notes.md
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" dist/* --title "$TAG" --notes-file release-notes.md --verify-tag
