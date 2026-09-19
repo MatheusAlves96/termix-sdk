@@ -102,6 +102,16 @@ class TermixClient:
             default_headers=default_headers,
         )
         self._requestor = APIRequestor(self._options, http_client=_http_client)
+        self._init_resources()
+
+    def _init_resources(self) -> None:
+        """Wire `client.hosts`, `client.users`, ... onto this instance.
+
+        Every path that builds a client has to call this, not only
+        `__init__`: `_with_options()` below bypasses `__init__` entirely,
+        and before this method existed the client `login()` handed back
+        had no resource attributes at all.
+        """
 
         # --- generated resource attributes start ---
 
@@ -158,6 +168,7 @@ class TermixClient:
         instance = cls.__new__(cls)
         instance._options = options
         instance._requestor = requestor
+        instance._init_resources()
         return instance
 
     @classmethod
