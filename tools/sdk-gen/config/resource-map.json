@@ -1,0 +1,34 @@
+{
+  "_comment": "operationId -> generated method name, grouped by the SDK module/attribute it belongs to (docs/sdk-plan.md section 4). Method names not overridden here fall back to generate.py's default naming rule (section 8): GET no id -> list, GET with trailing {id} -> retrieve, POST no extra segment -> create, PUT/PATCH with trailing {id} -> update, DELETE with trailing {id} -> delete, anything else -> snake_case of the trailing path segment(s). generate.py fails if an operationId in the spec under one of `services` below is missing from its module's `ops`, and fails if `ops` names an operationId the spec doesn't have.",
+  "_pilot_scope_note": "F3 pilot (2026-09-19): only `system` and `credentials` are populated — both are pure JSON (no multipart), which keeps the pilot's risk down per docs/sdk-plan.md phase F3. `hosts` and the rest of the 491 operations are F4 work.",
+  "modules": {
+    "system": {
+      "ops": {
+        "database_get_health": {},
+        "database_get_version": {},
+        "database_get_releases_rss": { "method": "list_releases" }
+      }
+    },
+    "credentials": {
+      "ops": {
+        "database_get_credentials": { "method": "list" },
+        "database_post_credentials": { "method": "create" },
+        "database_get_credentials_folders": { "method": "list_folders" },
+        "database_put_credentials_folders_rename": { "method": "rename_folder" },
+        "database_put_credentials_reorder": { "method": "reorder" },
+        "database_post_credentials_generate-key-pair": { "method": "generate_key_pair" },
+        "database_post_credentials_generate-public-key": { "method": "generate_public_key" },
+        "database_post_credentials_detect-key-type": { "method": "detect_key_type" },
+        "database_post_credentials_detect-public-key-type": { "method": "detect_public_key_type" },
+        "database_post_credentials_validate-key-pair": { "method": "validate_key_pair" },
+        "database_get_credentials_by-id": { "method": "retrieve" },
+        "database_put_credentials_by-id": { "method": "update" },
+        "database_delete_credentials_by-id": { "method": "delete" },
+        "database_post_credentials_by-id_apply-to-host_by-hostId": { "method": "apply_to_host" },
+        "database_post_credentials_by-id_deploy-to-host": { "method": "deploy_to_host" },
+        "database_post_credentials_by-id_duplicate": { "method": "duplicate" },
+        "database_get_credentials_by-id_hosts": { "method": "hosts" }
+      }
+    }
+  }
+}

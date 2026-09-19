@@ -41,6 +41,15 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 
+[tool.ruff.lint.per-file-ignores]
+# tools/sdk-gen/generate.py rewrites a marked import region in these two
+# files in place (docs/sdk-plan.md phases F3/F4). Ruff's isort otherwise
+# wants to merge that region with the hand-written imports above it,
+# which would defeat rewrite_region()'s ability to re-target the marker
+# on the next run.
+"src/termix_sdk/_client.py" = ["I001"]
+"src/termix_sdk/_async_client.py" = ["I001"]
+
 [tool.mypy]
 python_version = "3.10"
 packages = ["termix_sdk"]

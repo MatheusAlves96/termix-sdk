@@ -21,6 +21,13 @@ from ._http_client import HTTPClient
 from ._request_options import RequestOptions
 from ._response import TermixResponse
 
+# --- generated resource imports start ---
+
+from .resources import credentials as _credentials
+from .resources import system as _system
+
+# --- generated resource imports end ---
+
 if TYPE_CHECKING:
     from ._auth import PendingTOTP
 
@@ -58,10 +65,10 @@ class TermixClient:
         self._requestor = APIRequestor(self._options, http_client=_http_client)
 
         # --- generated resource attributes start ---
-        # tools/sdk-gen fills this region with one attribute per resource
-        # module (self.hosts = resources.hosts.HostsService(self._requestor),
-        # etc.) once tools/sdk-gen/config/resource-map.json exists. Left
-        # empty until then — see docs/sdk-plan.md phases F3/F4.
+
+        self.credentials = _credentials.CredentialsService(self._requestor)
+        self.system = _system.SystemService(self._requestor)
+
         # --- generated resource attributes end ---
 
     @classmethod
