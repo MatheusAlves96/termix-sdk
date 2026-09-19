@@ -4,56 +4,151 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+  # release.yml re-runs this whole workflow against the tagged commit.
+  workflow_call:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Every `uv sync`/`uv run` fails if uv.lock is out of date with pyproject.toml.
+  UV_LOCKED: "1"
 
 jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --extra dev
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+
   test:
-    runs-on: ubuntu-latest
+    name: test (${{ matrix.python-version }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # Codecov OIDC upload
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - run: uv sync --extra dev
+      - run: uv run pytest -q --cov --cov-report=xml --cov-report=term
+      - name: Upload coverage to Codecov
+        # One upload is enough; the suite is the same on every version.
+        if: matrix.python-version == '3.13'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: coverage.xml
+          use_oidc: true
+          # Fork PRs have no OIDC token, and a Codecov outage should not
+          # block a merge. Failures still show in the step log.
+          fail_ci_if_error: false
 
-      - name: Install package with dev extras
-        run: pip install -e ".[dev]"
+  generated-sync:
+    name: generated-sync
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --extra dev
+      - name: Regenerate resources/, models/, types/ and tests/contract/
+        run: uv run python tools/sdk-gen/generate.py
+      - name: Fail if the committed generated code differs
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Generated files are out of date. Run 'python tools/sdk-gen/generate.py' and commit the result."
+            git status --porcelain
+            git diff
+            exit 1
+          fi
 
-      - name: ruff check
-        run: ruff check .
-
-      - name: ruff format --check
-        run: ruff format --check .
-
-      - name: mypy
-        run: mypy
-
-      - name: pytest
-        run: pytest -q
+  spec-gen-typecheck:
+    name: spec-gen-typecheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: tools/spec-gen
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tools/spec-gen/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
 
   build:
-    runs-on: ubuntu-latest
-    needs: test
+    name: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: [lint, test, generated-sync, spec-gen-typecheck]
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          python-version: "3.12"
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv build
+      - run: uvx twine check --strict dist/*
+      - name: Install the wheel into a clean venv and import it
+        run: |
+          uv venv --no-project /tmp/smoke
+          uv pip install --python /tmp/smoke/bin/python dist/*.whl
+          /tmp/smoke/bin/python -c "$SMOKE"
+        env:
+          SMOKE: |
+            import pathlib
+            import termix_sdk
 
-      - name: Install build tooling
-        run: pip install build
-
-      - name: Build sdist and wheel
-        run: python -m build
-
-      - name: Upload dist artifacts
-        uses: actions/upload-artifact@v4
+            pkg = pathlib.Path(termix_sdk.__file__).parent
+            assert (pkg / "py.typed").exists(), "py.typed missing from the wheel"
+            print("termix_sdk", termix_sdk.__version__, "spec", termix_sdk.SPEC_VERSION)
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist
           path: dist/
+          if-no-files-found: error

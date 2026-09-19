@@ -5,22 +5,64 @@
 ```bash
 git clone https://github.com/MatheusAlves96/termix-sdk.git
 cd termix-sdk
-python -m venv .venv
-. .venv/Scripts/activate   # or: source .venv/bin/activate on Linux/macOS
-pip install -e ".[dev]"
+uv sync --extra dev      # creates .venv from uv.lock (pinned tool versions)
 ```
+
+Without [uv](https://docs.astral.sh/uv/): `python -m venv .venv`, activate
+it, `pip install -e ".[dev]"`. You then get whatever `ruff`/`mypy`/`pytest`
+versions resolve today rather than the locked ones CI uses, so a check may
+pass locally and fail in CI (or the reverse) — the lockfile exists to avoid
+exactly that.
 
 ## Running the checks
 
 ```bash
-pytest              # tests/ (unit) + tests/contract/ (generated)
-ruff check .
-ruff format --check .
-mypy
+uv run pytest            # tests/ (unit) + tests/contract/ (generated)
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy              # src/ and examples/
 ```
 
-All four run in CI on every push/PR (`.github/workflows/ci.yml`), across
-Python 3.10–3.13.
+## What CI checks
+
+`.github/workflows/ci.yml` runs on every push to `main` and every PR:
+
+| Job | What it does |
+|-----|--------------|
+| `lint` | `ruff check`, `ruff format --check`, `mypy` (Python 3.13) |
+| `test (3.10..3.13)` | `pytest` with coverage; the 3.13 run uploads to Codecov (informational, never blocks) |
+| `generated-sync` | runs `tools/sdk-gen/generate.py` and fails if any committed file changes — hand-edits to `resources/`, `models/`, `types/` or `tests/contract/` are caught here |
+| `spec-gen-typecheck` | `npm ci && npm run typecheck` in `tools/spec-gen` |
+| `build` | `uv build`, `twine check`, installs the wheel into a clean venv, imports it and checks `py.typed` is shipped; uploads `dist/` |
+
+`uv.lock` is enforced (`UV_LOCKED=1`): if you change `pyproject.toml`
+dependencies, run `uv lock` and commit the lockfile, or CI fails at
+`uv sync`.
+
+`.github/workflows/zizmor.yml` lints the workflows themselves for
+security issues (unpinned actions, template injection, leaked
+credentials). Actions are pinned by commit SHA; Dependabot
+(`.github/dependabot.yml`) opens weekly PRs to bump them, plus Python
+and `tools/spec-gen` npm dependencies.
+
+## Releasing
+
+Publishing is driven by a `vX.Y.Z` tag (`.github/workflows/release.yml`)
+and goes to PyPI through Trusted Publishing — no API token lives in the
+repo. The `pypi` GitHub environment requires a manual approval before
+the publish step runs.
+
+1. Bump `__version__` in `src/termix_sdk/_version.py`.
+2. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`
+   and add a fresh empty `## [Unreleased]` above it. The release notes on
+   GitHub are that section, verbatim.
+3. Open a PR with those two changes and merge it.
+4. `git tag vX.Y.Z main && git push origin vX.Y.Z`.
+5. The `preflight` job checks the tag matches `__version__` and that the
+   CHANGELOG section exists, then the full CI runs again against the tag.
+6. Approve the `pypi` environment deployment in the Actions UI. The
+   workflow publishes to PyPI and creates the GitHub Release with
+   `dist/` attached.
 
 ## How this repo is put together
 
@@ -67,7 +109,9 @@ Three layers, in dependency order:
    - a method name that's a Python keyword (raised directly)
    - a `resource-map.json` entry naming an `operationId` the spec
      doesn't have (raised directly)
-4. Run `pytest`, `mypy`, `ruff check .` — same as CI.
+4. Run `uv run pytest`, `uv run mypy`, `uv run ruff check .` — same as CI.
+   Commit the regenerated files: the `generated-sync` CI job regenerates
+   and fails on any diff.
 5. A field typed `Dict[str, Any]`/`List[...]` (or a list of a generated
    model) is, at runtime, wrapped as a nested `TermixObject`/list of
    `TermixObject` regardless of that static annotation — compare via
