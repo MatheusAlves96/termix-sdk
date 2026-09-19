@@ -79,6 +79,18 @@ def test_sync_contract(client, mock_http_client):
     }
 
 
+def test_discover_stream_contract(client, mock_http_client):
+    """Generated from GET /proxmox/discover/stream in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body=b'event: message\ndata: {"ok": true}\n\n')
+    result = client.proxmox.discover_stream()
+    sent = mock_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/proxmox/discover/stream")
+    events = list(result)
+    assert events[0].event == "message"
+    assert events[0].json() == {"ok": True}
+
+
 @pytest.mark.asyncio
 async def test_async_discover_contract(async_client, mock_async_http_client):
     """Generated from POST /proxmox/discover in spec/termix-openapi.json."""
@@ -151,3 +163,18 @@ async def test_async_sync_contract(async_client, mock_async_http_client):
         "skipped": 1.0,
         "errors": ["x"],
     }
+
+
+@pytest.mark.asyncio
+async def test_async_discover_stream_contract(async_client, mock_async_http_client):
+    """Generated from GET /proxmox/discover/stream in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200, body=b'event: message\ndata: {"ok": true}\n\n'
+    )
+    result = await async_client.proxmox.discover_stream()
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/proxmox/discover/stream")
+    events = [e async for e in result]
+    assert events[0].event == "message"
+    assert events[0].json() == {"ok": True}

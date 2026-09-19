@@ -939,7 +939,11 @@
     "proxmox": {
       "ops": {
         "database_post_proxmox_discover": {},
-        "database_post_proxmox_sync": {}
+        "database_post_proxmox_sync": {},
+        "database_get_proxmox_discover_stream": {
+          "method": "discover_stream",
+          "sse": true
+        }
       }
     },
     "proxmox_stats": {
@@ -992,7 +996,7 @@
       }
     },
     "tunnel": {
-      "_note": "GET /ssh/tunnel/status/stream is SSE — excluded, deferred to F6 SSE support.",
+      "_note": "GET /ssh/tunnel/status/stream now generated as SSE (F6).",
       "ops": {
         "tunnel_get_ssh_tunnel_status_by-tunnelName": {
           "method": "get_status_by_name"
@@ -1002,7 +1006,11 @@
         "tunnel_get_ssh_tunnel_status": {
           "method": "get_status"
         },
-        "tunnel_post_ssh_tunnel_cancel": {}
+        "tunnel_post_ssh_tunnel_cancel": {},
+        "tunnel_get_ssh_tunnel_status_stream": {
+          "method": "watch_status",
+          "sse": true
+        }
       }
     },
     "docker": {
@@ -1293,7 +1301,7 @@
       }
     },
     "ai": {
-      "_note": "POST /ai/chat/stream is SSE — excluded, deferred to F6 SSE support.",
+      "_note": "POST /ai/chat/stream now generated as SSE (F6).",
       "ops": {
         "database_post_ai_providers": {
           "method": "create_provider"
@@ -1328,6 +1336,10 @@
         },
         "database_post_ai_proposals_by-id_reject": {
           "method": "reject_proposal"
+        },
+        "database_post_ai_chat_stream": {
+          "method": "chat_stream",
+          "sse": true
         }
       }
     },

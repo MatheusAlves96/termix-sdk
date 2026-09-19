@@ -5,12 +5,14 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, Iterator
 from typing import Any, Dict, List, Literal  # noqa: F401, UP035
 
 from typing_extensions import Unpack
 
 from .._object import TermixObject
 from .._request_options import RequestOptions
+from .._response import SSEEvent
 from .._service import AsyncTermixService, TermixService
 from ..models.ai import (
     AiApplyProposalResult,
@@ -25,7 +27,12 @@ from ..models.ai import (
     AiRejectProposalResult,
     AiUpdateProviderResult,
 )
-from ..types.ai import AiCreateProviderParams, AiProbeModelsParams, AiUpdateProviderParams
+from ..types.ai import (
+    AiChatStreamParams,
+    AiCreateProviderParams,
+    AiProbeModelsParams,
+    AiUpdateProviderParams,
+)
 
 
 class AiService(TermixService):
@@ -223,6 +230,21 @@ class AiService(TermixService):
             response.data if response else None, last_response=response
         )
 
+    def chat_stream(
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[AiChatStreamParams],
+    ) -> Iterator[SSEEvent]:
+        """Send a message and stream the assistant's reply
+
+        POST /ai/chat/stream
+        Source: src/backend/ai/index.ts:622
+        """
+        return self._request_sse(
+            "POST", "/ai/chat/stream", json_body=dict(params) or None, options=options
+        )
+
 
 class AsyncAiService(AsyncTermixService):
     service = "database"
@@ -417,4 +439,19 @@ class AsyncAiService(AsyncTermixService):
         response = await self._request("POST", f"/ai/proposals/{id}/reject", options=options)
         return AiRejectProposalResult.construct_from(
             response.data if response else None, last_response=response
+        )
+
+    async def chat_stream(
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[AiChatStreamParams],
+    ) -> AsyncIterator[SSEEvent]:
+        """Send a message and stream the assistant's reply
+
+        POST /ai/chat/stream
+        Source: src/backend/ai/index.ts:622
+        """
+        return await self._request_sse(
+            "POST", "/ai/chat/stream", json_body=dict(params) or None, options=options
         )

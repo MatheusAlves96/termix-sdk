@@ -156,6 +156,35 @@ async def test_async_requestor_round_trip(mock_async_http_client: MockAsyncHTTPC
     assert mock_async_http_client.requests[0].headers["Authorization"] == "Bearer tmx_test"
 
 
+def test_request_sse_yields_events(mock_http_client: MockHTTPClient):
+    req = _requestor(mock_http_client)
+    mock_http_client.queue_response(
+        status_code=200, body=b'event: tunnel_status\ndata: {"status": "connected"}\n\n'
+    )
+    events = list(req.request_sse("GET", "/ssh/tunnel/status/stream"))
+    assert len(events) == 1
+    assert events[0].event == "tunnel_status"
+    assert events[0].json() == {"status": "connected"}
+    assert mock_http_client.requests[0].headers["Accept"] == "text/event-stream"
+
+
+def test_request_sse_error_status_raises(mock_http_client: MockHTTPClient):
+    req = _requestor(mock_http_client)
+    mock_http_client.queue_response(status_code=401, body={"error": "Authentication required"})
+    with pytest.raises(AuthenticationError):
+        list(req.request_sse("GET", "/ssh/tunnel/status/stream"))
+
+
+@pytest.mark.asyncio
+async def test_async_request_sse_yields_events(mock_async_http_client: MockAsyncHTTPClient):
+    options = ClientOptions(base_url="http://gateway", api_key="tmx_test")
+    req = AsyncAPIRequestor(options, http_client=mock_async_http_client)
+    mock_async_http_client.queue_response(status_code=200, body=b'data: {"a": 1}\n\n')
+    aiterator = await req.request_sse("GET", "/proxmox/discover/stream")
+    events = [e async for e in aiterator]
+    assert events[0].json() == {"a": 1}
+
+
 @pytest.mark.asyncio
 async def test_async_requestor_raises_typed_error(mock_async_http_client: MockAsyncHTTPClient):
     options = ClientOptions(base_url="http://gateway", api_key="tmx_test")

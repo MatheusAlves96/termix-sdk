@@ -329,12 +329,23 @@ class GeneratedOp:
     """
 
     def __init__(
-        self, op: Operation, method_name: str, class_prefix: str, module_name: str
+        self,
+        op: Operation,
+        method_name: str,
+        class_prefix: str,
+        module_name: str,
+        *,
+        is_sse: bool = False,
     ) -> None:
         self.op = op
         self.method_name = method_name
         self.class_prefix = class_prefix  # PascalCase resource name, e.g. "Credentials"
         self.module_name = module_name  # client attribute name, e.g. "credentials"
+        # Not inferred from the spec like everything else here — spec-gen
+        # has no signal to mark a `text/event-stream` response with (see
+        # _sse.py's module docstring). Set from resource-map.json's
+        # per-op "sse": true instead.
+        self.is_sse = is_sse
 
     @property
     def params_class_name(self) -> str:
@@ -383,6 +394,9 @@ class GeneratedOp:
         if op.is_octet_stream:
             return_type = "AsyncTermixStreamResponse" if is_async else "TermixStreamResponse"
             construct_expr = ""  # unused in this branch — see below
+        elif self.is_sse:
+            return_type = "AsyncIterator[SSEEvent]" if is_async else "Iterator[SSEEvent]"
+            construct_expr = ""  # unused — see below
         else:
             return_type, construct_expr = self._return_type_and_constructor("response")
 
@@ -454,6 +468,13 @@ class GeneratedOp:
         if op.is_octet_stream:
             request_call = (
                 f'{awaited}self._request_stream("{op.method}", {path_literal}'
+                + (f", {call_kwargs}" if call_kwargs else "")
+                + ", options=options)"
+            )
+            lines.append(f"        return {request_call}")
+        elif self.is_sse:
+            request_call = (
+                f'{awaited}self._request_sse("{op.method}", {path_literal}'
                 + (f", {call_kwargs}" if call_kwargs else "")
                 + ", options=options)"
             )
@@ -619,6 +640,28 @@ class GeneratedOp:
         )
         lines.append(f'    """Generated from {op.method} {op.path} in spec/termix-openapi.json."""')
 
+        if self.is_sse:
+            # A text/event-stream endpoint — _request_sse(), consumed as
+            # an iterator of SSEEvent rather than a single response.
+            sse_body = b'event: message\ndata: {"ok": true}\n\n'
+            lines.append(f"    {mock_fixture}.queue_response(status_code=200, body={sse_body!r})")
+            lines.append(
+                f"    result = {await_}{fixture}.{self.module_name}."
+                f"{self.method_name}({call_args_str})"
+            )
+            lines.append(f"    sent = {mock_fixture}.requests[0]")
+            lines.append(f'    assert sent.method == "{op.method}"')
+            lines.append(f'    assert sent.url.endswith("{path_literal}")')
+            if query_kwargs:
+                lines.append(f"    assert sent.params == {query_kwargs!r}")
+            if body_kwargs:
+                lines.append(f"    assert sent.json == {body_kwargs!r}")
+            events = "[e async for e in result]" if is_async else "list(result)"
+            lines.append(f"    events = {events}")
+            lines.append('    assert events[0].event == "message"')
+            lines.append('    assert events[0].json() == {"ok": True}')
+            return "\n".join(lines) + "\n"
+
         if op.is_octet_stream:
             # A raw binary/text download — _request_stream(), not the
             # normal JSON path. See Operation.is_octet_stream.
@@ -717,7 +760,9 @@ def build_generated_ops(
                 f'keyword. Add an explicit "method" override for this op '
                 f"in resource-map.json's {module_name!r} module."
             )
-        generated.append(GeneratedOp(op, method_name, class_prefix, module_name))
+        generated.append(
+            GeneratedOp(op, method_name, class_prefix, module_name, is_sse=bool(cfg.get("sse")))
+        )
     return generated
 
 
@@ -789,6 +834,7 @@ def write_resources_module(
     model_names = sorted(plain_model_names_str | array_item_model_names)
     param_names = sorted({g.params_class_name for g in generated_ops if g.has_params()})
     has_octet_stream = any(g.op.is_octet_stream for g in generated_ops)
+    has_sse = any(g.is_sse for g in generated_ops)
 
     lines = [
         GENERATED_HEADER.format(spec_version=spec_version),
@@ -806,6 +852,9 @@ def write_resources_module(
     ]
     if has_octet_stream:
         lines.append("from .._response import AsyncTermixStreamResponse, TermixStreamResponse")
+    if has_sse:
+        lines.append("from collections.abc import AsyncIterator, Iterator")
+        lines.append("from .._response import SSEEvent")
     if model_names:
         lines.append(f"from ..models.{module_name} import {', '.join(model_names)}")
     if param_names:

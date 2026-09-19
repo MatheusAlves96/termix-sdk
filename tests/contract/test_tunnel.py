@@ -133,6 +133,18 @@ def test_cancel_contract(client, mock_http_client):
     assert result.to_dict() == {"message": "Cancel request received", "tunnelName": "x"}
 
 
+def test_watch_status_contract(client, mock_http_client):
+    """Generated from GET /ssh/tunnel/status/stream in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body=b'event: message\ndata: {"ok": true}\n\n')
+    result = client.tunnel.watch_status()
+    sent = mock_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/ssh/tunnel/status/stream")
+    events = list(result)
+    assert events[0].event == "message"
+    assert events[0].json() == {"ok": True}
+
+
 @pytest.mark.asyncio
 async def test_async_get_status_by_name_contract(async_client, mock_async_http_client):
     """Generated from GET /ssh/tunnel/status/{tunnelName} in spec/termix-openapi.json."""
@@ -262,3 +274,18 @@ async def test_async_cancel_contract(async_client, mock_async_http_client):
     assert sent.url.endswith("/ssh/tunnel/cancel")
     assert sent.json == {"tunnelName": "x"}
     assert result.to_dict() == {"message": "Cancel request received", "tunnelName": "x"}
+
+
+@pytest.mark.asyncio
+async def test_async_watch_status_contract(async_client, mock_async_http_client):
+    """Generated from GET /ssh/tunnel/status/stream in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200, body=b'event: message\ndata: {"ok": true}\n\n'
+    )
+    result = await async_client.tunnel.watch_status()
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/ssh/tunnel/status/stream")
+    events = [e async for e in result]
+    assert events[0].event == "message"
+    assert events[0].json() == {"ok": True}

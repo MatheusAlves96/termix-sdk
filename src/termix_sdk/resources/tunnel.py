@@ -5,11 +5,13 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, Iterator
 from typing import Any, Dict, List, Literal  # noqa: F401, UP035
 
 from typing_extensions import Unpack
 
 from .._request_options import RequestOptions
+from .._response import SSEEvent
 from .._service import AsyncTermixService, TermixService
 from ..models.tunnel import (
     TunnelCancelResult,
@@ -105,6 +107,14 @@ class TunnelService(TermixService):
             response.data if response else None, last_response=response
         )
 
+    def watch_status(self, *, options: RequestOptions | None = None) -> Iterator[SSEEvent]:
+        """Get ssh tunnel status stream
+
+        GET /ssh/tunnel/status/stream
+        Source: src/backend/hosts/tunnel/routes.ts:63
+        """
+        return self._request_sse("GET", "/ssh/tunnel/status/stream", options=options)
+
 
 class AsyncTunnelService(AsyncTermixService):
     service = "tunnel"
@@ -193,3 +203,15 @@ class AsyncTunnelService(AsyncTermixService):
         return TunnelCancelResult.construct_from(
             response.data if response else None, last_response=response
         )
+
+    async def watch_status(
+        self,
+        *,
+        options: RequestOptions | None = None,
+    ) -> AsyncIterator[SSEEvent]:
+        """Get ssh tunnel status stream
+
+        GET /ssh/tunnel/status/stream
+        Source: src/backend/hosts/tunnel/routes.ts:63
+        """
+        return await self._request_sse("GET", "/ssh/tunnel/status/stream", options=options)

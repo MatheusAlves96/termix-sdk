@@ -5,12 +5,14 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, Iterator
 from typing import Any, Dict, List, Literal  # noqa: F401, UP035
 
 from typing_extensions import Unpack
 
 from .._object import TermixObject
 from .._request_options import RequestOptions
+from .._response import SSEEvent
 from .._service import AsyncTermixService, TermixService
 from ..types.proxmox import ProxmoxDiscoverParams, ProxmoxSyncParams
 
@@ -54,6 +56,14 @@ class ProxmoxService(TermixService):
             response.data if response else None, last_response=response
         )
 
+    def discover_stream(self, *, options: RequestOptions | None = None) -> Iterator[SSEEvent]:
+        """Get proxmox discover stream
+
+        GET /proxmox/discover/stream
+        Source: src/backend/database/routes/proxmox.ts:1004
+        """
+        return self._request_sse("GET", "/proxmox/discover/stream", options=options)
+
 
 class AsyncProxmoxService(AsyncTermixService):
     service = "database"
@@ -93,3 +103,15 @@ class AsyncProxmoxService(AsyncTermixService):
         return TermixObject.construct_from(
             response.data if response else None, last_response=response
         )
+
+    async def discover_stream(
+        self,
+        *,
+        options: RequestOptions | None = None,
+    ) -> AsyncIterator[SSEEvent]:
+        """Get proxmox discover stream
+
+        GET /proxmox/discover/stream
+        Source: src/backend/database/routes/proxmox.ts:1004
+        """
+        return await self._request_sse("GET", "/proxmox/discover/stream", options=options)

@@ -14,7 +14,7 @@ instead of a single fixed API base.
 from __future__ import annotations
 
 import json as _json
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Iterator, Mapping
 from typing import Any
 from urllib.parse import urljoin
 
@@ -30,7 +30,8 @@ from ._http_client import (
     ShouldRetry,
 )
 from ._request_options import RequestOptions, request_headers
-from ._response import TermixResponse, TermixStreamResponse
+from ._response import SSEEvent, TermixResponse, TermixStreamResponse
+from ._sse import aiter_sse_events, iter_sse_events
 
 USER_AGENT = "termix-sdk-python"
 
@@ -135,6 +136,34 @@ class APIRequestor:
             body = b"".join(iterator)
             self._interpret_response(status_code, body, resp_headers)  # raises
         return TermixStreamResponse(iterator, status_code, resp_headers)
+
+    def request_sse(
+        self,
+        method: str,
+        path: str,
+        *,
+        service: str | None = None,
+        query: Mapping[str, Any] | None = None,
+        json_body: Any | None = None,
+        options: RequestOptions | None = None,
+    ) -> Iterator[SSEEvent]:
+        """For the 3 `text/event-stream` endpoints (docs/sdk-plan.md
+        section 6, item 2 / `_sse.py`). Never retried, same as
+        `request_stream` — a partially-streamed connection can't be
+        safely replayed.
+        """
+        url = self._url_for(service, path)
+        headers = self._headers(options)
+        headers["Accept"] = "text/event-stream"
+        timeout = (options or {}).get("timeout", self._options.timeout)
+
+        iterator, status_code, resp_headers = self._http_client.request_stream(
+            method, url, headers=headers, params=query, json=json_body, timeout=timeout
+        )
+        if status_code >= 400:
+            body = b"".join(iterator)
+            self._interpret_response(status_code, body, resp_headers)  # raises
+        return iter_sse_events(iterator)
 
     def _interpret_response(
         self,
@@ -289,6 +318,31 @@ class AsyncAPIRequestor:
             body = b"".join(chunks)
             self._sync_delegate._interpret_response(status_code, body, resp_headers)  # raises
         return AsyncTermixStreamResponse(aiterator, status_code, resp_headers)
+
+    async def request_sse(
+        self,
+        method: str,
+        path: str,
+        *,
+        service: str | None = None,
+        query: Mapping[str, Any] | None = None,
+        json_body: Any | None = None,
+        options: RequestOptions | None = None,
+    ) -> AsyncIterator[SSEEvent]:
+        """Async mirror of `APIRequestor.request_sse()` — see its docstring."""
+        url = self._url_for(service, path)
+        headers = self._headers(options)
+        headers["Accept"] = "text/event-stream"
+        timeout = (options or {}).get("timeout", self._options.timeout)
+
+        aiterator, status_code, resp_headers = await self._http_client.request_stream(
+            method, url, headers=headers, params=query, json=json_body, timeout=timeout
+        )
+        if status_code >= 400:
+            chunks = [chunk async for chunk in aiterator]
+            body = b"".join(chunks)
+            self._sync_delegate._interpret_response(status_code, body, resp_headers)  # raises
+        return aiter_sse_events(aiterator)
 
 
 class _NullHTTPClient(HTTPClient):

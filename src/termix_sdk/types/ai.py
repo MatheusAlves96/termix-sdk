@@ -31,3 +31,11 @@ class AiProbeModelsParams(TypedDict, total=False):
     baseUrl: str
     apiKey: str
     providerId: int | None
+
+
+class AiChatStreamParams(TypedDict, total=False):
+    conversationId: int
+    providerId: int | None
+    model: str
+    message: str
+    activeTab: str

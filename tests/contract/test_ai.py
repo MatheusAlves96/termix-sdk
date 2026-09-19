@@ -155,6 +155,27 @@ def test_reject_proposal_contract(client, mock_http_client):
     assert result.to_dict() == {"success": True}
 
 
+def test_chat_stream_contract(client, mock_http_client):
+    """Generated from POST /ai/chat/stream in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body=b'event: message\ndata: {"ok": true}\n\n')
+    result = client.ai.chat_stream(
+        conversationId=1, providerId=1, model="x", message="x", activeTab="x"
+    )
+    sent = mock_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/ai/chat/stream")
+    assert sent.json == {
+        "conversationId": 1,
+        "providerId": 1,
+        "model": "x",
+        "message": "x",
+        "activeTab": "x",
+    }
+    events = list(result)
+    assert events[0].event == "message"
+    assert events[0].json() == {"ok": True}
+
+
 @pytest.mark.asyncio
 async def test_async_create_provider_contract(async_client, mock_async_http_client):
     """Generated from POST /ai/providers in spec/termix-openapi.json."""
@@ -315,3 +336,27 @@ async def test_async_reject_proposal_contract(async_client, mock_async_http_clie
     assert sent.method == "POST"
     assert sent.url.endswith("/ai/proposals/x/reject")
     assert result.to_dict() == {"success": True}
+
+
+@pytest.mark.asyncio
+async def test_async_chat_stream_contract(async_client, mock_async_http_client):
+    """Generated from POST /ai/chat/stream in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200, body=b'event: message\ndata: {"ok": true}\n\n'
+    )
+    result = await async_client.ai.chat_stream(
+        conversationId=1, providerId=1, model="x", message="x", activeTab="x"
+    )
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/ai/chat/stream")
+    assert sent.json == {
+        "conversationId": 1,
+        "providerId": 1,
+        "model": "x",
+        "message": "x",
+        "activeTab": "x",
+    }
+    events = [e async for e in result]
+    assert events[0].event == "message"
+    assert events[0].json() == {"ok": True}
