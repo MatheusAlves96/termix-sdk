@@ -47,8 +47,7 @@ def redact_value(field_name: str, value: Any) -> Any:
 
 def redact_headers(headers: Mapping[str, str]) -> dict:
     return {
-        k: ("<redacted>" if k.lower() in _SECRET_HEADER_NAMES else v)
-        for k, v in headers.items()
+        k: ("<redacted>" if k.lower() in _SECRET_HEADER_NAMES else v) for k, v in headers.items()
     }
 
 

@@ -5,11 +5,25 @@ build-backend = "hatchling.build"
 [project]
 name = "termix-sdk"
 version = "0.1.0"
-description = "Python client SDK for the Termix REST API"
+description = "Unofficial Python client SDK for the Termix REST API"
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Matheus Alves", email = "matheusalves965@gmail.com" }]
 requires-python = ">=3.10"
+keywords = ["termix", "ssh", "sdk", "api-client"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
 dependencies = [
     "httpx>=0.27",
     "typing-extensions>=4.10",
@@ -19,13 +33,14 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
-    "pytest-httpx>=0.30",
     "mypy>=1.10",
     "ruff>=0.6",
 ]
 
 [project.urls]
 Homepage = "https://github.com/MatheusAlves96/termix-sdk"
+Issues = "https://github.com/MatheusAlves96/termix-sdk/issues"
+Changelog = "https://github.com/MatheusAlves96/termix-sdk/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/termix_sdk"]

@@ -120,9 +120,7 @@ class TermixObject:
         `_inner_class_types` for known nested fields.
         """
         if isinstance(values, list):
-            return [
-                cls.construct_from(item, last_response=last_response) for item in values
-            ]
+            return [cls.construct_from(item, last_response=last_response) for item in values]
         if not isinstance(values, dict):
             # A handful of endpoints answer 200 with a bare scalar/None.
             return values
@@ -131,9 +129,7 @@ class TermixObject:
         for key, value in cast(dict[str, Any], values).items():
             nested_cls = instance._inner_class_types.get(key)
             if nested_cls is not None:
-                instance._data[key] = nested_cls.construct_from(
-                    value, last_response=last_response
-                )
+                instance._data[key] = nested_cls.construct_from(value, last_response=last_response)
             elif isinstance(value, dict):
                 instance._data[key] = TermixObject.construct_from(
                     value, last_response=last_response

@@ -8,5 +8,4 @@ from __future__ import annotations
 from typing import Any, Dict, List, Literal  # noqa: F401, UP035
 
 
-
 # No operations in this module take params.

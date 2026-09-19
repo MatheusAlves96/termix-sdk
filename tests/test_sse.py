@@ -27,13 +27,13 @@ def test_multiple_events_in_one_chunk():
 
 
 def test_event_split_across_chunks():
-    chunks = [b"data: {\"a\"", b": 1}\n", b"\n"]
+    chunks = [b'data: {"a"', b": 1}\n", b"\n"]
     events = list(iter_sse_events(iter(chunks)))
     assert events[0].json() == {"a": 1}
 
 
 def test_keepalive_comment_line_is_swallowed():
-    chunks = [b": keepalive\n\ndata: {\"a\": 1}\n\n"]
+    chunks = [b': keepalive\n\ndata: {"a": 1}\n\n']
     events = list(iter_sse_events(iter(chunks)))
     assert len(events) == 1
     assert events[0].json() == {"a": 1}
