@@ -24,6 +24,7 @@ from ._error import (
 from ._object import TermixObject
 from ._request_options import RequestOptions
 from ._response import SSEEvent, TermixResponse, TermixStreamResponse
+from ._session import SessionHandle, async_ssh_session, ssh_session
 from ._version import SPEC_VERSION, __version__
 
 __all__ = [
@@ -38,6 +39,9 @@ __all__ = [
     "TermixStreamResponse",
     "SSEEvent",
     "RequestOptions",
+    "SessionHandle",
+    "ssh_session",
+    "async_ssh_session",
     "TermixError",
     "APIConnectionError",
     "APIStatusError",

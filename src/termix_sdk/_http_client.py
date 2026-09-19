@@ -14,6 +14,7 @@ codes, not Stripe's.
 
 from __future__ import annotations
 
+import asyncio
 import random
 import time
 from collections.abc import AsyncIterator, Callable, Iterator, Mapping
@@ -295,8 +296,6 @@ class AsyncHTTPClient:
         max_retries: int = 2,
         should_retry: ShouldRetry = lambda *_: False,
     ) -> tuple[bytes, int, Mapping[str, str]]:
-        import asyncio
-
         num_retries = 0
         while True:
             try:
