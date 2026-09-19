@@ -30,11 +30,15 @@ from .resources import automations as _automations
 from .resources import credentials as _credentials
 from .resources import dashboard as _dashboard
 from .resources import database as _database
+from .resources import docker as _docker
 from .resources import encryption as _encryption
+from .resources import file_manager as _file_manager
 from .resources import fleets as _fleets
 from .resources import guacamole as _guacamole
 from .resources import homepage as _homepage
+from .resources import host_file_manager as _host_file_manager
 from .resources import instance_settings as _instance_settings
+from .resources import metrics as _metrics
 from .resources import network_topology as _network_topology
 from .resources import open_tabs as _open_tabs
 from .resources import preferences as _preferences
@@ -106,11 +110,15 @@ class TermixClient:
         self.credentials = _credentials.CredentialsService(self._requestor)
         self.dashboard = _dashboard.DashboardService(self._requestor)
         self.database = _database.DatabaseService(self._requestor)
+        self.docker = _docker.DockerService(self._requestor)
         self.encryption = _encryption.EncryptionService(self._requestor)
+        self.file_manager = _file_manager.FileManagerService(self._requestor)
         self.fleets = _fleets.FleetsService(self._requestor)
         self.guacamole = _guacamole.GuacamoleService(self._requestor)
         self.homepage = _homepage.HomepageService(self._requestor)
+        self.host_file_manager = _host_file_manager.HostFileManagerService(self._requestor)
         self.instance_settings = _instance_settings.InstanceSettingsService(self._requestor)
+        self.metrics = _metrics.MetricsService(self._requestor)
         self.network_topology = _network_topology.NetworkTopologyService(self._requestor)
         self.open_tabs = _open_tabs.OpenTabsService(self._requestor)
         self.preferences = _preferences.PreferencesService(self._requestor)

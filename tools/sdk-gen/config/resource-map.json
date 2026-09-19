@@ -1004,6 +1004,293 @@
         },
         "tunnel_post_ssh_tunnel_cancel": {}
       }
+    },
+    "docker": {
+      "ops": {
+        "docker_get_docker_containers_by-sessionId_by-containerId_stats": {
+          "method": "get_container_stats"
+        },
+        "docker_get_docker_containers_by-sessionId_by-containerId": {
+          "method": "get_container"
+        },
+        "docker_post_docker_containers_by-sessionId_by-containerId_start": {},
+        "docker_post_docker_containers_by-sessionId_by-containerId_stop": {},
+        "docker_post_docker_containers_by-sessionId_by-containerId_restart": {},
+        "docker_post_docker_containers_by-sessionId_by-containerId_pause": {},
+        "docker_post_docker_containers_by-sessionId_by-containerId_unpause": {},
+        "docker_delete_docker_containers_by-sessionId_by-containerId_remove": {
+          "method": "remove_container"
+        },
+        "docker_get_docker_containers_by-sessionId": {
+          "method": "list_containers"
+        },
+        "docker_get_docker_containers_by-sessionId_by-containerId_logs": {
+          "method": "get_container_logs"
+        },
+        "docker_post_docker_ssh_disconnect": {
+          "method": "disconnect"
+        },
+        "docker_post_docker_ssh_connect-totp": {},
+        "docker_post_docker_ssh_connect-warpgate": {},
+        "docker_post_docker_ssh_keepalive": {},
+        "docker_get_docker_ssh_status": {
+          "method": "get_status"
+        },
+        "docker_get_docker_validate_by-sessionId": {
+          "method": "validate_session"
+        },
+        "docker_post_docker_ssh_connect": {
+          "method": "connect"
+        }
+      }
+    },
+    "host_file_manager": {
+      "ops": {
+        "database_delete_host_file_manager_recent": {
+          "method": "clear_recent"
+        },
+        "database_get_host_file_manager_recent": {
+          "method": "list_recent"
+        },
+        "database_post_host_file_manager_recent": {
+          "method": "add_recent"
+        },
+        "database_get_host_file_manager_pinned": {
+          "method": "list_pinned"
+        },
+        "database_post_host_file_manager_pinned": {
+          "method": "add_pinned"
+        },
+        "database_delete_host_file_manager_pinned": {
+          "method": "remove_pinned"
+        },
+        "database_get_host_file_manager_shortcuts": {
+          "method": "list_shortcuts"
+        },
+        "database_post_host_file_manager_shortcuts": {
+          "method": "add_shortcut"
+        },
+        "database_delete_host_file_manager_shortcuts": {
+          "method": "remove_shortcut"
+        }
+      }
+    },
+    "file_manager": {
+      "_note": "uploadFileStream, downloadFileStream, uploadFileChunk send/receive a raw (non-JSON, non-multipart) body the spec leaves undocumented — excluded, deferred to F6 alongside multipart.",
+      "ops": {
+        "file-manager_post_ssh_file_manager_ssh_executeFile": {},
+        "file-manager_post_ssh_file_manager_ssh_changePermissions": {},
+        "file-manager_post_ssh_file_manager_ssh_copyItem": {},
+        "file-manager_get_ssh_file_manager_ssh_resolvePath": {},
+        "file-manager_get_ssh_file_manager_ssh_readFile": {},
+        "file-manager_post_ssh_file_manager_ssh_writeFile": {},
+        "file-manager_get_ssh_file_manager_ssh_identifySymlink": {},
+        "file-manager_post_ssh_file_manager_ssh_uploadFile": {},
+        "file-manager_post_ssh_file_manager_ssh_downloadFile": {},
+        "file-manager_post_ssh_file_manager_ssh_connect-totp": {},
+        "file-manager_post_ssh_file_manager_ssh_connect-warpgate": {},
+        "file-manager_post_ssh_file_manager_ssh_disconnect": {},
+        "file-manager_post_ssh_file_manager_sudo-password": {},
+        "file-manager_get_ssh_file_manager_ssh_status": {},
+        "file-manager_post_ssh_file_manager_ssh_keepalive": {},
+        "file-manager_post_ssh_file_manager_ssh_extractArchive": {},
+        "file-manager_post_ssh_file_manager_ssh_compressFiles": {},
+        "file-manager_post_ssh_file_manager_ssh_transferMethodPreview": {},
+        "file-manager_post_ssh_file_manager_ssh_transferToHost": {},
+        "file-manager_get_ssh_file_manager_ssh_activeTransfers": {
+          "method": "list_active_transfers"
+        },
+        "file-manager_get_ssh_file_manager_ssh_transferStatus_by-transferId": {
+          "method": "get_transfer_status"
+        },
+        "file-manager_post_ssh_file_manager_ssh_transferCancel_by-transferId": {
+          "method": "cancel_transfer"
+        },
+        "file-manager_post_ssh_file_manager_ssh_transferCleanup_by-transferId": {
+          "method": "cleanup_transfer"
+        },
+        "file-manager_post_ssh_file_manager_ssh_transferRetry_by-transferId": {
+          "method": "retry_transfer"
+        },
+        "file-manager_post_ssh_file_manager_ssh_connect": {
+          "method": "connect"
+        },
+        "file-manager_get_ssh_file_manager_ssh_listFiles": {},
+        "file-manager_delete_ssh_file_manager_ssh_trash_by-id": {
+          "method": "delete_trash_item"
+        },
+        "file-manager_delete_ssh_file_manager_ssh_trash": {
+          "method": "empty_trash"
+        },
+        "file-manager_get_ssh_file_manager_ssh_trash": {
+          "method": "list_trash"
+        },
+        "file-manager_put_ssh_file_manager_ssh_trash-retention": {
+          "method": "set_trash_retention"
+        },
+        "file-manager_post_ssh_file_manager_ssh_createFile": {},
+        "file-manager_post_ssh_file_manager_ssh_createFolder": {},
+        "file-manager_delete_ssh_file_manager_ssh_deleteItem": {},
+        "file-manager_put_ssh_file_manager_ssh_renameItem": {},
+        "file-manager_post_ssh_file_manager_ssh_trash_by-id_restore": {
+          "method": "restore_trash_item"
+        },
+        "file-manager_put_ssh_file_manager_ssh_moveItem": {}
+      }
+    },
+    "metrics": {
+      "ops": {
+        "metrics_get_host-metrics_managers_cron_by-id": {
+          "method": "get_cron"
+        },
+        "metrics_post_host-metrics_managers_cron_by-id": {
+          "method": "set_cron"
+        },
+        "metrics_post_host-metrics_managers_firewall_by-id_persist": {
+          "method": "persist_firewall"
+        },
+        "metrics_get_host-metrics_managers_firewall_by-id": {
+          "method": "get_firewall"
+        },
+        "metrics_post_host-metrics_managers_firewall_by-id_rule": {
+          "method": "add_firewall_rule"
+        },
+        "metrics_get_host-metrics_managers_health_by-id": {
+          "method": "get_health"
+        },
+        "metrics_post_host-metrics_managers_health_by-id_config": {
+          "method": "configure_health"
+        },
+        "metrics_post_host-metrics_managers_health_by-id_run": {
+          "method": "run_health_check"
+        },
+        "metrics_get_host-metrics_platform_by-id": {
+          "method": "get_platform"
+        },
+        "metrics_get_host-metrics_managers_logs_by-id_files": {
+          "method": "list_log_files"
+        },
+        "metrics_get_host-metrics_managers_logs_by-id": {
+          "method": "get_logs"
+        },
+        "metrics_post_host-metrics_managers_packages_by-id_action": {
+          "method": "run_package_action"
+        },
+        "metrics_get_host-metrics_managers_packages_by-id": {
+          "method": "get_packages"
+        },
+        "metrics_post_host-metrics_managers_processes_by-id_signal": {
+          "method": "signal_process"
+        },
+        "metrics_get_host-metrics_managers_processes_by-id": {
+          "method": "get_processes"
+        },
+        "metrics_post_host-metrics_managers_services_by-id_action": {
+          "method": "run_service_action"
+        },
+        "metrics_get_host-metrics_managers_services_by-id": {
+          "method": "get_services"
+        },
+        "metrics_get_host-metrics_managers_top-memory_by-id": {
+          "method": "get_top_memory"
+        },
+        "metrics_get_host-metrics_managers_timers_by-id": {
+          "method": "get_timers"
+        },
+        "metrics_get_host-metrics_managers_disk-breakdown_by-id": {
+          "method": "get_disk_breakdown"
+        },
+        "metrics_get_host-metrics_managers_ssl_by-id": {
+          "method": "get_ssl"
+        },
+        "metrics_post_host-metrics_managers_ssl_by-id_issue": {
+          "method": "issue_ssl"
+        },
+        "metrics_post_host-metrics_managers_ssl_by-id_renew": {
+          "method": "renew_ssl"
+        },
+        "metrics_post_host-metrics_managers_ssl_by-id_revoke": {
+          "method": "revoke_ssl"
+        },
+        "metrics_get_host-metrics_managers_tailscale_by-id": {
+          "method": "get_tailscale"
+        },
+        "metrics_post_host-metrics_managers_tailscale_by-id_action": {
+          "method": "run_tailscale_action"
+        },
+        "metrics_get_host-metrics_managers_users_by-id": {
+          "method": "get_users"
+        },
+        "metrics_post_host-metrics_managers_users_by-id_action": {
+          "method": "run_user_action"
+        },
+        "metrics_get_host-metrics_managers_wireguard_by-id": {
+          "method": "get_wireguard"
+        },
+        "metrics_post_host-metrics_managers_wireguard_by-id_action": {
+          "method": "run_wireguard_action"
+        },
+        "metrics_post_host-metrics_preferences_by-id": {
+          "method": "set_metrics_preferences"
+        },
+        "metrics_get_host-metrics_preferences_by-id": {
+          "method": "get_metrics_preferences"
+        },
+        "metrics_get_metrics_history_by-id": {
+          "method": "get_metrics_history"
+        },
+        "metrics_get_status": {
+          "method": "list_statuses"
+        },
+        "metrics_get_status_by-id": {
+          "method": "get_status"
+        },
+        "metrics_post_clear-connections": {
+          "method": "clear_connections"
+        },
+        "metrics_post_refresh": {
+          "method": "refresh_polling"
+        },
+        "metrics_post_host-updated": {
+          "method": "notify_host_updated"
+        },
+        "metrics_post_host-deleted": {
+          "method": "notify_host_deleted"
+        },
+        "metrics_get_metrics_by-id": {
+          "method": "get_metrics"
+        },
+        "metrics_post_metrics_start_by-id": {
+          "method": "start_metrics"
+        },
+        "metrics_post_metrics_stop_by-id": {
+          "method": "stop_metrics"
+        },
+        "metrics_post_metrics_connect-totp": {
+          "method": "connect_totp"
+        },
+        "metrics_post_global-settings": {
+          "method": "set_global_settings"
+        },
+        "metrics_get_global-settings": {
+          "method": "get_global_settings"
+        },
+        "metrics_get_global-settings_history": {
+          "method": "get_global_settings_history"
+        },
+        "metrics_post_global-settings_history": {
+          "method": "save_global_settings_history"
+        },
+        "metrics_post_metrics_register-viewer": {
+          "method": "register_metrics_viewer"
+        },
+        "metrics_post_metrics_unregister-viewer": {
+          "method": "unregister_metrics_viewer"
+        },
+        "metrics_post_metrics_heartbeat": {
+          "method": "metrics_heartbeat"
+        }
+      }
     }
   }
 }
