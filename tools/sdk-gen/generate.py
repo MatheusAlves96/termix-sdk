@@ -27,6 +27,7 @@ without writing, for CI use once this is wired into F4.
 from __future__ import annotations
 
 import json
+import keyword
 import re
 import sys
 from pathlib import Path
@@ -146,6 +147,36 @@ def schema_allows_null(schema: dict[str, Any] | None) -> bool:
         if any(schema_allows_null(v) for v in schema.get(key, [])):
             return True
     return False
+
+
+def resolve_array_items(schema: dict[str, Any] | None) -> dict[str, Any] | None:
+    """If `schema` describes a JSON array — directly, or as a `oneOf`/
+    `anyOf` where *every* variant is an array (e.g. `GET
+    /users/sso-providers`'s `oneOf: [array-of-typed-object,
+    array-of-empty-object]`, from a handler with more than one `res.json`
+    call site) — return the items schema to type the array's elements
+    with. Returns `{}` (meaning "no further typing", i.e. `List[Any]`)
+    when the variants disagree on item shape rather than arbitrarily
+    picking one, and `None` when `schema` isn't array-shaped at all.
+
+    `_return_type_and_constructor` and `GeneratedOp.emit_contract_test`
+    both call this — they used to each hardcode their own `schema.get
+    ("type") == "array"` check, which only handled the *direct* case and
+    silently diverged into two different wrong answers for the oneOf-of-
+    arrays case (a real op — see the test-generation commit this was
+    fixed in — that's why this is a shared helper now, not two copies).
+    """
+    if not schema:
+        return None
+    if schema.get("type") == "array":
+        return schema.get("items") or {}
+    for key in ("oneOf", "anyOf"):
+        variants = schema.get(key)
+        if variants and all(isinstance(v, dict) and v.get("type") == "array" for v in variants):
+            items_list = [v.get("items") or {} for v in variants]
+            first = items_list[0]
+            return first if all(i == first for i in items_list) else {}
+    return None
 
 
 # --------------------------------------------------------------------------
@@ -418,9 +449,9 @@ class GeneratedOp:
             )
 
         model_name = self._model_name_for(schema)
-        if schema.get("type") == "array":
-            items = schema.get("items") or {}
-            if items.get("type") == "object" and items.get("properties"):
+        items_schema = resolve_array_items(schema)
+        if items_schema is not None:
+            if items_schema.get("type") == "object" and items_schema.get("properties"):
                 inner = f"{self.class_prefix}{_pascal(self.method_name)}Item"
                 return f"List[{inner}]", (
                     f"{inner}.construct_from({response_var}.data if {response_var} else [], "
@@ -459,11 +490,11 @@ class GeneratedOp:
         schema = self.op.response_schema
         if schema is None:
             return None
-        if schema.get("type") == "array":
-            items = schema.get("items") or {}
-            if items.get("type") == "object" and items.get("properties"):
+        items_schema = resolve_array_items(schema)
+        if items_schema is not None:
+            if items_schema.get("type") == "object" and items_schema.get("properties"):
                 name = f"{self.class_prefix}{_pascal(self.method_name)}Item"
-                return self._emit_class(name, items)
+                return self._emit_class(name, items_schema)
             return None
         model_name = self._model_name_for(schema)
         if model_name is None:
@@ -568,12 +599,11 @@ class GeneratedOp:
         if op.is_204:
             lines.append("    assert result is None")
         else:
-            schema = op.response_schema
+            items_schema = resolve_array_items(op.response_schema)
             items_have_dedicated_model = bool(
-                schema
-                and schema.get("type") == "array"
-                and (schema.get("items") or {}).get("type") == "object"
-                and (schema.get("items") or {}).get("properties")
+                items_schema
+                and items_schema.get("type") == "object"
+                and items_schema.get("properties")
             )
             if isinstance(response_body, list) and items_have_dedicated_model:
                 # result is a list of a generated model, not raw dicts — a
@@ -622,6 +652,15 @@ def build_generated_ops(
             )
         op = operations[operation_id]
         method_name = cfg.get("method") or default_method_name(op.method, op.path)
+        if keyword.iskeyword(method_name) or keyword.issoftkeyword(method_name):
+            # e.g. POST /database/import defaulting to "import" — a
+            # reserved word can't be a method name at all (SyntaxError),
+            # not just an awkward one like the builtins.list collision.
+            raise ValueError(
+                f"{operation_id}: method name {method_name!r} is a Python "
+                f'keyword. Add an explicit "method" override for this op '
+                f"in resource-map.json's {module_name!r} module."
+            )
         generated.append(GeneratedOp(op, method_name, class_prefix, module_name))
     return generated
 
@@ -746,6 +785,14 @@ def write_contract_test_module(module_name: str, generated_ops: list[GeneratedOp
         f' see docs/sdk-plan.md phases F3/F4. Covers termix_sdk.resources.{module_name}."""',
         "",
         "from __future__ import annotations",
+        "",
+        # Some real Termix response strings (e.g. encryption's warning
+        # messages) or long paths (e.g. webauthn's credential routes) push
+        # a generated line past 100 columns on their own. Nothing here is
+        # meant to be read line-by-line by a human, so line length isn't
+        # enforced for these files rather than truncating real API data
+        # or the descriptive docstring to fit.
+        "# ruff: noqa: E501",
         "",
         "import pytest",
         "",

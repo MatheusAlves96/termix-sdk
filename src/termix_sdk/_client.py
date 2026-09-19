@@ -23,16 +23,29 @@ from ._response import TermixResponse
 
 # --- generated resource imports start ---
 
+from .resources import alerts as _alerts
+from .resources import api_keys as _api_keys
 from .resources import audit as _audit
 from .resources import automations as _automations
 from .resources import credentials as _credentials
+from .resources import database as _database
+from .resources import encryption as _encryption
+from .resources import guacamole as _guacamole
 from .resources import network_topology as _network_topology
 from .resources import open_tabs as _open_tabs
+from .resources import preferences as _preferences
+from .resources import rbac as _rbac
+from .resources import session_logs as _session_logs
+from .resources import session_sharing as _session_sharing
 from .resources import snippets as _snippets
+from .resources import sso as _sso
+from .resources import sync as _sync
 from .resources import system as _system
 from .resources import tailscale as _tailscale
+from .resources import termix_id as _termix_id
 from .resources import tunnel_presets as _tunnel_presets
 from .resources import vault as _vault
+from .resources import webauthn as _webauthn
 from .resources import workspaces as _workspaces
 
 # --- generated resource imports end ---
@@ -75,16 +88,29 @@ class TermixClient:
 
         # --- generated resource attributes start ---
 
+        self.alerts = _alerts.AlertsService(self._requestor)
+        self.api_keys = _api_keys.ApiKeysService(self._requestor)
         self.audit = _audit.AuditService(self._requestor)
         self.automations = _automations.AutomationsService(self._requestor)
         self.credentials = _credentials.CredentialsService(self._requestor)
+        self.database = _database.DatabaseService(self._requestor)
+        self.encryption = _encryption.EncryptionService(self._requestor)
+        self.guacamole = _guacamole.GuacamoleService(self._requestor)
         self.network_topology = _network_topology.NetworkTopologyService(self._requestor)
         self.open_tabs = _open_tabs.OpenTabsService(self._requestor)
+        self.preferences = _preferences.PreferencesService(self._requestor)
+        self.rbac = _rbac.RbacService(self._requestor)
+        self.session_logs = _session_logs.SessionLogsService(self._requestor)
+        self.session_sharing = _session_sharing.SessionSharingService(self._requestor)
         self.snippets = _snippets.SnippetsService(self._requestor)
+        self.sso = _sso.SsoService(self._requestor)
+        self.sync = _sync.SyncService(self._requestor)
         self.system = _system.SystemService(self._requestor)
         self.tailscale = _tailscale.TailscaleService(self._requestor)
+        self.termix_id = _termix_id.TermixIdService(self._requestor)
         self.tunnel_presets = _tunnel_presets.TunnelPresetsService(self._requestor)
         self.vault = _vault.VaultService(self._requestor)
+        self.webauthn = _webauthn.WebauthnService(self._requestor)
         self.workspaces = _workspaces.WorkspacesService(self._requestor)
 
         # --- generated resource attributes end ---

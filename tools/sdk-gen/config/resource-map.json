@@ -6,57 +6,129 @@
       "ops": {
         "database_get_health": {},
         "database_get_version": {},
-        "database_get_releases_rss": { "method": "list_releases" }
+        "database_get_releases_rss": {
+          "method": "list_releases"
+        }
       }
     },
     "snippets": {
       "ops": {
-        "database_get_snippets": { "method": "list" },
-        "database_post_snippets": { "method": "create" },
-        "database_get_snippets_by-id": { "method": "retrieve" },
-        "database_put_snippets_by-id": { "method": "update" },
-        "database_delete_snippets_by-id": { "method": "delete" },
-        "database_get_snippets_folders": { "method": "list_folders" },
-        "database_post_snippets_folders": { "method": "create_folder" },
-        "database_put_snippets_folders_by-name_metadata": { "method": "update_folder_metadata" },
-        "database_put_snippets_folders_rename": { "method": "rename_folder" },
-        "database_delete_snippets_folders_by-name": { "method": "delete_folder" },
-        "database_put_snippets_reorder": { "method": "reorder" },
-        "database_post_snippets_execute": { "method": "execute" },
-        "database_get_snippets_export": { "method": "export" },
-        "database_post_snippets_bulk-import": { "method": "bulk_import" }
+        "database_get_snippets": {
+          "method": "list"
+        },
+        "database_post_snippets": {
+          "method": "create"
+        },
+        "database_get_snippets_by-id": {
+          "method": "retrieve"
+        },
+        "database_put_snippets_by-id": {
+          "method": "update"
+        },
+        "database_delete_snippets_by-id": {
+          "method": "delete"
+        },
+        "database_get_snippets_folders": {
+          "method": "list_folders"
+        },
+        "database_post_snippets_folders": {
+          "method": "create_folder"
+        },
+        "database_put_snippets_folders_by-name_metadata": {
+          "method": "update_folder_metadata"
+        },
+        "database_put_snippets_folders_rename": {
+          "method": "rename_folder"
+        },
+        "database_delete_snippets_folders_by-name": {
+          "method": "delete_folder"
+        },
+        "database_put_snippets_reorder": {
+          "method": "reorder"
+        },
+        "database_post_snippets_execute": {
+          "method": "execute"
+        },
+        "database_get_snippets_export": {
+          "method": "export"
+        },
+        "database_post_snippets_bulk-import": {
+          "method": "bulk_import"
+        }
       }
     },
     "credentials": {
       "ops": {
-        "database_get_credentials": { "method": "list" },
-        "database_post_credentials": { "method": "create" },
-        "database_get_credentials_folders": { "method": "list_folders" },
-        "database_put_credentials_folders_rename": { "method": "rename_folder" },
-        "database_put_credentials_reorder": { "method": "reorder" },
-        "database_post_credentials_generate-key-pair": { "method": "generate_key_pair" },
-        "database_post_credentials_generate-public-key": { "method": "generate_public_key" },
-        "database_post_credentials_detect-key-type": { "method": "detect_key_type" },
-        "database_post_credentials_detect-public-key-type": { "method": "detect_public_key_type" },
-        "database_post_credentials_validate-key-pair": { "method": "validate_key_pair" },
-        "database_get_credentials_by-id": { "method": "retrieve" },
-        "database_put_credentials_by-id": { "method": "update" },
-        "database_delete_credentials_by-id": { "method": "delete" },
-        "database_post_credentials_by-id_apply-to-host_by-hostId": { "method": "apply_to_host" },
-        "database_post_credentials_by-id_deploy-to-host": { "method": "deploy_to_host" },
-        "database_post_credentials_by-id_duplicate": { "method": "duplicate" },
-        "database_get_credentials_by-id_hosts": { "method": "hosts" }
+        "database_get_credentials": {
+          "method": "list"
+        },
+        "database_post_credentials": {
+          "method": "create"
+        },
+        "database_get_credentials_folders": {
+          "method": "list_folders"
+        },
+        "database_put_credentials_folders_rename": {
+          "method": "rename_folder"
+        },
+        "database_put_credentials_reorder": {
+          "method": "reorder"
+        },
+        "database_post_credentials_generate-key-pair": {
+          "method": "generate_key_pair"
+        },
+        "database_post_credentials_generate-public-key": {
+          "method": "generate_public_key"
+        },
+        "database_post_credentials_detect-key-type": {
+          "method": "detect_key_type"
+        },
+        "database_post_credentials_detect-public-key-type": {
+          "method": "detect_public_key_type"
+        },
+        "database_post_credentials_validate-key-pair": {
+          "method": "validate_key_pair"
+        },
+        "database_get_credentials_by-id": {
+          "method": "retrieve"
+        },
+        "database_put_credentials_by-id": {
+          "method": "update"
+        },
+        "database_delete_credentials_by-id": {
+          "method": "delete"
+        },
+        "database_post_credentials_by-id_apply-to-host_by-hostId": {
+          "method": "apply_to_host"
+        },
+        "database_post_credentials_by-id_deploy-to-host": {
+          "method": "deploy_to_host"
+        },
+        "database_post_credentials_by-id_duplicate": {
+          "method": "duplicate"
+        },
+        "database_get_credentials_by-id_hosts": {
+          "method": "hosts"
+        }
       }
     },
     "workspaces": {
       "ops": {
         "database_post_workspaces": {},
-        "database_get_workspaces": { "method": "list" },
-        "database_get_workspaces_last-session": { "method": "get_last_session" },
-        "database_put_workspaces_last-session": { "method": "save_last_session" },
+        "database_get_workspaces": {
+          "method": "list"
+        },
+        "database_get_workspaces_last-session": {
+          "method": "get_last_session"
+        },
+        "database_put_workspaces_last-session": {
+          "method": "save_last_session"
+        },
         "database_patch_workspaces_by-id": {},
         "database_delete_workspaces_by-id": {},
-        "database_put_workspaces_by-id_content": { "method": "set_content" },
+        "database_put_workspaces_by-id_content": {
+          "method": "set_content"
+        },
         "database_post_workspaces_by-id_duplicate": {},
         "database_post_workspaces_by-id_set-default": {},
         "database_post_workspaces_by-id_unset-default": {},
@@ -65,60 +137,467 @@
     },
     "open_tabs": {
       "ops": {
-        "database_post_open-tabs": { "method": "upsert" },
-        "database_put_open-tabs": { "method": "replace_all" },
-        "database_get_open-tabs": { "method": "list" },
+        "database_post_open-tabs": {
+          "method": "upsert"
+        },
+        "database_put_open-tabs": {
+          "method": "replace_all"
+        },
+        "database_get_open-tabs": {
+          "method": "list"
+        },
         "database_patch_open-tabs_by-id": {},
         "database_delete_open-tabs_by-id": {},
-        "database_get_open-tabs_active-sessions": { "method": "list_active_sessions" }
+        "database_get_open-tabs_active-sessions": {
+          "method": "list_active_sessions"
+        }
       }
     },
     "audit": {
       "ops": {
-        "database_get_audit-logs_actions": { "method": "list_actions" },
+        "database_get_audit-logs_actions": {
+          "method": "list_actions"
+        },
         "database_get_audit-logs_export": {},
-        "database_get_audit-logs": { "method": "list" }
+        "database_get_audit-logs": {
+          "method": "list"
+        }
       }
     },
     "tunnel_presets": {
       "ops": {
         "database_post_c2s-tunnel-presets": {},
-        "database_get_c2s-tunnel-presets": { "method": "list" },
+        "database_get_c2s-tunnel-presets": {
+          "method": "list"
+        },
         "database_put_c2s-tunnel-presets_by-id": {},
         "database_delete_c2s-tunnel-presets_by-id": {}
       }
     },
     "network_topology": {
       "ops": {
-        "database_post_network-topology": { "method": "save" },
-        "database_get_network-topology": { "method": "get" }
+        "database_post_network-topology": {
+          "method": "save"
+        },
+        "database_get_network-topology": {
+          "method": "get"
+        }
       }
     },
     "tailscale": {
       "ops": {
-        "database_get_tailscale_devices": { "method": "list_devices" }
+        "database_get_tailscale_devices": {
+          "method": "list_devices"
+        }
       }
     },
     "automations": {
       "ops": {
-        "database_get_automations": { "method": "list" },
+        "database_get_automations": {
+          "method": "list"
+        },
         "database_post_automations": {},
         "database_get_automations_by-id": {},
         "database_put_automations_by-id": {},
         "database_delete_automations_by-id": {},
         "database_post_automations_by-id_run": {},
-        "database_get_automations_runs_history": { "method": "list_run_history" },
-        "database_get_automations_runs_by-runId_steps": { "method": "list_run_steps" },
-        "database_post_automations_webhook_by-token": { "method": "trigger_webhook" }
+        "database_get_automations_runs_history": {
+          "method": "list_run_history"
+        },
+        "database_get_automations_runs_by-runId_steps": {
+          "method": "list_run_steps"
+        },
+        "database_post_automations_webhook_by-token": {
+          "method": "trigger_webhook"
+        }
       }
     },
     "vault": {
       "_note": "GET /vault/oidc/callback is a browser-redirect OIDC flow, out of scope per docs/sdk-plan.md section 2 item 10 — deliberately omitted, not generated.",
       "ops": {
-        "database_get_vault_profiles": { "method": "list_profiles" },
-        "database_post_vault_profiles": { "method": "create_profile" },
-        "database_put_vault_profiles_by-id": { "method": "update_profile" },
-        "database_delete_vault_profiles_by-id": { "method": "delete_profile" }
+        "database_get_vault_profiles": {
+          "method": "list_profiles"
+        },
+        "database_post_vault_profiles": {
+          "method": "create_profile"
+        },
+        "database_put_vault_profiles_by-id": {
+          "method": "update_profile"
+        },
+        "database_delete_vault_profiles_by-id": {
+          "method": "delete_profile"
+        }
+      }
+    },
+    "rbac": {
+      "ops": {
+        "database_get_rbac_roles": {
+          "method": "list_roles"
+        },
+        "database_post_rbac_roles": {
+          "method": "create_role"
+        },
+        "database_put_rbac_roles_by-id": {
+          "method": "update_role"
+        },
+        "database_delete_rbac_roles_by-id": {
+          "method": "delete_role"
+        },
+        "database_get_rbac_permissions_catalog": {
+          "method": "permissions_catalog"
+        },
+        "database_post_rbac_users_by-userId_roles": {
+          "method": "assign_role"
+        },
+        "database_get_rbac_users_by-userId_roles": {
+          "method": "list_user_roles"
+        },
+        "database_delete_rbac_users_by-userId_roles_by-roleId": {
+          "method": "revoke_role"
+        },
+        "database_post_rbac_snippet_by-id_share": {
+          "method": "share_snippet"
+        },
+        "database_post_rbac_host_by-id_share": {
+          "method": "share_host"
+        },
+        "database_delete_rbac_snippet_by-id_access_by-accessId": {
+          "method": "delete_snippet_access"
+        },
+        "database_get_rbac_snippet_by-id_access": {
+          "method": "list_snippet_access"
+        },
+        "database_get_rbac_shared-snippets": {
+          "method": "list_shared_snippets"
+        },
+        "database_put_rbac_host-access_by-hostId_auth_by-protocol": {
+          "method": "set_host_access_auth"
+        },
+        "database_get_rbac_host-access_by-hostId_auth_by-protocol": {
+          "method": "get_host_access_auth"
+        },
+        "database_post_rbac_folder_share": {
+          "method": "share_folder"
+        },
+        "database_patch_rbac_host_by-id_access_by-accessId": {
+          "method": "update_host_access"
+        },
+        "database_delete_rbac_host_by-id_access_by-accessId": {
+          "method": "delete_host_access"
+        },
+        "database_get_rbac_host_by-id_access": {
+          "method": "list_host_access"
+        },
+        "database_get_rbac_shared-hosts": {
+          "method": "list_shared_hosts"
+        }
+      }
+    },
+    "termix_id": {
+      "ops": {
+        "database_get_termix-id_ca": {
+          "method": "get_ca"
+        },
+        "database_post_termix-id_ca": {
+          "method": "create_ca"
+        },
+        "database_delete_termix-id_ca": {
+          "method": "delete_ca"
+        },
+        "database_post_termix-id_ca_rotate": {
+          "method": "rotate_ca"
+        },
+        "database_post_termix-id_keys_by-id_certificate": {
+          "method": "issue_certificate"
+        },
+        "database_get_termix-id_linked-credentials": {
+          "method": "list_linked_credentials"
+        },
+        "database_get_termix-id_u_by-handle_ca": {
+          "method": "get_public_ca"
+        },
+        "database_get_termix-id_u_by-handle": {
+          "method": "get_public_identity"
+        },
+        "database_get_termix-id_u_by-handle_by-algo": {
+          "method": "get_public_key"
+        },
+        "database_get_termix-id_me": {
+          "method": "get_me"
+        },
+        "database_get_termix-id_check_by-handle": {
+          "method": "check_handle"
+        },
+        "database_post_termix-id": {},
+        "database_put_termix-id": {
+          "method": "update"
+        },
+        "database_delete_termix-id": {
+          "method": "delete"
+        },
+        "database_post_termix-id_keys": {
+          "method": "create_key"
+        },
+        "database_post_termix-id_keys_generate": {
+          "method": "generate_key"
+        },
+        "database_patch_termix-id_keys_by-id": {
+          "method": "update_key"
+        },
+        "database_delete_termix-id_keys_by-id": {
+          "method": "delete_key"
+        }
+      }
+    },
+    "alerts": {
+      "ops": {
+        "database_put_notification-channels_by-id": {
+          "method": "update_channel"
+        },
+        "database_delete_notification-channels_by-id": {
+          "method": "delete_channel"
+        },
+        "database_post_notification-channels_by-id_test": {
+          "method": "test_channel"
+        },
+        "database_get_alert-rules": {
+          "method": "list_rules"
+        },
+        "database_post_alert-rules": {
+          "method": "create_rule"
+        },
+        "database_put_alert-rules_by-id": {
+          "method": "update_rule"
+        },
+        "database_delete_alert-rules_by-id": {
+          "method": "delete_rule"
+        },
+        "database_get_notification-channels": {
+          "method": "list_channels"
+        },
+        "database_post_notification-channels": {
+          "method": "create_channel"
+        },
+        "database_get_alert-firings": {
+          "method": "list_firings"
+        },
+        "database_post_alert-firings_by-id_acknowledge": {
+          "method": "acknowledge_firing"
+        },
+        "database_post_alert-firings_acknowledge-all": {
+          "method": "acknowledge_all_firings"
+        },
+        "database_get_alerts": {
+          "method": "list"
+        },
+        "database_post_alerts_dismiss": {
+          "method": "dismiss"
+        },
+        "database_delete_alerts_dismiss": {
+          "method": "clear_dismissed"
+        },
+        "database_get_alerts_dismissed": {
+          "method": "list_dismissed"
+        }
+      }
+    },
+    "session_logs": {
+      "ops": {
+        "database_get_session_logs": {
+          "method": "list"
+        },
+        "database_get_session_logs_retention": {
+          "method": "get_retention"
+        },
+        "database_put_session_logs_retention": {
+          "method": "set_retention"
+        },
+        "database_get_session_logs_by-id": {
+          "method": "retrieve"
+        },
+        "database_delete_session_logs_by-id": {
+          "method": "delete"
+        },
+        "database_get_session_logs_by-id_content": {
+          "method": "get_content"
+        }
+      }
+    },
+    "session_sharing": {
+      "ops": {
+        "database_post_session-sharing_create": {
+          "method": "create"
+        },
+        "database_get_session-sharing_host_by-hostId_active": {
+          "method": "get_active_for_host"
+        },
+        "database_delete_session-sharing_by-shareId": {
+          "method": "delete"
+        },
+        "database_get_session-sharing_resolve_by-linkToken": {
+          "method": "resolve"
+        },
+        "database_post_session-sharing_by-shareId_end": {
+          "method": "end"
+        }
+      }
+    },
+    "sync": {
+      "ops": {
+        "database_get_sync_by-entityType": {
+          "method": "pull"
+        },
+        "database_post_sync_by-entityType": {
+          "method": "push"
+        },
+        "database_post_sync_tombstones": {
+          "method": "push_tombstones"
+        },
+        "database_get_sync_by-entityType_tombstones": {
+          "method": "pull_tombstones"
+        }
+      }
+    },
+    "database": {
+      "ops": {
+        "database_post_database_import": {
+          "method": "import_data"
+        },
+        "database_post_database_export_preview": {
+          "method": "preview_export"
+        },
+        "database_post_database_restore": {
+          "method": "restore"
+        },
+        "database_get_database_migration_status": {
+          "method": "migration_status"
+        },
+        "database_get_database_migration_history": {
+          "method": "migration_history"
+        },
+        "database_post_database_export": {
+          "method": "export"
+        }
+      }
+    },
+    "encryption": {
+      "ops": {
+        "database_get_encryption_status": {
+          "method": "get_status"
+        },
+        "database_post_encryption_initialize": {
+          "method": "initialize"
+        },
+        "database_post_encryption_regenerate": {
+          "method": "regenerate"
+        },
+        "database_post_encryption_regenerate-jwt": {
+          "method": "regenerate_jwt"
+        }
+      }
+    },
+    "guacamole": {
+      "ops": {
+        "database_post_guacamole_connect-host_by-hostId": {
+          "method": "connect_host"
+        },
+        "database_get_guacamole_status": {
+          "method": "get_status"
+        },
+        "database_post_guacamole_token": {
+          "method": "create_token"
+        }
+      }
+    },
+    "sso": {
+      "ops": {
+        "database_post_users_ldap_login": {
+          "method": "ldap_login"
+        },
+        "database_get_users_sso-providers": {
+          "method": "list_providers"
+        },
+        "database_post_users_sso-providers": {
+          "method": "create_provider"
+        },
+        "database_get_users_sso-providers_admin": {
+          "method": "list_providers_admin"
+        },
+        "database_put_users_sso-providers_by-id": {
+          "method": "update_provider"
+        },
+        "database_delete_users_sso-providers_by-id": {
+          "method": "delete_provider"
+        }
+      }
+    },
+    "api_keys": {
+      "ops": {
+        "database_get_users_api-keys": {
+          "method": "list"
+        },
+        "database_post_users_api-keys": {
+          "method": "create"
+        },
+        "database_delete_users_api-keys_by-keyId": {
+          "method": "delete"
+        }
+      }
+    },
+    "webauthn": {
+      "ops": {
+        "database_get_users_webauthn_credentials": {
+          "method": "list_credentials"
+        },
+        "database_post_users_webauthn_register_options": {
+          "method": "register_options"
+        },
+        "database_post_users_webauthn_register_verify": {
+          "method": "register_verify"
+        },
+        "database_post_users_webauthn_authenticate_options": {
+          "method": "authenticate_options"
+        },
+        "database_post_users_webauthn_authenticate_verify": {
+          "method": "authenticate_verify"
+        },
+        "database_delete_users_webauthn_credentials_by-credentialId": {
+          "method": "delete_credential"
+        }
+      }
+    },
+    "preferences": {
+      "ops": {
+        "database_get_credential-sidebar_preferences": {
+          "method": "get_credential_sidebar"
+        },
+        "database_put_credential-sidebar_preferences": {
+          "method": "set_credential_sidebar"
+        },
+        "database_put_host-sidebar_preferences": {
+          "method": "set_host_sidebar"
+        },
+        "database_get_host-sidebar_preferences": {
+          "method": "get_host_sidebar"
+        },
+        "database_put_ui-preferences": {
+          "method": "set_ui_preferences"
+        },
+        "database_get_ui-preferences": {
+          "method": "get_ui_preferences"
+        },
+        "database_get_user-preferences": {
+          "method": "get_user_preferences"
+        },
+        "database_put_user-preferences": {
+          "method": "set_user_preferences"
+        },
+        "database_get_users_touch-input-settings": {
+          "method": "get_touch_input_settings"
+        },
+        "database_patch_users_touch-input-settings": {
+          "method": "update_touch_input_settings"
+        }
       }
     }
   }

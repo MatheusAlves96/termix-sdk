@@ -3,6 +3,7 @@ see docs/sdk-plan.md phases F3/F4. Covers termix_sdk.resources.audit."""
 
 from __future__ import annotations
 
+# ruff: noqa: E501
 import pytest
 
 
