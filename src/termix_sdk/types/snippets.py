@@ -20,6 +20,16 @@ class SnippetsCreateParams(TypedDict, total=False):
     isNote: bool
 
 
+class SnippetsUpdateParams(TypedDict, total=False):
+    name: str
+    content: str
+    description: str
+    folder: str
+    order: float
+    hostFilter: str | None
+    isNote: bool
+
+
 class SnippetsCreateFolderParams(TypedDict, total=False):
     name: str
     color: str | None

@@ -9535,12 +9535,12 @@
                     "confidence": "frontend-type",
                     "note": "object type, depth limit reached"
                   },
-                  "__@iterator@4967": {
+                  "__@iterator@4921": {
                     "type": "object",
                     "confidence": "frontend-type",
                     "note": "object type, depth limit reached"
                   },
-                  "__@unscopables@4969": {
+                  "__@unscopables@4923": {
                     "type": "object",
                     "confidence": "frontend-type",
                     "note": "object type, depth limit reached"
@@ -9585,8 +9585,8 @@
                   "toSorted",
                   "toSpliced",
                   "with",
-                  "__@iterator@4967",
-                  "__@unscopables@4969"
+                  "__@iterator@4921",
+                  "__@unscopables@4923"
                 ],
                 "confidence": "frontend-type"
               }

@@ -34,6 +34,7 @@ from ..types.snippets import (
     SnippetsRenameFolderParams,
     SnippetsReorderParams,
     SnippetsUpdateFolderMetadataParams,
+    SnippetsUpdateParams,
 )
 
 
@@ -88,13 +89,16 @@ class SnippetsService(TermixService):
         id: str,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[SnippetsUpdateParams],
     ) -> SnippetsUpdateResult:
         """Update a snippet
 
         PUT /snippets/{id}
         Source: src/backend/database/routes/snippets.ts:1183
         """
-        response = self._request("PUT", f"/snippets/{id}", options=options)
+        response = self._request(
+            "PUT", f"/snippets/{id}", json_body=dict(params) or None, options=options
+        )
         return SnippetsUpdateResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -315,13 +319,16 @@ class AsyncSnippetsService(AsyncTermixService):
         id: str,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[SnippetsUpdateParams],
     ) -> SnippetsUpdateResult:
         """Update a snippet
 
         PUT /snippets/{id}
         Source: src/backend/database/routes/snippets.ts:1183
         """
-        response = await self._request("PUT", f"/snippets/{id}", options=options)
+        response = await self._request(
+            "PUT", f"/snippets/{id}", json_body=dict(params) or None, options=options
+        )
         return SnippetsUpdateResult.construct_from(
             response.data if response else None, last_response=response
         )

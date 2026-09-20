@@ -51,10 +51,28 @@ def test_retrieve_contract(client, mock_http_client):
 def test_update_contract(client, mock_http_client):
     """Generated from PUT /snippets/{id} in spec/termix-openapi.json."""
     mock_http_client.queue_response(status_code=200, body={})
-    result = client.snippets.update("x")
+    result = client.snippets.update(
+        "x",
+        name="x",
+        content="x",
+        description="x",
+        folder="x",
+        order=1.0,
+        hostFilter="x",
+        isNote=True,
+    )
     sent = mock_http_client.requests[0]
     assert sent.method == "PUT"
     assert sent.url.endswith("/snippets/x")
+    assert sent.json == {
+        "name": "x",
+        "content": "x",
+        "description": "x",
+        "folder": "x",
+        "order": 1.0,
+        "hostFilter": "x",
+        "isNote": True,
+    }
     assert result is not None
 
 
@@ -290,10 +308,28 @@ async def test_async_retrieve_contract(async_client, mock_async_http_client):
 async def test_async_update_contract(async_client, mock_async_http_client):
     """Generated from PUT /snippets/{id} in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(status_code=200, body={})
-    result = await async_client.snippets.update("x")
+    result = await async_client.snippets.update(
+        "x",
+        name="x",
+        content="x",
+        description="x",
+        folder="x",
+        order=1.0,
+        hostFilter="x",
+        isNote=True,
+    )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "PUT"
     assert sent.url.endswith("/snippets/x")
+    assert sent.json == {
+        "name": "x",
+        "content": "x",
+        "description": "x",
+        "folder": "x",
+        "order": 1.0,
+        "hostFilter": "x",
+        "isNote": True,
+    }
     assert result is not None
 
 

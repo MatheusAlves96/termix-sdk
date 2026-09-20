@@ -124,29 +124,39 @@
         "schema": {
           "type": "object",
           "properties": {
+            "providerType": {
+              "type": "string",
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter"
+            },
             "label": {
               "type": "string",
-              "confidence": "frontend-type"
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter"
             },
             "baseUrl": {
               "type": "string",
-              "confidence": "frontend-type"
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter"
             },
             "apiKey": {
               "type": "string",
-              "confidence": "frontend-type"
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter"
             },
             "defaultModel": {
               "type": "string",
-              "confidence": "frontend-type"
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter"
             },
             "enabled": {
               "type": "boolean",
-              "confidence": "frontend-type"
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter"
             }
           },
           "required": [],
-          "confidence": "frontend-type"
+          "confidence": "inferred"
         }
       }
     ],
@@ -1216,7 +1226,25 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "multipart/form-data",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "file": {
+              "type": "string",
+              "format": "binary",
+              "confidence": "inferred"
+            }
+          },
+          "required": [
+            "file"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -24569,11 +24597,11 @@
                       "type": "object",
                       "confidence": "unknown"
                     },
-                    "__@iterator@2002": {
+                    "__@iterator@1958": {
                       "type": "object",
                       "confidence": "unknown"
                     },
-                    "__@unscopables@2117": {
+                    "__@unscopables@2073": {
                       "type": "object",
                       "properties": {
                         "length": {
@@ -24696,11 +24724,11 @@
                           "type": "boolean",
                           "confidence": "repository-type"
                         },
-                        "__@iterator@2002": {
+                        "__@iterator@1958": {
                           "type": "boolean",
                           "confidence": "repository-type"
                         },
-                        "__@unscopables@2117": {
+                        "__@unscopables@2073": {
                           "type": "boolean",
                           "confidence": "repository-type"
                         }
@@ -24739,8 +24767,8 @@
                     "toSorted",
                     "toSpliced",
                     "with",
-                    "__@iterator@2002",
-                    "__@unscopables@2117"
+                    "__@iterator@1958",
+                    "__@unscopables@2073"
                   ],
                   "confidence": "repository-type"
                 }
@@ -25705,11 +25733,11 @@
                       "type": "object",
                       "confidence": "unknown"
                     },
-                    "__@iterator@2002": {
+                    "__@iterator@1958": {
                       "type": "object",
                       "confidence": "unknown"
                     },
-                    "__@unscopables@2117": {
+                    "__@unscopables@2073": {
                       "type": "object",
                       "properties": {
                         "length": {
@@ -25832,11 +25860,11 @@
                           "type": "boolean",
                           "confidence": "repository-type"
                         },
-                        "__@iterator@2002": {
+                        "__@iterator@1958": {
                           "type": "boolean",
                           "confidence": "repository-type"
                         },
-                        "__@unscopables@2117": {
+                        "__@unscopables@2073": {
                           "type": "boolean",
                           "confidence": "repository-type"
                         }
@@ -25875,8 +25903,8 @@
                     "toSorted",
                     "toSpliced",
                     "with",
-                    "__@iterator@2002",
-                    "__@unscopables@2117"
+                    "__@iterator@1958",
+                    "__@unscopables@2073"
                   ],
                   "confidence": "repository-type"
                 }
@@ -26154,11 +26182,11 @@
                       "type": "object",
                       "confidence": "unknown"
                     },
-                    "__@iterator@2002": {
+                    "__@iterator@1958": {
                       "type": "object",
                       "confidence": "unknown"
                     },
-                    "__@unscopables@2117": {
+                    "__@unscopables@2073": {
                       "type": "object",
                       "properties": {
                         "length": {
@@ -26281,11 +26309,11 @@
                           "type": "boolean",
                           "confidence": "repository-type"
                         },
-                        "__@iterator@2002": {
+                        "__@iterator@1958": {
                           "type": "boolean",
                           "confidence": "repository-type"
                         },
-                        "__@unscopables@2117": {
+                        "__@unscopables@2073": {
                           "type": "boolean",
                           "confidence": "repository-type"
                         }
@@ -26324,8 +26352,8 @@
                     "toSorted",
                     "toSpliced",
                     "with",
-                    "__@iterator@2002",
-                    "__@unscopables@2117"
+                    "__@iterator@1958",
+                    "__@unscopables@2073"
                   ],
                   "confidence": "repository-type"
                 }
@@ -27711,7 +27739,54 @@
     ],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter"
+            },
+            "content": {
+              "type": "string",
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter"
+            },
+            "description": {
+              "type": "string",
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter"
+            },
+            "folder": {
+              "type": "string",
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter"
+            },
+            "order": {
+              "type": "number",
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter"
+            },
+            "hostFilter": {
+              "type": "string",
+              "confidence": "matched-type",
+              "nullable": true,
+              "note": "matched column `snippets.hostFilter`"
+            },
+            "isNote": {
+              "type": "boolean",
+              "confidence": "repository-type",
+              "note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -39823,7 +39898,22 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "logout_token": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -48067,7 +48157,16 @@
         "name": "content-type"
       }
     ],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "multipart/form-data",
+        "schema": {
+          "type": "object",
+          "confidence": "unknown",
+          "note": "parsed via busboy/stream; fields not enumerated"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -48205,7 +48304,16 @@
       }
     ],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "multipart/form-data",
+        "schema": {
+          "type": "object",
+          "confidence": "unknown",
+          "note": "parsed via busboy/stream; fields not enumerated"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -63899,10 +64007,8 @@
               "confidence": "frontend-type"
             }
           },
-          "required": [
-            "paneId"
-          ],
-          "confidence": "frontend-type"
+          "required": [],
+          "confidence": "inferred"
         }
       }
     ],
@@ -64057,10 +64163,8 @@
               "confidence": "frontend-type"
             }
           },
-          "required": [
-            "name"
-          ],
-          "confidence": "frontend-type"
+          "required": [],
+          "confidence": "inferred"
         }
       }
     ],
@@ -64238,10 +64342,8 @@
               "confidence": "frontend-type"
             }
           },
-          "required": [
-            "sessionName"
-          ],
-          "confidence": "frontend-type"
+          "required": [],
+          "confidence": "inferred"
         }
       }
     ],
@@ -64578,13 +64680,12 @@
           "properties": {
             "sessionName": {
               "type": "string",
-              "confidence": "frontend-type"
+              "confidence": "matched-type",
+              "note": "matched column `tmux_session_tags.sessionName`"
             }
           },
-          "required": [
-            "sessionName"
-          ],
-          "confidence": "frontend-type"
+          "required": [],
+          "confidence": "inferred"
         }
       }
     ],
@@ -64901,10 +65002,8 @@
               "confidence": "frontend-type"
             }
           },
-          "required": [
-            "paneId"
-          ],
-          "confidence": "frontend-type"
+          "required": [],
+          "confidence": "inferred"
         }
       }
     ],

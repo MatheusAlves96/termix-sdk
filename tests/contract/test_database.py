@@ -26,10 +26,11 @@ def test_import_data_contract(client, mock_http_client):
             },
         },
     )
-    result = client.database.import_data()
+    result = client.database.import_data(file=b"file-content-placeholder")
     sent = mock_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/database/import")
+    assert sent.files == {"file": b"file-content-placeholder"}
     assert result.to_dict() == {
         "success": True,
         "message": "Incremental import completed successfully",
@@ -210,10 +211,11 @@ async def test_async_import_data_contract(async_client, mock_async_http_client):
             },
         },
     )
-    result = await async_client.database.import_data()
+    result = await async_client.database.import_data(file=b"file-content-placeholder")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/database/import")
+    assert sent.files == {"file": b"file-content-placeholder"}
     assert result.to_dict() == {
         "success": True,
         "message": "Incremental import completed successfully",

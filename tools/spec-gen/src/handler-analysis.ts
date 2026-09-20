@@ -662,10 +662,17 @@ function fieldTypeFromValidators(
   return { type, required, enumValues, note };
 }
 
-/** Peels `as X` casts and `?? {}` / `|| {}` defensive fallbacks down to the real expression. */
+/** Peels parentheses, `as X` casts and `?? {}` / `|| {}` defensive fallbacks down to the real
+ *  expression. */
 function unwrapBodyExpr(n: Node): Node {
   let e = n;
   while (true) {
+    if (Node.isParenthesizedExpression(e)) {
+      // `(req.body as Record<string, unknown> | undefined)?.logout_token` — the parentheses a
+      // cast needs before a property access were hiding the body from the `.x` pass below.
+      e = e.getExpression();
+      continue;
+    }
     if (Node.isAsExpression(e)) {
       e = e.getExpression();
       continue;
@@ -690,6 +697,11 @@ function isReqBodyExpr(n: Node): boolean {
 interface DeclaredField {
   schema: SchemaNode;
   required: boolean;
+  /** Confidence to stamp when this declaration is what ends up typing the field. Defaults to
+   *  "handler-literal" (E0's own `req.body as {...}` cast); E6 supplies its own. */
+  confidence?: Confidence;
+  /** Note to stamp alongside it, same defaulting rule as `confidence`. */
+  note?: string;
 }
 
 /**
@@ -742,6 +754,93 @@ function extractDeclaredBodyFieldTypes(initExpr: Node, ctx: AnalysisContext): Ma
     out.set(name, { schema: propSchema, required: requiredNames.has(name) });
   }
   return out.size > 0 ? out : null;
+}
+
+/** True for an argument that *is* the request body: `req.body` itself, or an identifier the
+ *  handler assigned `req.body` to. `{ ...req.body }` and friends are deliberately excluded —
+ *  only a whole-body forward tells us the parameter's type is the body's type. */
+function isForwardedBodyArg(arg: Node, bodyAliases: Set<string>): boolean {
+  if (isReqBodyExpr(arg)) return true;
+  const inner = unwrapBodyExpr(arg);
+  return Node.isIdentifier(inner) && bodyAliases.has(inner.getText());
+}
+
+/** Last segment of a callee expression: `createCurrentSnippetRepository().updateSnippet` -> `updateSnippet`. */
+function calleeDisplayName(call: Node): string {
+  const callee = (call as import("ts-morph").CallExpression).getExpression();
+  return Node.isPropertyAccessExpression(callee) ? callee.getName() : callee.getText();
+}
+
+/**
+ * E6: the handler never destructures the body and never casts it — it just forwards the whole
+ * thing to something else (`const updateData = req.body; ... repo.updateSnippet(userId, id,
+ * updateData)`). E0-E5 all come up empty on that shape, and so does E4 when the frontend
+ * client types its own argument as `Record<string, unknown>` — which is exactly how
+ * `PUT /snippets/{id}` ended up in the spec with no requestBody at all, making the whole
+ * operation unusable from a generated SDK.
+ *
+ * The callee's own parameter type is the missing signal, and it's a real dataflow edge rather
+ * than a name match: whatever `updateSnippet(userId, snippetId, input: SnippetUpdateInput)`
+ * declares its third parameter to be IS the body's shape, as checked by tsc on every build.
+ *
+ * Deliberately narrow: only fires when nothing else found a single field, only for a single
+ * (non-overloaded) call signature, and only when the parameter resolves to an object type
+ * that actually has named properties — a parameter typed `unknown`/`any`/`Record<string,
+ * unknown>` (PUT /snippets/reorder's `extractSnippetReorderUpdates(body: unknown)`) yields
+ * nothing and is skipped, same as before.
+ */
+function forwardedBodyDeclaredFields(
+  fnNode: Node,
+  bodyAliases: Set<string>,
+  ctx: AnalysisContext,
+): Map<string, DeclaredField> | null {
+  for (const call of fnNode.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    const argIndex = call.getArguments().findIndex((a) => isForwardedBodyArg(a, bodyAliases));
+    if (argIndex < 0) continue;
+
+    // An overloaded callee would mean picking one signature's parameter over another's; that's
+    // a guess, and this whole module's rule is to leave a field alone rather than guess at it.
+    const signatures = call.getExpression().getType().getCallSignatures();
+    if (signatures.length !== 1) continue;
+    const param = signatures[0].getParameters()[argIndex];
+    if (!param) continue;
+    const decl = param.getValueDeclaration() ?? param.getDeclarations()[0];
+    if (!decl || !Node.isParameterDeclaration(decl) || decl.isRestParameter()) continue;
+
+    // A repository's own input interface is the same class of signal as its return type
+    // (both are the Drizzle-backed layer's declared TS types); anything else is a plain
+    // type match, no stronger than E2/E3.
+    const fromRepository = decl.getSourceFile().getFilePath().includes("/repositories/");
+    const conf: Confidence = fromRepository ? "repository-type" : "matched-type";
+    const paramType = param.getTypeAtLocation(decl);
+    const schema = schemaFromType(paramType, ctx, 0, conf);
+    if (schema.type !== "object" || !schema.properties) continue;
+    const names = Object.keys(schema.properties);
+    if (names.length === 0) continue;
+
+    // The annotation as written (`Partial<AiProviderUpdate>`) rather than the checker's own
+    // name for it (just `Partial`), falling back to the symbol when the parameter is only
+    // typed by inference. An inline object literal type is skipped — it can be pages long,
+    // and the fields it declares are already right there in the schema.
+    const annotation = decl.getTypeNode()?.getText();
+    const symbolName = (paramType.getAliasSymbol() ?? paramType.getSymbol())?.getName();
+    const typeName =
+      annotation && annotation.length <= 60 && !annotation.includes("{")
+        ? annotation
+        : symbolName && symbolName !== "__type"
+          ? symbolName
+          : null;
+    const note =
+      `body forwarded whole to \`${calleeDisplayName(call)}()\`; typed by its ` +
+      `\`${param.getName()}${typeName ? `: ${typeName}` : ""}\` parameter`;
+    const requiredNames = new Set(schema.required ?? []);
+    const out = new Map<string, DeclaredField>();
+    for (const name of names) {
+      out.set(name, { schema: schema.properties[name], required: requiredNames.has(name), confidence: conf, note });
+    }
+    return out;
+  }
+  return null;
 }
 
 function extractBodyFields(
@@ -798,8 +897,8 @@ function extractBodyFields(
   }
 
   for (const pae of fnNode.getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)) {
-    const obj = pae.getExpression();
-    const isDirect = Node.isPropertyAccessExpression(obj) && obj.getExpression().getText() === "req" && obj.getName() === "body";
+    const obj = unwrapBodyExpr(pae.getExpression());
+    const isDirect = isReqBodyExpr(obj);
     const isAliased = Node.isIdentifier(obj) && bodyAliases.has(obj.getText());
     if (isDirect || isAliased) {
       const name = pae.getName();
@@ -813,6 +912,13 @@ function extractBodyFields(
   // have a declared type, its own properties ARE the field list.
   if (fields.size === 0 && declaredTypes.size > 0) {
     for (const [name, declared] of declaredTypes) fields.set(name, { name, declared });
+  }
+
+  // E6: same "forwarded whole, never touched" shape as above, minus the cast that made the
+  // declared type available — so the type has to come from the callee's own parameter instead.
+  if (fields.size === 0) {
+    const forwarded = forwardedBodyDeclaredFields(fnNode, bodyAliases, ctx);
+    if (forwarded) for (const [name, declared] of forwarded) fields.set(name, { name, declared });
   }
 
   for (const field of fields.values()) {
@@ -916,7 +1022,37 @@ function findBestTypeInterfaceMatch(fieldNames: Set<string>, typeInterfaces: Typ
 
 function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[], ctx: AnalysisContext): RequestBodyVariant[] {
   const fields = extractBodyFields(fnNode, ctx);
-  if (fields.length === 0) return [];
+
+  const uploadMiddleware = middlewares.find((m) => /^upload\.single\(/.test(m));
+  const uploadFileField = uploadMiddleware
+    ? (/^upload\.single\(\s*["']([^"']+)["']\s*\)/.exec(uploadMiddleware)?.[1] ?? "file")
+    : null;
+  const streamed = /\bBusboy\(/.test(fnText) || /req\.pipe\(/.test(fnText);
+
+  // No JSON field anywhere doesn't mean no body: an `upload.single("file")` route accepts a
+  // multipart file whether or not its handler ever reads a text field beside it (POST
+  // /database/import reads only `req.file`), and a busboy/`req.pipe` route consumes the raw
+  // stream by definition. Returning [] for those emitted a write operation with no
+  // requestBody at all — an SDK generated from it can't send the upload the route exists for.
+  if (fields.length === 0) {
+    if (uploadFileField) {
+      return [
+        {
+          contentType: "multipart/form-data",
+          schema: {
+            type: "object",
+            properties: { [uploadFileField]: { type: "string", format: "binary", confidence: "inferred" } },
+            required: [uploadFileField],
+            confidence: "inferred",
+          },
+        },
+      ];
+    }
+    if (streamed) {
+      return [{ contentType: "multipart/form-data", schema: { type: "object", confidence: "unknown", note: "parsed via busboy/stream; fields not enumerated" } }];
+    }
+    return [];
+  }
 
   const calledFactories = calledRepositoryFactories(fnNode, ctx);
   const typeMatch = findBestTypeInterfaceMatch(new Set(fields.map((f) => f.name)), ctx.typeInterfaces);
@@ -927,16 +1063,20 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
     let confidence: Confidence = type === "unknown" ? "unknown" : "inferred";
     let nullable: boolean | undefined;
     let note: string | undefined = validatorNote;
+    // True once the declared type (E0's cast or E6's callee parameter) is what typed this
+    // field — which is also what makes that declaration's own optionality meaningful below.
+    let typedFromDeclared = false;
 
     // E0: an explicit validator in the handler's own control flow is still the strongest
     // signal (it's what the server actually enforces at runtime) — only fall back to the
     // declared cast type when the validator pass found nothing.
     if (type === "unknown" && f.declared && f.declared.schema.type && f.declared.schema.type !== "unknown") {
       type = f.declared.schema.type;
-      confidence = "handler-literal";
+      confidence = f.declared.confidence ?? "handler-literal";
       nullable = f.declared.schema.nullable;
       if (f.declared.schema.enumValues) enumValues = f.declared.schema.enumValues.map(String);
-      note = "declared via `req.body as {...}`";
+      note = f.declared.note ?? "declared via `req.body as {...}`";
+      typedFromDeclared = true;
     }
 
     // E1: no explicit validator and no declared cast — the destructuring default's own
@@ -986,17 +1126,14 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
       ...(nullable ? { nullable } : {}),
       ...(note ? { note } : {}),
     };
-    if (req || f.default !== undefined || (f.declared?.required && confidence === "handler-literal")) required.push(f.name);
+    if (req || f.default !== undefined || (f.declared?.required && typedFromDeclared)) required.push(f.name);
   }
   const schema: SchemaNode = { type: "object", properties, required, confidence: "inferred" };
 
-  const uploadMiddleware = middlewares.find((m) => /^upload\.single\(/.test(m));
-  if (uploadMiddleware) {
-    const m = /^upload\.single\(\s*["']([^"']+)["']\s*\)/.exec(uploadMiddleware);
-    const fileField = m?.[1] ?? "file";
+  if (uploadFileField) {
     const multipartProps: Record<string, SchemaNode> = {
       ...properties,
-      [fileField]: { type: "string", format: "binary", confidence: "inferred" },
+      [uploadFileField]: { type: "string", format: "binary", confidence: "inferred" },
     };
     return [
       { contentType: "multipart/form-data", schema: { type: "object", properties: multipartProps, required, confidence: "inferred" } },
@@ -1004,7 +1141,7 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
     ];
   }
 
-  if (/\bBusboy\(/.test(fnText) || /req\.pipe\(/.test(fnText)) {
+  if (streamed) {
     return [{ contentType: "multipart/form-data", schema: { type: "object", confidence: "unknown", note: "parsed via busboy/stream; fields not enumerated" } }];
   }
 
