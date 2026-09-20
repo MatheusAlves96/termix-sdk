@@ -73,16 +73,18 @@ def test_hosts_crud(client: TermixClient, run_prefix: str) -> None:
 
 
 def test_snippets_crud(client: TermixClient, run_prefix: str) -> None:
-    # No update leg: `PUT /snippets/{id}` has no documented request body in
-    # the spec, so the generated `snippets.update()` takes no fields and
-    # cannot change anything. Tracked separately; the update path is
-    # covered by test_hosts_crud.
     name = f"{run_prefix}-snippet"
     created = client.snippets.create(name=name, content="echo live-smoke")
     snippet_id = str(created.id)
 
     assert client.snippets.retrieve(snippet_id).content == "echo live-smoke"
     assert name in [snippet["name"] for snippet in client.snippets.list()]
+
+    # Partial update: only `content` is sent, so `name` has to survive it.
+    client.snippets.update(snippet_id, content="echo live-smoke-updated")
+    updated = client.snippets.retrieve(snippet_id)
+    assert updated.content == "echo live-smoke-updated"
+    assert updated.name == name
 
     client.snippets.delete(snippet_id)
     with pytest.raises(NotFoundError):

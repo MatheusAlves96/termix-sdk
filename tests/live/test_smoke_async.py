@@ -81,7 +81,6 @@ async def test_hosts_crud(async_client: AsyncTermixClient, run_prefix: str) -> N
 
 
 async def test_snippets_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
-    # See the comment in test_smoke.py: `snippets.update()` takes no body.
     name = f"{run_prefix}-snippet-async"
     created = await async_client.snippets.create(name=name, content="echo live-smoke")
     snippet_id = str(created.id)
@@ -90,6 +89,12 @@ async def test_snippets_crud(async_client: AsyncTermixClient, run_prefix: str) -
     assert fetched.content == "echo live-smoke"
     snippets = await async_client.snippets.list()
     assert name in [snippet["name"] for snippet in snippets]
+
+    # Partial update: only `content` is sent, so `name` has to survive it.
+    await async_client.snippets.update(snippet_id, content="echo live-smoke-updated")
+    updated = await async_client.snippets.retrieve(snippet_id)
+    assert updated.content == "echo live-smoke-updated"
+    assert updated.name == name
 
     await async_client.snippets.delete(snippet_id)
     with pytest.raises(NotFoundError):
