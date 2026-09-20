@@ -152,12 +152,19 @@ def test_snippets_execute_sends_all_body_fields(
     }
 
 
-def test_snippets_update_with_no_request_body_in_spec_sends_no_body(
+def test_snippets_update_sends_only_the_fields_passed(
     client: TermixClient, mock_http_client: MockHTTPClient
 ):
-    # PUT /snippets/{id} has no requestBody in the spec at all (a real gap
-    # — see docs/api-schema-validation.md) — the generated method
-    # faithfully reflects that rather than inventing a body.
+    # PUT /snippets/{id} takes a partial body: every field is optional, so
+    # the request carries exactly what the caller passed and nothing else.
+    mock_http_client.queue_response(status_code=200, body={})
+    client.snippets.update("3", content="echo hi")
+    assert mock_http_client.requests[0].json == {"content": "echo hi"}
+
+
+def test_snippets_update_with_no_fields_sends_no_body(
+    client: TermixClient, mock_http_client: MockHTTPClient
+):
     mock_http_client.queue_response(status_code=200, body={})
     client.snippets.update("3")
     assert mock_http_client.requests[0].json is None
