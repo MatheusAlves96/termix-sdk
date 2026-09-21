@@ -19,6 +19,7 @@ class AiCreateProviderParams(TypedDict, total=False):
 
 
 class AiUpdateProviderParams(TypedDict, total=False):
+    providerType: str
     label: str
     baseUrl: str
     apiKey: str

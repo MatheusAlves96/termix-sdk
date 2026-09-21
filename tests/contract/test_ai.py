@@ -40,12 +40,13 @@ def test_update_provider_contract(client, mock_http_client):
     """Generated from PATCH /ai/providers/{id} in spec/termix-openapi.json."""
     mock_http_client.queue_response(status_code=200, body={"provider": {}})
     result = client.ai.update_provider(
-        "x", label="x", baseUrl="x", apiKey="x", defaultModel="x", enabled=True
+        "x", providerType="x", label="x", baseUrl="x", apiKey="x", defaultModel="x", enabled=True
     )
     sent = mock_http_client.requests[0]
     assert sent.method == "PATCH"
     assert sent.url.endswith("/ai/providers/x")
     assert sent.json == {
+        "providerType": "x",
         "label": "x",
         "baseUrl": "x",
         "apiKey": "x",
@@ -212,12 +213,13 @@ async def test_async_update_provider_contract(async_client, mock_async_http_clie
     """Generated from PATCH /ai/providers/{id} in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(status_code=200, body={"provider": {}})
     result = await async_client.ai.update_provider(
-        "x", label="x", baseUrl="x", apiKey="x", defaultModel="x", enabled=True
+        "x", providerType="x", label="x", baseUrl="x", apiKey="x", defaultModel="x", enabled=True
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "PATCH"
     assert sent.url.endswith("/ai/providers/x")
     assert sent.json == {
+        "providerType": "x",
         "label": "x",
         "baseUrl": "x",
         "apiKey": "x",

@@ -258,6 +258,21 @@ class Operation:
         content = rb.get("content", {})
         json_body = content.get("application/json")
         if json_body is None:
+            # A multipart body that is nothing but file parts has no JSON
+            # half to lose: `multipart_file_fields` below turns each part
+            # into its own `bytes | BinaryIO` keyword argument, so there is
+            # no body schema left to represent (POST /database/import takes
+            # exactly one part, the SQLite file). A multipart body with
+            # non-binary form fields, or one whose parts the spec could not
+            # enumerate at all (busboy-streamed uploads), would silently
+            # drop real fields — those still stop generation.
+            multipart_props = (content.get("multipart/form-data", {}).get("schema", {}) or {}).get(
+                "properties"
+            )
+            if multipart_props and all(
+                s.get("format") == "binary" for s in multipart_props.values()
+            ):
+                return None
             raise NotImplementedError(
                 f"{self.method} {self.path}: non-JSON request body "
                 f"(content types: {list(content)}) — multipart is out of "

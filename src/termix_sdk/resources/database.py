@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal  # noqa: F401, UP035
+from typing import Any, BinaryIO, Dict, List, Literal  # noqa: F401, UP035
 
 from typing_extensions import Unpack
 
@@ -28,6 +28,7 @@ class DatabaseService(TermixService):
     def import_data(
         self,
         *,
+        file: bytes | BinaryIO,
         options: RequestOptions | None = None,
     ) -> DatabaseImportDataResult:
         """Import user data
@@ -35,7 +36,7 @@ class DatabaseService(TermixService):
         POST /database/import
         Source: src/backend/database/database.ts:1186
         """
-        response = self._request("POST", "/database/import", options=options)
+        response = self._request("POST", "/database/import", files={"file": file}, options=options)
         return DatabaseImportDataResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -124,6 +125,7 @@ class AsyncDatabaseService(AsyncTermixService):
     async def import_data(
         self,
         *,
+        file: bytes | BinaryIO,
         options: RequestOptions | None = None,
     ) -> DatabaseImportDataResult:
         """Import user data
@@ -131,7 +133,9 @@ class AsyncDatabaseService(AsyncTermixService):
         POST /database/import
         Source: src/backend/database/database.ts:1186
         """
-        response = await self._request("POST", "/database/import", options=options)
+        response = await self._request(
+            "POST", "/database/import", files={"file": file}, options=options
+        )
         return DatabaseImportDataResult.construct_from(
             response.data if response else None, last_response=response
         )

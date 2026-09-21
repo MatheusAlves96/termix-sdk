@@ -6,6 +6,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `snippets.update()` accepted no body fields, so a snippet could not
+  actually be updated through the SDK. The spec generator only found a
+  request body when the handler named its fields (destructuring or
+  `req.body.x`); `PUT /snippets/{id}` assigns `req.body` to a variable
+  and forwards it whole, so the operation reached the spec with no
+  `requestBody`. The generator now also reads the type of the parameter
+  the body is forwarded into, which gives the route its real fields
+  (`name`, `content`, `description`, `folder`, `order`, `hostFilter`,
+  `isNote`).
+- `ai.update_provider()` gained the `providerType` field, from the same
+  fix — it was previously typed from the frontend client, which does not
+  send that field.
+- `database.import_data()` now takes the SQLite file it exists to
+  upload. A `multipart/form-data` route whose handler reads only
+  `req.file` (no text field beside it) was being emitted with no request
+  body at all, so the generated method sent an empty POST.
+- `POST /users/oidc/backchannel-logout`'s `logout_token` field is now in
+  the spec: a body read through a parenthesized cast
+  (`(req.body as Record<string, unknown> | undefined)?.logout_token`) was
+  invisible to the extractor.
+
 ## [0.1.1] - 2026-09-21
 
 ### Fixed
