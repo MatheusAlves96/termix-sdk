@@ -8,7 +8,7 @@
   "x-termix-source": {
     "tag": "release-2.7.1-tag",
     "commit": "76fd9eedbf0f7e853d5ffe40717cac126ffe6a98",
-    "generatedAt": "2026-09-18T22:46:52.203Z"
+    "generatedAt": "2026-09-20T08:26:15.176Z"
   },
   "servers": [
     {
@@ -288,28 +288,38 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "providerType": {
+                    "type": "string",
+                    "x-note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter",
+                    "x-confidence": "repository-type"
+                  },
                   "label": {
                     "type": "string",
-                    "x-confidence": "frontend-type"
+                    "x-note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter",
+                    "x-confidence": "repository-type"
                   },
                   "baseUrl": {
                     "type": "string",
-                    "x-confidence": "frontend-type"
+                    "x-note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter",
+                    "x-confidence": "repository-type"
                   },
                   "apiKey": {
                     "type": "string",
-                    "x-confidence": "frontend-type"
+                    "x-note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter",
+                    "x-confidence": "repository-type"
                   },
                   "defaultModel": {
                     "type": "string",
-                    "x-confidence": "frontend-type"
+                    "x-note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter",
+                    "x-confidence": "repository-type"
                   },
                   "enabled": {
                     "type": "boolean",
-                    "x-confidence": "frontend-type"
+                    "x-note": "body forwarded whole to `updateProvider()`; typed by its `input: Partial<Omit<AiProviderInput, \"userId\">>` parameter",
+                    "x-confidence": "repository-type"
                   }
                 },
-                "x-confidence": "frontend-type"
+                "x-confidence": "inferred"
               }
             }
           }
@@ -1718,6 +1728,26 @@
         "tags": [
           "Database"
         ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "x-confidence": "inferred"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -31450,11 +31480,11 @@
                               "type": "object",
                               "x-confidence": "unknown"
                             },
-                            "__@iterator@2002": {
+                            "__@iterator@1958": {
                               "type": "object",
                               "x-confidence": "unknown"
                             },
-                            "__@unscopables@2117": {
+                            "__@unscopables@2073": {
                               "type": "object",
                               "properties": {
                                 "length": {
@@ -31577,11 +31607,11 @@
                                   "type": "boolean",
                                   "x-confidence": "repository-type"
                                 },
-                                "__@iterator@2002": {
+                                "__@iterator@1958": {
                                   "type": "boolean",
                                   "x-confidence": "repository-type"
                                 },
-                                "__@unscopables@2117": {
+                                "__@unscopables@2073": {
                                   "type": "boolean",
                                   "x-confidence": "repository-type"
                                 }
@@ -31619,8 +31649,8 @@
                             "toSorted",
                             "toSpliced",
                             "with",
-                            "__@iterator@2002",
-                            "__@unscopables@2117"
+                            "__@iterator@1958",
+                            "__@unscopables@2073"
                           ],
                           "x-confidence": "repository-type"
                         }
@@ -32812,11 +32842,11 @@
                               "type": "object",
                               "x-confidence": "unknown"
                             },
-                            "__@iterator@2002": {
+                            "__@iterator@1958": {
                               "type": "object",
                               "x-confidence": "unknown"
                             },
-                            "__@unscopables@2117": {
+                            "__@unscopables@2073": {
                               "type": "object",
                               "properties": {
                                 "length": {
@@ -32939,11 +32969,11 @@
                                   "type": "boolean",
                                   "x-confidence": "repository-type"
                                 },
-                                "__@iterator@2002": {
+                                "__@iterator@1958": {
                                   "type": "boolean",
                                   "x-confidence": "repository-type"
                                 },
-                                "__@unscopables@2117": {
+                                "__@unscopables@2073": {
                                   "type": "boolean",
                                   "x-confidence": "repository-type"
                                 }
@@ -32981,8 +33011,8 @@
                             "toSorted",
                             "toSpliced",
                             "with",
-                            "__@iterator@2002",
-                            "__@unscopables@2117"
+                            "__@iterator@1958",
+                            "__@unscopables@2073"
                           ],
                           "x-confidence": "repository-type"
                         }
@@ -33296,11 +33326,11 @@
                               "type": "object",
                               "x-confidence": "unknown"
                             },
-                            "__@iterator@2002": {
+                            "__@iterator@1958": {
                               "type": "object",
                               "x-confidence": "unknown"
                             },
-                            "__@unscopables@2117": {
+                            "__@unscopables@2073": {
                               "type": "object",
                               "properties": {
                                 "length": {
@@ -33423,11 +33453,11 @@
                                   "type": "boolean",
                                   "x-confidence": "repository-type"
                                 },
-                                "__@iterator@2002": {
+                                "__@iterator@1958": {
                                   "type": "boolean",
                                   "x-confidence": "repository-type"
                                 },
-                                "__@unscopables@2117": {
+                                "__@unscopables@2073": {
                                   "type": "boolean",
                                   "x-confidence": "repository-type"
                                 }
@@ -33465,8 +33495,8 @@
                             "toSorted",
                             "toSpliced",
                             "with",
-                            "__@iterator@2002",
-                            "__@unscopables@2117"
+                            "__@iterator@1958",
+                            "__@unscopables@2073"
                           ],
                           "x-confidence": "repository-type"
                         }
@@ -35165,6 +35195,56 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "x-note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter",
+                    "x-confidence": "repository-type"
+                  },
+                  "content": {
+                    "type": "string",
+                    "x-note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter",
+                    "x-confidence": "repository-type"
+                  },
+                  "description": {
+                    "type": "string",
+                    "x-note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter",
+                    "x-confidence": "repository-type"
+                  },
+                  "folder": {
+                    "type": "string",
+                    "x-note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter",
+                    "x-confidence": "repository-type"
+                  },
+                  "order": {
+                    "type": "number",
+                    "x-note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter",
+                    "x-confidence": "repository-type"
+                  },
+                  "hostFilter": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "x-note": "matched column `snippets.hostFilter`",
+                    "x-confidence": "matched-type"
+                  },
+                  "isNote": {
+                    "type": "boolean",
+                    "x-note": "body forwarded whole to `updateSnippet()`; typed by its `input: SnippetUpdateInput` parameter",
+                    "x-confidence": "repository-type"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -51350,6 +51430,21 @@
         "tags": [
           "Users"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "logout_token": {
+                    "x-confidence": "unknown"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -62141,6 +62236,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "x-note": "parsed via busboy/stream; fields not enumerated",
+                "x-confidence": "unknown"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -62322,6 +62428,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "x-note": "parsed via busboy/stream; fields not enumerated",
+                "x-confidence": "unknown"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -81209,10 +81326,7 @@
                     "x-confidence": "frontend-type"
                   }
                 },
-                "required": [
-                  "paneId"
-                ],
-                "x-confidence": "frontend-type"
+                "x-confidence": "inferred"
               }
             }
           }
@@ -81411,10 +81525,7 @@
                     "x-confidence": "frontend-type"
                   }
                 },
-                "required": [
-                  "name"
-                ],
-                "x-confidence": "frontend-type"
+                "x-confidence": "inferred"
               }
             }
           }
@@ -81639,10 +81750,7 @@
                     "x-confidence": "frontend-type"
                   }
                 },
-                "required": [
-                  "sessionName"
-                ],
-                "x-confidence": "frontend-type"
+                "x-confidence": "inferred"
               }
             }
           }
@@ -82069,13 +82177,11 @@
                 "properties": {
                   "sessionName": {
                     "type": "string",
-                    "x-confidence": "frontend-type"
+                    "x-note": "matched column `tmux_session_tags.sessionName`",
+                    "x-confidence": "matched-type"
                   }
                 },
-                "required": [
-                  "sessionName"
-                ],
-                "x-confidence": "frontend-type"
+                "x-confidence": "inferred"
               }
             }
           }
@@ -82479,10 +82585,7 @@
                     "x-confidence": "frontend-type"
                   }
                 },
-                "required": [
-                  "paneId"
-                ],
-                "x-confidence": "frontend-type"
+                "x-confidence": "inferred"
               }
             }
           }

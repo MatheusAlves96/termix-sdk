@@ -1,6 +1,6 @@
 # termix-sdk spec-gen report
 
-Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac126ffe6a98`) on 2026-09-18T22:46:52.203Z.
+Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac126ffe6a98`) on 2026-09-20T08:26:15.176Z.
 
 ## Route counts
 
@@ -32,19 +32,21 @@ Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac12
 
 ### Request body completeness (docs/spec-generation-strategy-v2.md)
 
-- POST/PUT/PATCH routes: **265**, of which **183** (69%) have an `application/json` body with every top-level field typed
-- Routes where no body field was found at all: **43**
-- Top-level `application/json` fields still `unknown`: **86**
+- POST/PUT/PATCH routes: **265**, of which **184** (69%) have an `application/json` body with every top-level field typed
+- Routes where no body field was found at all: **38**
+- Routes with a body but no `application/json` variant (e.g. streamed uploads): **3**
+- Top-level `application/json` fields still `unknown`: **87**
 
 ### Request body field confidence (all nodes, all content types — includes nested fields)
 
 | Confidence | Count |
 |---|---|
+| repository-type | 12 |
 | handler-literal | 77 |
-| frontend-type | 340 |
-| matched-type | 415 |
-| inferred | 671 |
-| unknown | 95 |
+| frontend-type | 328 |
+| matched-type | 417 |
+| inferred | 681 |
+| unknown | 98 |
 
 ### Response field confidence
 
