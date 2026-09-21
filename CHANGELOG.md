@@ -6,6 +6,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `tests/live/`: an opt-in smoke suite (`TERMIX_LIVE=1`) that runs the
+  sync and async clients against a real Termix instance, plus
+  `docker/live/compose.yml` to bring one up and a weekly
+  `.github/workflows/live.yml` that runs it outside of PR checks.
+
 ### Fixed
 
 - `snippets.update()` accepted no body fields, so a snippet could not

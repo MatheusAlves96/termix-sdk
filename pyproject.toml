@@ -57,6 +57,9 @@ only-include = ["src", "tests", "examples", "CHANGELOG.md", "CONTRIBUTING.md"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "live: runs against a real Termix instance (opt-in via TERMIX_LIVE=1)",
+]
 
 [tool.coverage.run]
 source = ["termix_sdk"]

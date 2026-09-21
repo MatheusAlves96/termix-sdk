@@ -1,0 +1,18 @@
+# The Termix instance the live smoke suite runs against — used both
+# locally and by .github/workflows/live.yml. Ephemeral on purpose: the
+# suite registers its own user and mints its own API key, and nothing
+# here should survive the run.
+#
+# `guacd` (remote desktop) is deliberately absent; the smoke never
+# touches those endpoints. The image ships its own healthcheck, so
+# `docker compose up -d --wait` blocks until Termix is serving.
+
+services:
+  termix:
+    image: ${TERMIX_IMAGE:-ghcr.io/lukegus/termix:latest}
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+    tmpfs:
+      - /app/data

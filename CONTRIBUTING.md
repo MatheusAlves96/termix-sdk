@@ -23,6 +23,8 @@ uv run ruff format --check .
 uv run mypy              # src/ and examples/
 ```
 
+`tests/live/` is skipped unless you opt in — see "Live smoke" below.
+
 ## What CI checks
 
 `.github/workflows/ci.yml` runs on every push to `main` and every PR:
@@ -38,6 +40,9 @@ uv run mypy              # src/ and examples/
 `uv.lock` is enforced (`UV_LOCKED=1`): if you change `pyproject.toml`
 dependencies, run `uv lock` and commit the lockfile, or CI fails at
 `uv sync`.
+
+`.github/workflows/live.yml` is the one workflow that never runs on a
+PR — see "Live smoke" below.
 
 `.github/workflows/zizmor.yml` lints the workflows themselves for
 security issues (unpinned actions, template injection, leaked
@@ -170,5 +175,41 @@ live-instance coverage would need real SSH hosts, Docker containers, and
 tmux sessions to test against, plus care around endpoints with real
 side effects (`database/export`, `encryption/regenerate-jwt`,
 `delete-account`, fleet actions across real hosts) that shouldn't run
-unattended in CI. If you want to exercise the SDK against a real
-instance, do so manually — there's no `tests/live/` yet.
+unattended in CI.
+
+`tests/live/` is the narrow exception: a smoke suite against a real
+Termix instance, covering authentication, the central read/write
+endpoints and the error mapping — not per-operation coverage.
+
+## Live smoke
+
+```bash
+docker compose -f docker/live/compose.yml up -d --wait
+```
+
+```bash
+TERMIX_LIVE=1 TERMIX_BASE_URL=http://localhost:8080 TERMIX_LIVE_PASSWORD='Live-Smoke-Aa1' uv run pytest tests/live -q
+```
+
+Without those three environment variables the whole directory is skipped
+at collection, so a plain `uv run pytest` still runs only the mocked
+suites (one reported skip, which is the gate).
+
+What it covers, in sync and async: `health`; `version` (warns when the
+instance is newer than the `SPEC_VERSION` the SDK was generated from);
+`users.get_me()`; hosts create/retrieve/update/list/delete; snippets
+create/retrieve/list/delete; the bootstrap API key showing up in
+`api_keys.list()`; `NotFoundError` on an unknown id; `AuthenticationError`
+on a bad API key; and that `login()` returns a client whose resources
+actually work.
+
+The suite registers its own `ci` user on the empty instance (the first
+account created is the admin, which is what lets it mint an API key),
+authenticates with that key, prefixes everything it creates with
+`live-smoke-<hex>` and deletes it again on teardown.
+
+`.github/workflows/live.yml` runs the same thing weekly and on
+`workflow_dispatch`, against `ghcr.io/lukegus/termix:latest`. It has no
+`pull_request` trigger on purpose: a Termix that is down, or an upstream
+release that changes a response shape, must never block a merge. A failed
+scheduled run opens (or comments on) an issue labelled `live-smoke`.
