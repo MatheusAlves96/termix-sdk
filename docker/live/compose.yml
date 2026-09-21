@@ -1,7 +1,17 @@
-# The Termix instance the live smoke suite runs against — used both
-# locally and by .github/workflows/live.yml. Ephemeral on purpose: the
-# suite registers its own user and mints its own API key, and nothing
-# here should survive the run.
+# The Termix instance the live smoke suite runs against, for local use.
+# Ephemeral on purpose: the suite registers its own user and mints its
+# own API key, and nothing here should survive the run.
+#
+# Pinned to the release SPEC_VERSION was generated from, not `:latest`:
+# a floating tag means a local run silently tests a different Termix
+# release than the one the spec documents (as opposed to a version
+# mismatch, which the suite's `version` case only warns about, by
+# design). Bump this alongside SPEC_VERSION when the spec is
+# regenerated against a new release — see docs/sdk-plan.md section 9.
+# `.github/workflows/live.yml` does NOT read this default: it always
+# sets `TERMIX_IMAGE` itself (`:latest` unless `workflow_dispatch`
+# overrides it), on purpose, so the weekly run is what finds an
+# upstream break before a user does.
 #
 # `guacd` (remote desktop) is deliberately absent; the smoke never
 # touches those endpoints. The image ships its own healthcheck, so
@@ -9,7 +19,7 @@
 
 services:
   termix:
-    image: ${TERMIX_IMAGE:-ghcr.io/lukegus/termix:latest}
+    image: ${TERMIX_IMAGE:-ghcr.io/lukegus/termix:2.7.1}
     ports:
       - "8080:8080"
     environment:

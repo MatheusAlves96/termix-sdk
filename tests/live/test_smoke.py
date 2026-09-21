@@ -23,11 +23,17 @@ def test_health(client: TermixClient) -> None:
 
 def test_version_matches_the_spec_the_sdk_was_generated_from(client: TermixClient) -> None:
     version = client.system.version().to_dict()
-    local = version.get("version") or version.get("localVersion")
+    # `localVersion` is the instance actually running; `version` is an alias
+    # for `remoteVersion`, the latest release on GitHub — comparing against
+    # that instead would warn any time an update exists, regardless of what
+    # this instance is pinned to.
+    local = version.get("localVersion") or version.get("version")
     assert local, f"no version field in {version!r}"
 
-    # Not an assertion: a newer Termix is expected to show up here first,
-    # and the weekly schedule surfacing it is the point of this suite.
+    # Not an assertion: `docker/live/compose.yml`'s local default tracks
+    # `SPEC_VERSION`, but `live.yml`'s weekly run tracks `:latest` on
+    # purpose — a newer Termix is expected to show up here first, and
+    # surfacing that drift is the point of that schedule.
     if f"release-{local}-tag" != SPEC_VERSION:
         warnings.warn(
             f"Termix {local} vs SPEC_VERSION {SPEC_VERSION}: the SDK may be "
