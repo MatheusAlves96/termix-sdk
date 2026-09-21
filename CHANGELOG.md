@@ -29,6 +29,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (`(req.body as Record<string, unknown> | undefined)?.logout_token`) was
   invisible to the extractor.
 
+## [0.1.1] - 2026-09-21
+
+### Fixed
+
+- `TermixClient.login()`, `AsyncTermixClient.login()` and
+  `PendingTOTP.verify()` returned a client with no resource attributes:
+  `client.users`, `client.hosts` and every other resource raised
+  `AttributeError`, so a JWT-authenticated client could only be used
+  through the low-level `request()` escape hatch. Found while probing a
+  real Termix instance for the live smoke suite.
+
 ## [0.1.0] - 2026-09-19
 
 First release. Generated against Termix `release-2.7.1-tag`.
