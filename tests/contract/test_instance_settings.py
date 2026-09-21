@@ -179,6 +179,7 @@ def test_update_host_defaults_contract(client, mock_http_client):
             "cursorBlink": True,
             "enableSessionLogging": True,
             "enableCommandHistory": True,
+            "autoTmux": True,
         },
     )
     result = client.instance_settings.update_host_defaults(
@@ -197,6 +198,7 @@ def test_update_host_defaults_contract(client, mock_http_client):
         cursorBlink=True,
         enableSessionLogging=True,
         enableCommandHistory=True,
+        autoTmux=True,
     )
     sent = mock_http_client.requests[0]
     assert sent.method == "PATCH"
@@ -217,6 +219,7 @@ def test_update_host_defaults_contract(client, mock_http_client):
         "cursorBlink": True,
         "enableSessionLogging": True,
         "enableCommandHistory": True,
+        "autoTmux": True,
     }
     assert result.to_dict() == {
         "useSocks5": True,
@@ -234,6 +237,7 @@ def test_update_host_defaults_contract(client, mock_http_client):
         "cursorBlink": True,
         "enableSessionLogging": True,
         "enableCommandHistory": True,
+        "autoTmux": True,
     }
 
 
@@ -645,6 +649,85 @@ def test_get_oidc_config_admin_contract(client, mock_http_client):
     }
 
 
+def test_get_branding_contract(client, mock_http_client):
+    """Generated from GET /users/branding in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200, body={"appName": "x", "tagline": "x", "logo": "x"}
+    )
+    result = client.instance_settings.get_branding()
+    sent = mock_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/users/branding")
+    assert result.to_dict() == {"appName": "x", "tagline": "x", "logo": "x"}
+
+
+def test_update_branding_contract(client, mock_http_client):
+    """Generated from PATCH /users/branding in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200, body={"appName": "x", "tagline": "x", "logo": "x"}
+    )
+    result = client.instance_settings.update_branding(appName="x", tagline="x", logo="x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "PATCH"
+    assert sent.url.endswith("/users/branding")
+    assert sent.json == {"appName": "x", "tagline": "x", "logo": "x"}
+    assert result.to_dict() == {"appName": "x", "tagline": "x", "logo": "x"}
+
+
+def test_get_audit_forwarding_contract(client, mock_http_client):
+    """Generated from GET /users/audit-forwarding in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200, body={"url": "x", "hasToken": True, "envConfigured": True}
+    )
+    result = client.instance_settings.get_audit_forwarding()
+    sent = mock_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/users/audit-forwarding")
+    assert result.to_dict() == {"url": "x", "hasToken": True, "envConfigured": True}
+
+
+def test_update_audit_forwarding_contract(client, mock_http_client):
+    """Generated from PATCH /users/audit-forwarding in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body={"url": "x", "hasToken": True})
+    result = client.instance_settings.update_audit_forwarding(url="x", token="x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "PATCH"
+    assert sent.url.endswith("/users/audit-forwarding")
+    assert sent.json == {"url": "x", "token": "x"}
+    assert result.to_dict() == {"url": "x", "hasToken": True}
+
+
+def test_get_step_ca_settings_contract(client, mock_http_client):
+    """Generated from GET /users/step-ca-settings in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body={"configured": True})
+    result = client.instance_settings.get_step_ca_settings()
+    sent = mock_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/users/step-ca-settings")
+    assert result.to_dict() == {"configured": True}
+
+
+def test_update_step_ca_settings_contract(client, mock_http_client):
+    """Generated from PATCH /users/step-ca-settings in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200,
+        body={"configured": True, "caUrl": "x", "fingerprint": "x", "provisioner": "x"},
+    )
+    result = client.instance_settings.update_step_ca_settings(
+        caUrl="x", fingerprint="x", provisioner="x"
+    )
+    sent = mock_http_client.requests[0]
+    assert sent.method == "PATCH"
+    assert sent.url.endswith("/users/step-ca-settings")
+    assert sent.json == {"caUrl": "x", "fingerprint": "x", "provisioner": "x"}
+    assert result.to_dict() == {
+        "configured": True,
+        "caUrl": "x",
+        "fingerprint": "x",
+        "provisioner": "x",
+    }
+
+
 @pytest.mark.asyncio
 async def test_async_get_acme_ssl_settings_contract(async_client, mock_async_http_client):
     """Generated from GET /users/acme-ssl-settings in spec/termix-openapi.json."""
@@ -823,6 +906,7 @@ async def test_async_update_host_defaults_contract(async_client, mock_async_http
             "cursorBlink": True,
             "enableSessionLogging": True,
             "enableCommandHistory": True,
+            "autoTmux": True,
         },
     )
     result = await async_client.instance_settings.update_host_defaults(
@@ -841,6 +925,7 @@ async def test_async_update_host_defaults_contract(async_client, mock_async_http
         cursorBlink=True,
         enableSessionLogging=True,
         enableCommandHistory=True,
+        autoTmux=True,
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "PATCH"
@@ -861,6 +946,7 @@ async def test_async_update_host_defaults_contract(async_client, mock_async_http
         "cursorBlink": True,
         "enableSessionLogging": True,
         "enableCommandHistory": True,
+        "autoTmux": True,
     }
     assert result.to_dict() == {
         "useSocks5": True,
@@ -878,6 +964,7 @@ async def test_async_update_host_defaults_contract(async_client, mock_async_http
         "cursorBlink": True,
         "enableSessionLogging": True,
         "enableCommandHistory": True,
+        "autoTmux": True,
     }
 
 
@@ -1325,4 +1412,91 @@ async def test_async_get_oidc_config_admin_contract(async_client, mock_async_htt
         "group_claim": "x",
         "role_map": "x",
         "ca_cert": "x",
+    }
+
+
+@pytest.mark.asyncio
+async def test_async_get_branding_contract(async_client, mock_async_http_client):
+    """Generated from GET /users/branding in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200, body={"appName": "x", "tagline": "x", "logo": "x"}
+    )
+    result = await async_client.instance_settings.get_branding()
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/users/branding")
+    assert result.to_dict() == {"appName": "x", "tagline": "x", "logo": "x"}
+
+
+@pytest.mark.asyncio
+async def test_async_update_branding_contract(async_client, mock_async_http_client):
+    """Generated from PATCH /users/branding in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200, body={"appName": "x", "tagline": "x", "logo": "x"}
+    )
+    result = await async_client.instance_settings.update_branding(
+        appName="x", tagline="x", logo="x"
+    )
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "PATCH"
+    assert sent.url.endswith("/users/branding")
+    assert sent.json == {"appName": "x", "tagline": "x", "logo": "x"}
+    assert result.to_dict() == {"appName": "x", "tagline": "x", "logo": "x"}
+
+
+@pytest.mark.asyncio
+async def test_async_get_audit_forwarding_contract(async_client, mock_async_http_client):
+    """Generated from GET /users/audit-forwarding in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200, body={"url": "x", "hasToken": True, "envConfigured": True}
+    )
+    result = await async_client.instance_settings.get_audit_forwarding()
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/users/audit-forwarding")
+    assert result.to_dict() == {"url": "x", "hasToken": True, "envConfigured": True}
+
+
+@pytest.mark.asyncio
+async def test_async_update_audit_forwarding_contract(async_client, mock_async_http_client):
+    """Generated from PATCH /users/audit-forwarding in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(status_code=200, body={"url": "x", "hasToken": True})
+    result = await async_client.instance_settings.update_audit_forwarding(url="x", token="x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "PATCH"
+    assert sent.url.endswith("/users/audit-forwarding")
+    assert sent.json == {"url": "x", "token": "x"}
+    assert result.to_dict() == {"url": "x", "hasToken": True}
+
+
+@pytest.mark.asyncio
+async def test_async_get_step_ca_settings_contract(async_client, mock_async_http_client):
+    """Generated from GET /users/step-ca-settings in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(status_code=200, body={"configured": True})
+    result = await async_client.instance_settings.get_step_ca_settings()
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/users/step-ca-settings")
+    assert result.to_dict() == {"configured": True}
+
+
+@pytest.mark.asyncio
+async def test_async_update_step_ca_settings_contract(async_client, mock_async_http_client):
+    """Generated from PATCH /users/step-ca-settings in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200,
+        body={"configured": True, "caUrl": "x", "fingerprint": "x", "provisioner": "x"},
+    )
+    result = await async_client.instance_settings.update_step_ca_settings(
+        caUrl="x", fingerprint="x", provisioner="x"
+    )
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "PATCH"
+    assert sent.url.endswith("/users/step-ca-settings")
+    assert sent.json == {"caUrl": "x", "fingerprint": "x", "provisioner": "x"}
+    assert result.to_dict() == {
+        "configured": True,
+        "caUrl": "x",
+        "fingerprint": "x",
+        "provisioner": "x",
     }

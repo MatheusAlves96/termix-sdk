@@ -30,6 +30,7 @@ import json
 import keyword
 import re
 import sys
+import textwrap
 from pathlib import Path
 from typing import Any
 
@@ -491,7 +492,13 @@ class GeneratedOp:
         doc = op.summary or op.description
         if doc:
             src = op.source
-            lines.append(f'        """{doc}')
+            # `ruff format` never rewraps a docstring, so a summary long
+            # enough to push `        """<summary>` past 100 columns is an
+            # E501 the generator has to avoid itself (Termix 2.8.0's
+            # PATCH /users/step-ca-settings summary is 110 characters).
+            doc_lines = textwrap.wrap(doc, width=100 - len('        """')) or [doc]
+            lines.append(f'        """{doc_lines[0]}')
+            lines.extend(f"        {extra}" for extra in doc_lines[1:])
             lines.append("")
             lines.append(f"        {op.method} {op.path}")
             if src.get("file"):

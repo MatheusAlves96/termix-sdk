@@ -145,6 +145,17 @@ def test_watch_status_contract(client, mock_http_client):
     assert events[0].json() == {"ok": True}
 
 
+def test_open_web_endpoint_contract(client, mock_http_client):
+    """Generated from POST /ssh/tunnel/web-endpoint/open in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body={"port": 1.0})
+    result = client.tunnel.open_web_endpoint(hostId=1.0, endpointId="x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/ssh/tunnel/web-endpoint/open")
+    assert sent.json == {"hostId": 1.0, "endpointId": "x"}
+    assert result.to_dict() == {"port": 1.0}
+
+
 @pytest.mark.asyncio
 async def test_async_get_status_by_name_contract(async_client, mock_async_http_client):
     """Generated from GET /ssh/tunnel/status/{tunnelName} in spec/termix-openapi.json."""
@@ -289,3 +300,15 @@ async def test_async_watch_status_contract(async_client, mock_async_http_client)
     events = [e async for e in result]
     assert events[0].event == "message"
     assert events[0].json() == {"ok": True}
+
+
+@pytest.mark.asyncio
+async def test_async_open_web_endpoint_contract(async_client, mock_async_http_client):
+    """Generated from POST /ssh/tunnel/web-endpoint/open in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(status_code=200, body={"port": 1.0})
+    result = await async_client.tunnel.open_web_endpoint(hostId=1.0, endpointId="x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/ssh/tunnel/web-endpoint/open")
+    assert sent.json == {"hostId": 1.0, "endpointId": "x"}
+    assert result.to_dict() == {"port": 1.0}

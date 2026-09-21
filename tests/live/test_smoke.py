@@ -23,10 +23,12 @@ def test_health(client: TermixClient) -> None:
 
 def test_version_matches_the_spec_the_sdk_was_generated_from(client: TermixClient) -> None:
     version = client.system.version().to_dict()
-    # `localVersion` is the instance actually running; `version` is an alias
-    # for `remoteVersion`, the latest release on GitHub — comparing against
-    # that instead would warn any time an update exists, regardless of what
-    # this instance is pinned to.
+    # `localVersion` is the running instance; `version`/`remoteVersion` are
+    # the newest release GitHub knows about, which this endpoint reports so
+    # the UI can offer an update. Reading `version` first compared
+    # SPEC_VERSION against upstream's latest release instead of against the
+    # instance under test, so the warning never fired for an outdated
+    # instance and fired for an up-to-date one.
     local = version.get("localVersion") or version.get("version")
     assert local, f"no version field in {version!r}"
 

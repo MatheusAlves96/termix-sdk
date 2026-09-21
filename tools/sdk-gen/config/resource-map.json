@@ -290,6 +290,27 @@
         },
         "database_get_rbac_shared-hosts": {
           "method": "list_shared_hosts"
+        },
+        "database_post_rbac_credential_by-id_share": {
+          "method": "share_credential"
+        },
+        "database_get_rbac_credential_by-id_access": {
+          "method": "list_credential_access"
+        },
+        "database_delete_rbac_credential_by-id_access_by-accessId": {
+          "method": "delete_credential_access"
+        },
+        "database_post_rbac_snippet-folder_share": {
+          "method": "share_snippet_folder"
+        },
+        "database_get_rbac_folder_access": {
+          "method": "list_folder_access"
+        },
+        "database_delete_rbac_folder_access_by-id": {
+          "method": "delete_folder_access"
+        },
+        "database_get_rbac_roles_by-id_members": {
+          "method": "list_role_members"
         }
       }
     },
@@ -506,6 +527,9 @@
         },
         "database_post_guacamole_token": {
           "method": "create_token"
+        },
+        "database_get_guacamole_connection_by-connectId": {
+          "method": "get_connection"
         }
       }
     },
@@ -832,6 +856,24 @@
         },
         "database_get_users_oidc-config_admin": {
           "method": "get_oidc_config_admin"
+        },
+        "database_get_users_branding": {
+          "method": "get_branding"
+        },
+        "database_patch_users_branding": {
+          "method": "update_branding"
+        },
+        "database_get_users_audit-forwarding": {
+          "method": "get_audit_forwarding"
+        },
+        "database_patch_users_audit-forwarding": {
+          "method": "update_audit_forwarding"
+        },
+        "database_get_users_step-ca-settings": {
+          "method": "get_step_ca_settings"
+        },
+        "database_patch_users_step-ca-settings": {
+          "method": "update_step_ca_settings"
         }
       }
     },
@@ -1013,6 +1055,9 @@
         "tunnel_get_ssh_tunnel_status_stream": {
           "method": "watch_status",
           "sse": true
+        },
+        "tunnel_post_ssh_tunnel_web-endpoint_open": {
+          "method": "open_web_endpoint"
         }
       }
     },
@@ -1343,11 +1388,14 @@
         "database_post_ai_chat_stream": {
           "method": "chat_stream",
           "sse": true
+        },
+        "database_post_ai_proposals_by-id_mark-run-in-terminal": {
+          "method": "mark_proposal_run_in_terminal"
         }
       }
     },
     "hosts": {
-      "_note": "POST /host/db/host, POST /host/enroll, PUT /host/db/host/{id} document multipart/form-data as an alternative to application/json (for uploading an SSH key as a file instead of pasting its text) - both variants have the identical 86-field schema, so these are generated against the JSON variant; multipart file upload for the key itself is not exposed. GET /host/db/host/internal(/all) (internal-auth) and GET /host/opkssh-callback (browser redirect) are out of scope per docs/sdk-plan.md section 2 item 10.",
+      "_note": "POST /host/db/host, POST /host/enroll, PUT /host/db/host/{id} document multipart/form-data as an alternative to application/json (for uploading an SSH key as a file instead of pasting its text) - both variants have the identical 86-field schema, so these are generated against the JSON variant; multipart file upload for the key itself is not exposed. GET /host/db/host/internal(/all) (internal-auth) and GET /host/opkssh-callback and GET /host/step-ca-callback (browser redirects that render an HTML result page) are out of scope per docs/sdk-plan.md section 2 item 10.",
       "ops": {
         "database_delete_host_autostart_disable": {
           "method": "disable_autostart"
@@ -1426,6 +1474,83 @@
         },
         "database_put_host_db_host_by-id": {
           "method": "update"
+        },
+        "database_patch_host_db_host_by-id_terminal-config": {
+          "method": "update_terminal_config"
+        },
+        "database_get_host_db_host_by-id_local-connection-auth": {
+          "method": "get_local_connection_auth"
+        }
+      }
+    },
+    "secret_sources": {
+      "ops": {
+        "database_get_secret-sources": {
+          "method": "list"
+        },
+        "database_post_secret-sources": {
+          "method": "create"
+        },
+        "database_put_secret-sources_by-id": {
+          "method": "update"
+        },
+        "database_delete_secret-sources_by-id": {
+          "method": "delete"
+        },
+        "database_post_secret-sources_by-id_test": {
+          "method": "test"
+        }
+      }
+    },
+    "collab": {
+      "ops": {
+        "database_get_collab_rooms": {
+          "method": "list_rooms"
+        },
+        "database_post_collab_rooms": {
+          "method": "create_room"
+        },
+        "database_get_collab_rooms_by-id": {
+          "method": "get_room"
+        },
+        "database_delete_collab_rooms_by-id": {
+          "method": "delete_room"
+        },
+        "database_post_collab_rooms_by-id_end": {
+          "method": "end_room"
+        },
+        "database_post_collab_rooms_by-id_members": {
+          "method": "invite_members"
+        },
+        "database_delete_collab_rooms_by-id_members_by-userId": {
+          "method": "remove_member"
+        },
+        "database_post_collab_rooms_by-id_present": {
+          "method": "present"
+        },
+        "database_post_collab_rooms_by-id_stop": {
+          "method": "stop_presenting"
+        },
+        "database_get_collab_rooms_by-id_stage": {
+          "method": "get_stage"
+        },
+        "database_post_collab_rooms_by-id_control": {
+          "method": "set_control"
+        },
+        "database_post_collab_rooms_by-id_control_request": {
+          "method": "request_control"
+        },
+        "database_get_collab_rooms_by-id_control_requests": {
+          "method": "list_control_requests"
+        },
+        "database_delete_collab_rooms_by-id_control_requests_by-userId": {
+          "method": "delete_control_request"
+        },
+        "database_post_collab_rooms_by-id_guest-link": {
+          "method": "set_guest_link"
+        },
+        "database_get_collab_guest_by-token": {
+          "method": "get_guest_stage"
         }
       }
     }

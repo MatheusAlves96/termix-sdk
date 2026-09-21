@@ -9,12 +9,12 @@ import pytest
 
 def test_list_contract(client, mock_http_client):
     """Generated from GET /credentials in spec/termix-openapi.json."""
-    mock_http_client.queue_response(status_code=200, body=[{}])
+    mock_http_client.queue_response(status_code=200, body=["x"])
     result = client.credentials.list()
     sent = mock_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/credentials")
-    assert result == [{}]
+    assert result == ["x"]
 
 
 def test_create_contract(client, mock_http_client):
@@ -316,12 +316,12 @@ def test_hosts_contract(client, mock_http_client):
 @pytest.mark.asyncio
 async def test_async_list_contract(async_client, mock_async_http_client):
     """Generated from GET /credentials in spec/termix-openapi.json."""
-    mock_async_http_client.queue_response(status_code=200, body=[{}])
+    mock_async_http_client.queue_response(status_code=200, body=["x"])
     result = await async_client.credentials.list()
     sent = mock_async_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/credentials")
-    assert result == [{}]
+    assert result == ["x"]
 
 
 @pytest.mark.asyncio

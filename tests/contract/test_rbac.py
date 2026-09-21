@@ -285,11 +285,11 @@ def test_set_host_access_auth_contract(client, mock_http_client):
     mock_http_client.queue_response(
         status_code=200, body={"success": True, "protocol": "ssh", "credentialId": "x"}
     )
-    result = client.rbac.set_host_access_auth("x", "x", credentialId=1.0)
+    result = client.rbac.set_host_access_auth("x", "x", credentialId="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "PUT"
     assert sent.url.endswith("/rbac/host-access/x/auth/x")
-    assert sent.json == {"credentialId": 1.0}
+    assert sent.json == {"credentialId": "x"}
     assert result.to_dict() == {"success": True, "protocol": "ssh", "credentialId": "x"}
 
 
@@ -449,6 +449,120 @@ def test_list_shared_hosts_contract(client, mock_http_client):
                 "ownerUsername": "x",
             }
         ]
+    }
+
+
+def test_share_credential_contract(client, mock_http_client):
+    """Generated from POST /rbac/credential/{id}/share in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200, body={"success": True, "permissionLevel": "x", "expiresAt": "x"}
+    )
+    result = client.rbac.share_credential("x", durationHours=1.0, permissionLevel="x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/rbac/credential/x/share")
+    assert sent.json == {"durationHours": 1.0, "permissionLevel": "x"}
+    assert result.to_dict() == {"success": True, "permissionLevel": "x", "expiresAt": "x"}
+
+
+def test_list_credential_access_contract(client, mock_http_client):
+    """Generated from GET /rbac/credential/{id}/access in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200,
+        body={
+            "access": [
+                {
+                    "targetType": "role",
+                    "username": "x",
+                    "roleName": "x",
+                    "roleDisplayName": "x",
+                    "grantedByUsername": "x",
+                }
+            ]
+        },
+    )
+    result = client.rbac.list_credential_access("x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/rbac/credential/x/access")
+    assert result.to_dict() == {
+        "access": [
+            {
+                "targetType": "role",
+                "username": "x",
+                "roleName": "x",
+                "roleDisplayName": "x",
+                "grantedByUsername": "x",
+            }
+        ]
+    }
+
+
+def test_delete_credential_access_contract(client, mock_http_client):
+    """Generated from DELETE /rbac/credential/{id}/access/{accessId} in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body={"success": True})
+    result = client.rbac.delete_credential_access("x", "x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "DELETE"
+    assert sent.url.endswith("/rbac/credential/x/access/x")
+    assert result.to_dict() == {"success": True}
+
+
+def test_share_snippet_folder_contract(client, mock_http_client):
+    """Generated from POST /rbac/snippet-folder/share in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200, body={"success": True, "expiresAt": "x", "snippetsShared": 1.0}
+    )
+    result = client.rbac.share_snippet_folder(folder="x", durationHours=1.0)
+    sent = mock_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/rbac/snippet-folder/share")
+    assert sent.json == {"folder": "x", "durationHours": 1.0}
+    assert result.to_dict() == {"success": True, "expiresAt": "x", "snippetsShared": 1.0}
+
+
+def test_list_folder_access_contract(client, mock_http_client):
+    """Generated from GET /rbac/folder/access in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200,
+        body={
+            "rules": [
+                {"targetType": "role", "username": "x", "roleName": "x", "roleDisplayName": "x"}
+            ]
+        },
+    )
+    result = client.rbac.list_folder_access(folder="x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/rbac/folder/access")
+    assert sent.params == {"folder": "x"}
+    assert result.to_dict() == {
+        "rules": [{"targetType": "role", "username": "x", "roleName": "x", "roleDisplayName": "x"}]
+    }
+
+
+def test_delete_folder_access_contract(client, mock_http_client):
+    """Generated from DELETE /rbac/folder/access/{id} in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body={"success": True})
+    result = client.rbac.delete_folder_access("x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "DELETE"
+    assert sent.url.endswith("/rbac/folder/access/x")
+    assert result.to_dict() == {"success": True}
+
+
+def test_list_role_members_contract(client, mock_http_client):
+    """Generated from GET /rbac/roles/{id}/members in spec/termix-openapi.json."""
+    mock_http_client.queue_response(
+        status_code=200,
+        body={"members": [{"userId": "x", "username": "x", "grantedAt": "x", "grantedBy": "x"}]},
+    )
+    result = client.rbac.list_role_members("x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/rbac/roles/x/members")
+    assert result.to_dict() == {
+        "members": [{"userId": "x", "username": "x", "grantedAt": "x", "grantedBy": "x"}]
     }
 
 
@@ -746,11 +860,11 @@ async def test_async_set_host_access_auth_contract(async_client, mock_async_http
     mock_async_http_client.queue_response(
         status_code=200, body={"success": True, "protocol": "ssh", "credentialId": "x"}
     )
-    result = await async_client.rbac.set_host_access_auth("x", "x", credentialId=1.0)
+    result = await async_client.rbac.set_host_access_auth("x", "x", credentialId="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "PUT"
     assert sent.url.endswith("/rbac/host-access/x/auth/x")
-    assert sent.json == {"credentialId": 1.0}
+    assert sent.json == {"credentialId": "x"}
     assert result.to_dict() == {"success": True, "protocol": "ssh", "credentialId": "x"}
 
 
@@ -922,4 +1036,125 @@ async def test_async_list_shared_hosts_contract(async_client, mock_async_http_cl
                 "ownerUsername": "x",
             }
         ]
+    }
+
+
+@pytest.mark.asyncio
+async def test_async_share_credential_contract(async_client, mock_async_http_client):
+    """Generated from POST /rbac/credential/{id}/share in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200, body={"success": True, "permissionLevel": "x", "expiresAt": "x"}
+    )
+    result = await async_client.rbac.share_credential("x", durationHours=1.0, permissionLevel="x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/rbac/credential/x/share")
+    assert sent.json == {"durationHours": 1.0, "permissionLevel": "x"}
+    assert result.to_dict() == {"success": True, "permissionLevel": "x", "expiresAt": "x"}
+
+
+@pytest.mark.asyncio
+async def test_async_list_credential_access_contract(async_client, mock_async_http_client):
+    """Generated from GET /rbac/credential/{id}/access in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200,
+        body={
+            "access": [
+                {
+                    "targetType": "role",
+                    "username": "x",
+                    "roleName": "x",
+                    "roleDisplayName": "x",
+                    "grantedByUsername": "x",
+                }
+            ]
+        },
+    )
+    result = await async_client.rbac.list_credential_access("x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/rbac/credential/x/access")
+    assert result.to_dict() == {
+        "access": [
+            {
+                "targetType": "role",
+                "username": "x",
+                "roleName": "x",
+                "roleDisplayName": "x",
+                "grantedByUsername": "x",
+            }
+        ]
+    }
+
+
+@pytest.mark.asyncio
+async def test_async_delete_credential_access_contract(async_client, mock_async_http_client):
+    """Generated from DELETE /rbac/credential/{id}/access/{accessId} in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(status_code=200, body={"success": True})
+    result = await async_client.rbac.delete_credential_access("x", "x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "DELETE"
+    assert sent.url.endswith("/rbac/credential/x/access/x")
+    assert result.to_dict() == {"success": True}
+
+
+@pytest.mark.asyncio
+async def test_async_share_snippet_folder_contract(async_client, mock_async_http_client):
+    """Generated from POST /rbac/snippet-folder/share in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200, body={"success": True, "expiresAt": "x", "snippetsShared": 1.0}
+    )
+    result = await async_client.rbac.share_snippet_folder(folder="x", durationHours=1.0)
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/rbac/snippet-folder/share")
+    assert sent.json == {"folder": "x", "durationHours": 1.0}
+    assert result.to_dict() == {"success": True, "expiresAt": "x", "snippetsShared": 1.0}
+
+
+@pytest.mark.asyncio
+async def test_async_list_folder_access_contract(async_client, mock_async_http_client):
+    """Generated from GET /rbac/folder/access in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200,
+        body={
+            "rules": [
+                {"targetType": "role", "username": "x", "roleName": "x", "roleDisplayName": "x"}
+            ]
+        },
+    )
+    result = await async_client.rbac.list_folder_access(folder="x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/rbac/folder/access")
+    assert sent.params == {"folder": "x"}
+    assert result.to_dict() == {
+        "rules": [{"targetType": "role", "username": "x", "roleName": "x", "roleDisplayName": "x"}]
+    }
+
+
+@pytest.mark.asyncio
+async def test_async_delete_folder_access_contract(async_client, mock_async_http_client):
+    """Generated from DELETE /rbac/folder/access/{id} in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(status_code=200, body={"success": True})
+    result = await async_client.rbac.delete_folder_access("x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "DELETE"
+    assert sent.url.endswith("/rbac/folder/access/x")
+    assert result.to_dict() == {"success": True}
+
+
+@pytest.mark.asyncio
+async def test_async_list_role_members_contract(async_client, mock_async_http_client):
+    """Generated from GET /rbac/roles/{id}/members in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(
+        status_code=200,
+        body={"members": [{"userId": "x", "username": "x", "grantedAt": "x", "grantedBy": "x"}]},
+    )
+    result = await async_client.rbac.list_role_members("x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/rbac/roles/x/members")
+    assert result.to_dict() == {
+        "members": [{"userId": "x", "username": "x", "grantedAt": "x", "grantedBy": "x"}]
     }

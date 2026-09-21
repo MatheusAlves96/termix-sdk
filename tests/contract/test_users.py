@@ -120,12 +120,15 @@ def test_get_data_status_contract(client, mock_http_client):
 
 def test_setup_totp_contract(client, mock_http_client):
     """Generated from POST /users/totp/setup in spec/termix-openapi.json."""
-    mock_http_client.queue_response(status_code=200, body={"secret": "x", "qr_code": "x"})
-    result = client.users.setup_totp()
+    mock_http_client.queue_response(
+        status_code=200, body={"secret": "x", "qr_code": "x", "additional": True}
+    )
+    result = client.users.setup_totp(credential="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/users/totp/setup")
-    assert result.to_dict() == {"secret": "x", "qr_code": "x"}
+    assert sent.json == {"credential": "x"}
+    assert result.to_dict() == {"secret": "x", "qr_code": "x", "additional": True}
 
 
 def test_enable_totp_contract(client, mock_http_client):
@@ -515,12 +518,15 @@ async def test_async_get_data_status_contract(async_client, mock_async_http_clie
 @pytest.mark.asyncio
 async def test_async_setup_totp_contract(async_client, mock_async_http_client):
     """Generated from POST /users/totp/setup in spec/termix-openapi.json."""
-    mock_async_http_client.queue_response(status_code=200, body={"secret": "x", "qr_code": "x"})
-    result = await async_client.users.setup_totp()
+    mock_async_http_client.queue_response(
+        status_code=200, body={"secret": "x", "qr_code": "x", "additional": True}
+    )
+    result = await async_client.users.setup_totp(credential="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/users/totp/setup")
-    assert result.to_dict() == {"secret": "x", "qr_code": "x"}
+    assert sent.json == {"credential": "x"}
+    assert result.to_dict() == {"secret": "x", "qr_code": "x", "additional": True}
 
 
 @pytest.mark.asyncio

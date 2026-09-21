@@ -196,8 +196,9 @@ at collection, so a plain `uv run pytest` still runs only the mocked
 suites (one reported skip, which is the gate).
 
 What it covers, in sync and async: `health`; `version` (warns when the
-instance is newer than the `SPEC_VERSION` the SDK was generated from);
-`users.get_me()`; hosts create/retrieve/update/list/delete; snippets
+instance's own `localVersion` differs from the `SPEC_VERSION` the SDK
+was generated from); `users.get_me()`; hosts
+create/retrieve/update/list/delete; snippets
 create/retrieve/update/list/delete; the bootstrap API key showing up in
 `api_keys.list()`; `NotFoundError` on an unknown id; `AuthenticationError`
 on a bad API key; and that `login()` returns a client whose resources
@@ -209,14 +210,22 @@ authenticates with that key, prefixes everything it creates with
 `live-smoke-<hex>` and deletes it again on teardown.
 
 `docker/live/compose.yml`'s own default is pinned to the release
-`SPEC_VERSION` was generated from (`ghcr.io/lukegus/termix:2.7.1`, for
-`release-2.7.1-tag`), not `:latest` — a floating tag would run the local
+`SPEC_VERSION` was generated from (`ghcr.io/lukegus/termix:2.8.0`, for
+`release-2.8.0-tag`), not `:latest` — a floating tag would run the local
 smoke against whatever Termix shipped most recently, silently testing a
 release the spec doesn't describe. Bump it alongside `SPEC_VERSION` when
-the spec is regenerated (`docs/sdk-plan.md` section 9). Override it with
+the spec is regenerated (`docs/sdk-plan.md` section 9); upstream
+publishes one image tag per release (`ghcr.io/lukegus/termix:X.Y.Z` and
+`release-X.Y.Z`, both point at the same manifest). Override it with
 `TERMIX_IMAGE=ghcr.io/lukegus/termix:<tag> docker compose -f
 docker/live/compose.yml up -d --wait` to test a different release
-locally.
+locally — and check what actually got pulled rather than trusting a
+cached image, since a `docker compose pull` that fails mid-download
+leaves the previous image in place and `up` will happily start it:
+
+```bash
+docker image inspect ghcr.io/lukegus/termix:2.8.0 --format '{{.RepoDigests}} {{.Created}}'
+```
 
 `.github/workflows/live.yml` does not read that default: it sets
 `TERMIX_IMAGE` itself and runs weekly and on `workflow_dispatch` against

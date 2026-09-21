@@ -23,6 +23,7 @@ from .resources import alerts as _alerts
 from .resources import api_keys as _api_keys
 from .resources import audit as _audit
 from .resources import automations as _automations
+from .resources import collab as _collab
 from .resources import credentials as _credentials
 from .resources import dashboard as _dashboard
 from .resources import database as _database
@@ -42,6 +43,7 @@ from .resources import preferences as _preferences
 from .resources import proxmox as _proxmox
 from .resources import proxmox_stats as _proxmox_stats
 from .resources import rbac as _rbac
+from .resources import secret_sources as _secret_sources
 from .resources import session_logs as _session_logs
 from .resources import session_sharing as _session_sharing
 from .resources import snippets as _snippets
@@ -109,6 +111,7 @@ class AsyncTermixClient:
         self.api_keys = _api_keys.AsyncApiKeysService(self._requestor)
         self.audit = _audit.AsyncAuditService(self._requestor)
         self.automations = _automations.AsyncAutomationsService(self._requestor)
+        self.collab = _collab.AsyncCollabService(self._requestor)
         self.credentials = _credentials.AsyncCredentialsService(self._requestor)
         self.dashboard = _dashboard.AsyncDashboardService(self._requestor)
         self.database = _database.AsyncDatabaseService(self._requestor)
@@ -128,6 +131,7 @@ class AsyncTermixClient:
         self.proxmox = _proxmox.AsyncProxmoxService(self._requestor)
         self.proxmox_stats = _proxmox_stats.AsyncProxmoxStatsService(self._requestor)
         self.rbac = _rbac.AsyncRbacService(self._requestor)
+        self.secret_sources = _secret_sources.AsyncSecretSourcesService(self._requestor)
         self.session_logs = _session_logs.AsyncSessionLogsService(self._requestor)
         self.session_sharing = _session_sharing.AsyncSessionSharingService(self._requestor)
         self.snippets = _snippets.AsyncSnippetsService(self._requestor)

@@ -1,82 +1,85 @@
 # termix-sdk spec-gen report
 
-Generated from tag `release-2.7.1-tag` (commit `76fd9eedbf0f7e853d5ffe40717cac126ffe6a98`) on 2026-09-20T08:26:15.176Z.
+Generated from tag `release-2.8.0-tag` (commit `fef8a5f28a5a6023ff10832acb65cbdfea81b777`) on 2026-09-21T14:33:53.411Z.
 
 ## Route counts
 
-- Total route registrations: **494** (3 of which are `X.use()` method catch-alls, listed under `x-any-method-routes` instead of `paths`)
+- Total route registrations: **535** (4 of which are `X.use()` method catch-alls, listed under `x-any-method-routes` instead of `paths`)
 - Unresolved routes (origin never reached an express() app): **0**
 
 | Service | Port | Routes | Global auth |
 |---|---|---|---|
-| database | 30001 | 343 | no (per-route) |
-| tunnel | 30003 | 6 | no (per-route) |
-| file-manager | 30004 | 40 | yes (from line 133) |
-| metrics | 30005 | 58 | yes (from line 1047) |
-| dashboard | 30006 | 8 | yes (from line 38) |
-| docker | 30007 | 17 | yes (from line 36) |
-| tmux | 30010 | 12 | yes (from line 339) |
-| homepage | 30012 | 10 | yes (from line 26) |
+| database | 30001 | 383 | no (per-route) |
+| tunnel | 30003 | 7 | no (per-route) |
+| file-manager | 30004 | 40 | yes (from line 129) |
+| metrics | 30005 | 58 | yes (from line 1112) |
+| dashboard | 30006 | 8 | yes (from line 40) |
+| docker | 30007 | 17 | yes (from line 31) |
+| tmux | 30010 | 12 | yes (from line 341) |
+| homepage | 30012 | 10 | yes (from line 29) |
 
 ## Drizzle schema
 
-- Tables: **72**
-- Columns: **726**
+- Tables: **82**
+- Columns: **817**
 
 ## Handler analysis coverage
 
-- Routes with a resolvable handler: **494/494**
+- Routes with a resolvable handler: **535/535**
 - Opaque handlers (could not be statically resolved): **0**
 - Routes with no documented 2xx/3xx response: **1**
 - Routes whose every response is `x-confidence: unknown`: **0**
 
 ### Request body completeness (docs/spec-generation-strategy-v2.md)
 
-- POST/PUT/PATCH routes: **265**, of which **184** (69%) have an `application/json` body with every top-level field typed
-- Routes where no body field was found at all: **38**
+- POST/PUT/PATCH routes: **284**, of which **198** (70%) have an `application/json` body with every top-level field typed
+- Routes where no body field was found at all: **41**
 - Routes with a body but no `application/json` variant (e.g. streamed uploads): **3**
-- Top-level `application/json` fields still `unknown`: **87**
+- Top-level `application/json` fields still `unknown`: **89**
 
 ### Request body field confidence (all nodes, all content types — includes nested fields)
 
 | Confidence | Count |
 |---|---|
 | repository-type | 12 |
-| handler-literal | 77 |
-| frontend-type | 328 |
-| matched-type | 417 |
-| inferred | 681 |
-| unknown | 98 |
+| handler-literal | 78 |
+| frontend-type | 346 |
+| matched-type | 444 |
+| inferred | 711 |
+| unknown | 100 |
 
 ### Response field confidence
 
 | Confidence | Count |
 |---|---|
-| repository-type | 1861 |
-| handler-literal | 3544 |
-| inferred | 664 |
-| unknown | 331 |
+| repository-type | 1978 |
+| handler-literal | 3840 |
+| inferred | 714 |
+| unknown | 349 |
 
 ### Routes with no documented success response
 
-- POST /database/export — `src/backend/database/database.ts:669`
+- POST /database/export — `src/backend/database/database.ts:671`
 
 ## Test suite examples (Phase 6)
 
-- Examples mined: **90**, covering **29** route(s) from **7** test file(s).
+- Examples mined: **101**, covering **31** route(s) from **8** test file(s).
+- Statuses a test proved but static analysis missed: **2** (added to the OpenAPI output with `x-confidence: test`)
+  - PATCH /users/branding → 401, from `src/backend/tests/database/routes/branding-routes.test.ts` ("rejects an unauthenticated request and persists nothing")
+  - PATCH /users/branding → 403, from `src/backend/tests/database/routes/branding-routes.test.ts` ("rejects a non-admin request and persists nothing")
 
 ## Frontend client cross-check (Phase 7)
 
-- Frontend calls matched to a route: **380**, covering **354** route(s).
+- Frontend calls matched to a route: **415**, covering **389** route(s).
 - Responses where the frontend's return type filled a gap the backend analysis left `unknown`: **6**
 - Frontend/backend request-body field mismatches worth a look: **3**
   - PUT /host-sidebar/preferences (`src/ui/api/host-sidebar-preferences-api.ts:24`, saveHostSidebarPreferences) — frontend body type has 3 field(s) not seen in the backend's own destructuring: version, groupKey, openFolders
-  - PUT /user-preferences (`src/ui/api/open-tabs-api.ts:156`, saveUserPreferences) — frontend body type has 5 field(s) not seen in the backend's own destructuring: showHostTags, hostTrayOnClick, foldersCollapsed, compactHostView, statusColorScheme
-  - POST /ssh/tunnel/connect (`src/ui/api/tunnel-api.ts:171`, connectTunnel) — frontend body type has 28 field(s) not seen in the backend's own destructuring: scope, mode, tunnelType, bindHost, targetHost, hostName, sourceIP, sourceSSHPort
+  - PUT /user-preferences (`src/ui/api/open-tabs-api.ts:164`, saveUserPreferences) — frontend body type has 5 field(s) not seen in the backend's own destructuring: showHostTags, hostTrayOnClick, foldersCollapsed, compactHostView, statusColorScheme
+  - POST /ssh/tunnel/connect (`src/ui/api/tunnel-api.ts:172`, connectTunnel) — frontend body type has 32 field(s) not seen in the backend's own destructuring: scope, mode, tunnelType, localAddress, remoteAddress, bindHost, targetHost, sourceHostSyncId
 
 ## Existing @openapi text reuse (Phase 8)
 
-- `@openapi` JSDoc blocks parsed: **425**. Their `summary`/`description`/`tags`/parameter descriptions are reused verbatim when present; `requestBody`/`responses` from them are never used as a schema source.
+- `@openapi` JSDoc blocks parsed: **466**. Their `summary`/`description`/`tags`/parameter descriptions are reused verbatim when present; `requestBody`/`responses` from them are never used as a schema source.
 
 ## Golden route regression check (docs/spec-generation-strategy-v2.md, Passo 0)
 
@@ -86,19 +89,26 @@ No regressions: every field that already had a concrete type from an explicit va
 
 Official spec regenerated with `npm run generate:openapi` (Termix's own release process) rather than scraped from the docs site — see `official-diff.ts` for why.
 
-- Official operations: **413**
-- Our operations: **512**
-- Matched: **410**
-- Only in the official spec (we should have these too — worth investigating each one): **3**
+- Official operations: **454**
+- Our operations: **559**
+- Matched: **444**
+- Only in the official spec (we should have these too — worth investigating each one): **10**
   - DELETE /host/opkssh/token/{hostId}
   - GET /automations/runs
   - GET /host/opkssh/token/{hostId}
-- Only in ours (the known coverage gap — real endpoints the official spec never documented): **102**
+  - GET /plugin-api/{pluginId}/{path}
+  - GET /users/notification-private-endpoints
+  - GET /users/secret-source-private-endpoints
+  - GET /users/step-ca-private-endpoints
+  - PATCH /users/notification-private-endpoints
+  - PATCH /users/secret-source-private-endpoints
+  - PATCH /users/step-ca-private-endpoints
+- Only in ours (the known coverage gap — real endpoints the official spec never documented): **115**
 
 ## OpenAPI lint (@redocly/cli)
 
 - Errors: **0**
-- Warnings: **756**
+- Warnings: **832**
 - Ignored: **0**
 
 Spec is structurally valid OpenAPI 3.1.

@@ -135,7 +135,7 @@ def test_export_user_contract(client, mock_http_client):
                 "fileManagerData": {},
                 "dismissedAlerts": ["x"],
             },
-            "metadata": {"totalRecords": 1.0, "encrypted": True, "exportType": "all"},
+            "metadata": {"totalRecords": 1.0, "encrypted": True, "exportType": "user_data"},
         },
     )
     result = client.user_admin.export_user("x")
@@ -153,7 +153,7 @@ def test_export_user_contract(client, mock_http_client):
             "fileManagerData": {},
             "dismissedAlerts": ["x"],
         },
-        "metadata": {"totalRecords": 1.0, "encrypted": True, "exportType": "all"},
+        "metadata": {"totalRecords": 1.0, "encrypted": True, "exportType": "user_data"},
     }
 
 
@@ -322,7 +322,7 @@ async def test_async_export_user_contract(async_client, mock_async_http_client):
                 "fileManagerData": {},
                 "dismissedAlerts": ["x"],
             },
-            "metadata": {"totalRecords": 1.0, "encrypted": True, "exportType": "all"},
+            "metadata": {"totalRecords": 1.0, "encrypted": True, "exportType": "user_data"},
         },
     )
     result = await async_client.user_admin.export_user("x")
@@ -340,7 +340,7 @@ async def test_async_export_user_contract(async_client, mock_async_http_client):
             "fileManagerData": {},
             "dismissedAlerts": ["x"],
         },
-        "metadata": {"totalRecords": 1.0, "encrypted": True, "exportType": "all"},
+        "metadata": {"totalRecords": 1.0, "encrypted": True, "exportType": "user_data"},
     }
 
 
