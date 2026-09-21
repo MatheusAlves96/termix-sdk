@@ -996,6 +996,7 @@ def write_contract_test_module(module_name: str, generated_ops: list[GeneratedOp
 
 
 REGION_RE_TEMPLATE = r"( *# --- {label} start ---\n).*?(\n *# --- {label} end ---)"
+MARKDOWN_REGION_RE_TEMPLATE = r"(<!-- {label} start -->\n).*?(<!-- {label} end -->)"
 
 
 def rewrite_region(file_path: Path, label: str, new_body: str) -> None:
@@ -1006,6 +1007,124 @@ def rewrite_region(file_path: Path, label: str, new_body: str) -> None:
     replacement = r"\1" + new_body + r"\2"
     text = pattern.sub(replacement, text, count=1)
     file_path.write_text(text, encoding="utf-8")
+
+
+def rewrite_markdown_region(file_path: Path, label: str, new_body: str) -> None:
+    text = file_path.read_text(encoding="utf-8")
+    pattern = re.compile(MARKDOWN_REGION_RE_TEMPLATE.format(label=re.escape(label)), re.DOTALL)
+    if not pattern.search(text):
+        raise ValueError(f"{file_path}: marker region {label!r} not found")
+    replacement = r"\1" + new_body + r"\2"
+    text = pattern.sub(replacement, text, count=1)
+    file_path.write_text(text, encoding="utf-8")
+
+
+# --------------------------------------------------------------------------
+# README.md routes table
+# --------------------------------------------------------------------------
+
+README_PATH = REPO_ROOT / "README.md"
+
+LIVE_TEST_FILES = [
+    REPO_ROOT / "tests" / "live" / "test_smoke.py",
+    REPO_ROOT / "tests" / "live" / "test_smoke_async.py",
+]
+# `client.<module>.<method>(` / `await x.<module>.<method>(` — module is
+# filtered down to real module names below, so this doesn't need to be
+# precise about what comes before the dot.
+LIVE_CALL_RE = re.compile(r"\.([a-z][a-z0-9_]*)\.([a-z][a-z0-9_]*)\(")
+
+
+def find_live_tested_ops(module_names: set[str]) -> set[tuple[str, str]]:
+    """(module, method_name) pairs that `tests/live/` actually calls against
+    a real Termix instance (CONTRIBUTING.md's "Live smoke"), not just the
+    synthetic `tests/contract/` fixtures every generated op gets. Read
+    directly from the live test source rather than hand-maintained, so the
+    README table below can't claim a route is live-tested after the smoke
+    suite stops covering it.
+    """
+    found: set[tuple[str, str]] = set()
+    for path in LIVE_TEST_FILES:
+        text = path.read_text(encoding="utf-8")
+        for module, method in LIVE_CALL_RE.findall(text):
+            if module in module_names:
+                found.add((module, method))
+    return found
+
+
+def render_routes_section(
+    resource_map: dict[str, Any],
+    operations: dict[str, Operation],
+    live_tested: set[tuple[str, str]],
+) -> str:
+    """One collapsible `<details>` block per resource module, listing every
+    endpoint the module covers next to the SDK call that implements it, and
+    whether that call is exercised by `tests/live/` against a real Termix
+    instance rather than only the synthetic `tests/contract/` fixtures every
+    generated op gets. Rebuilt from resource-map.json + the spec on every
+    generator run, so it can't drift from what's actually generated the way
+    a hand-maintained table would (CI's `generated-sync` job fails the build
+    if it does).
+    """
+    modules: dict[str, Any] = resource_map["modules"]
+    covered_ids = {op_id for cfg in modules.values() for op_id in cfg["ops"]}
+
+    lines = [
+        f"**{len(covered_ids)}** of **{len(operations)}** endpoints documented in "
+        "[`spec/termix-openapi.json`](spec/termix-openapi.json) have a generated SDK "
+        "call below, grouped by resource module (`client.<module>`). Every one also "
+        "exists on `AsyncTermixClient` as an async twin — see [Async](#async). "
+        f"**{len(live_tested)}** are additionally exercised against a real Termix "
+        "instance by the [live smoke suite](CONTRIBUTING.md#live-smoke) (marked "
+        "✅ below) — every other row is verified only against a synthetic "
+        "contract test in `tests/contract/`, not a live instance. Rebuilt "
+        "automatically by `python tools/sdk-gen/generate.py` "
+        "(see [Development](#development)); don't edit this section by hand.",
+        "",
+    ]
+
+    for module_name in sorted(modules):
+        generated_ops = build_generated_ops(module_name, modules[module_name]["ops"], operations)
+        generated_ops.sort(key=lambda g: (g.op.path, g.op.method))
+        module_live_count = sum(
+            1 for g in generated_ops if (module_name, g.method_name) in live_tested
+        )
+
+        lines.append("<details>")
+        summary = (
+            f"<summary><code>client.{module_name}</code> "
+            f"({len(generated_ops)} operation{'s' if len(generated_ops) != 1 else ''}"
+        )
+        if module_live_count:
+            summary += f", {module_live_count} live-tested"
+        summary += ")</summary>"
+        lines.append(summary)
+        lines.append("")
+        lines.append("| Method | Path | SDK call | Live-tested |")
+        lines.append("|---|---|---|---|")
+        for g in generated_ops:
+            call_args = [
+                *g.python_path_args(),
+                *(python_param_name(f) for f in g.op.multipart_file_fields),
+            ]
+            if g.has_params():
+                call_args.append("**params")
+            call = f"`client.{module_name}.{g.method_name}({', '.join(call_args)})`"
+            live_mark = "✅" if (module_name, g.method_name) in live_tested else ""
+            lines.append(f"| {g.op.method} | `{g.op.path}` | {call} | {live_mark} |")
+        lines.append("")
+        lines.append("</details>")
+        lines.append("")
+
+    return "\n".join(lines).rstrip("\n") + "\n"
+
+
+def write_readme_routes_section(
+    resource_map: dict[str, Any], operations: dict[str, Operation]
+) -> None:
+    live_tested = find_live_tested_ops(set(resource_map["modules"]))
+    body = render_routes_section(resource_map, operations, live_tested)
+    rewrite_markdown_region(README_PATH, "routes-table", "\n" + body)
 
 
 def wire_client(module_names: list[str]) -> None:
@@ -1048,6 +1167,9 @@ def main() -> None:
 
     wire_client(module_names)
     print("wired client attributes:", ", ".join(module_names))
+
+    write_readme_routes_section(resource_map, operations)
+    print("updated README.md routes table")
 
     format_generated_files(module_names)
 

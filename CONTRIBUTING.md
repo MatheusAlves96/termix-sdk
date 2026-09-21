@@ -33,7 +33,7 @@ uv run mypy              # src/ and examples/
 |-----|--------------|
 | `lint` | `ruff check`, `ruff format --check`, `mypy` (Python 3.13) |
 | `test (3.10..3.13)` | `pytest` with coverage; the 3.13 run uploads to Codecov (informational, never blocks) |
-| `generated-sync` | runs `tools/sdk-gen/generate.py` and fails if any committed file changes — hand-edits to `resources/`, `models/`, `types/` or `tests/contract/` are caught here |
+| `generated-sync` | runs `tools/sdk-gen/generate.py` and fails if any committed file changes — hand-edits to `resources/`, `models/`, `types/`, `tests/contract/`, or README.md's "Routes covered" table are caught here |
 | `spec-gen-typecheck` | `npm ci && npm run typecheck` in `tools/spec-gen` |
 | `build` | `uv build`, `twine check`, installs the wheel into a clean venv, imports it and checks `py.typed` is shipped; uploads `dist/` |
 
