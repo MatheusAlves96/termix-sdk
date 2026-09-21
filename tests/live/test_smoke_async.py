@@ -31,7 +31,8 @@ async def test_version_matches_the_spec_the_sdk_was_generated_from(
     async_client: AsyncTermixClient,
 ) -> None:
     version = (await async_client.system.version()).to_dict()
-    local = version.get("version") or version.get("localVersion")
+    # See test_smoke.py's sync twin for why `localVersion` comes first.
+    local = version.get("localVersion") or version.get("version")
     assert local, f"no version field in {version!r}"
     if f"release-{local}-tag" != SPEC_VERSION:
         warnings.warn(

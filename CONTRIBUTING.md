@@ -198,7 +198,7 @@ suites (one reported skip, which is the gate).
 What it covers, in sync and async: `health`; `version` (warns when the
 instance is newer than the `SPEC_VERSION` the SDK was generated from);
 `users.get_me()`; hosts create/retrieve/update/list/delete; snippets
-create/retrieve/list/delete; the bootstrap API key showing up in
+create/retrieve/update/list/delete; the bootstrap API key showing up in
 `api_keys.list()`; `NotFoundError` on an unknown id; `AuthenticationError`
 on a bad API key; and that `login()` returns a client whose resources
 actually work.
@@ -208,8 +208,21 @@ account created is the admin, which is what lets it mint an API key),
 authenticates with that key, prefixes everything it creates with
 `live-smoke-<hex>` and deletes it again on teardown.
 
-`.github/workflows/live.yml` runs the same thing weekly and on
-`workflow_dispatch`, against `ghcr.io/lukegus/termix:latest`. It has no
-`pull_request` trigger on purpose: a Termix that is down, or an upstream
-release that changes a response shape, must never block a merge. A failed
-scheduled run opens (or comments on) an issue labelled `live-smoke`.
+`docker/live/compose.yml`'s own default is pinned to the release
+`SPEC_VERSION` was generated from (`ghcr.io/lukegus/termix:2.7.1`, for
+`release-2.7.1-tag`), not `:latest` — a floating tag would run the local
+smoke against whatever Termix shipped most recently, silently testing a
+release the spec doesn't describe. Bump it alongside `SPEC_VERSION` when
+the spec is regenerated (`docs/sdk-plan.md` section 9). Override it with
+`TERMIX_IMAGE=ghcr.io/lukegus/termix:<tag> docker compose -f
+docker/live/compose.yml up -d --wait` to test a different release
+locally.
+
+`.github/workflows/live.yml` does not read that default: it sets
+`TERMIX_IMAGE` itself and runs weekly and on `workflow_dispatch` against
+`ghcr.io/lukegus/termix:latest` (or the tag a dispatch input names). That
+one stays on `:latest` on purpose — it has no `pull_request` trigger, so
+a Termix that is down, or an upstream release that changes a response
+shape, can never block a merge, and the weekly run is what finds that
+break before a user does. A failed scheduled run opens (or comments on)
+an issue labelled `live-smoke`.

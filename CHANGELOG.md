@@ -12,6 +12,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   sync and async clients against a real Termix instance, plus
   `docker/live/compose.yml` to bring one up and a weekly
   `.github/workflows/live.yml` that runs it outside of PR checks.
+  `docker/live/compose.yml`'s own default is pinned to the release
+  `SPEC_VERSION` was generated from, not `:latest`, so a local run tests
+  the release the spec documents; `live.yml` still tracks `:latest` on
+  its own, so the weekly run keeps finding upstream breaks early. The
+  version case itself was comparing against the wrong field
+  (`GET /version`'s `version` key mirrors `remoteVersion`, the latest
+  GitHub release, not the instance actually running — `localVersion` is)
+  and so always warned once any newer release existed upstream,
+  regardless of what the local instance was pinned to.
 
 ### Fixed
 
