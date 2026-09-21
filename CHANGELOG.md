@@ -13,14 +13,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `docker/live/compose.yml` to bring one up and a weekly
   `.github/workflows/live.yml` that runs it outside of PR checks.
 
+## [0.1.1] - 2026-09-21
+
 ### Fixed
 
 - `TermixClient.login()`, `AsyncTermixClient.login()` and
   `PendingTOTP.verify()` returned a client with no resource attributes:
   `client.users`, `client.hosts` and every other resource raised
   `AttributeError`, so a JWT-authenticated client could only be used
-  through the low-level `request()` escape hatch. Found by the new live
-  smoke suite against a real Termix instance.
+  through the low-level `request()` escape hatch. Found while probing a
+  real Termix instance for the live smoke suite.
 
 ## [0.1.0] - 2026-09-19
 
