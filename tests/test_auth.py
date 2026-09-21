@@ -155,3 +155,80 @@ async def test_async_login_requires_totp_then_verify(mock_async_http_client: Moc
     )
     client = await pending.verify("654321")
     assert isinstance(client, AsyncTermixClient)
+
+
+def test_login_client_has_resource_attributes(mock_http_client: MockHTTPClient):
+    """`_with_options()` builds the client with `cls.__new__`, skipping
+    `__init__` — so it has to wire the resources itself. It didn't, and
+    every `client.users` / `client.hosts` on a logged-in client raised
+    `AttributeError` (found by the live smoke against a real Termix).
+    """
+    mock_http_client.queue_response(
+        status_code=200, body={"success": True, "is_admin": True, "token": "jwt_abc"}
+    )
+    client = TermixClient.login(
+        base_url=BASE_URL, username="alice", password="pw", _http_client=mock_http_client
+    )
+    assert isinstance(client, TermixClient)
+
+    mock_http_client.queue_response(status_code=200, body={"username": "alice"})
+    assert client.users.get_me().username == "alice"
+    assert mock_http_client.requests[1].headers["Authorization"] == "Bearer jwt_abc"
+
+
+def test_totp_verified_client_has_resource_attributes(mock_http_client: MockHTTPClient):
+    mock_http_client.queue_response(
+        status_code=200,
+        body={"success": True, "requires_totp": True, "temp_token": "temp_xyz"},
+    )
+    pending = TermixClient.login(
+        base_url=BASE_URL, username="alice", password="pw", _http_client=mock_http_client
+    )
+    assert isinstance(pending, PendingTOTP)
+
+    mock_http_client.queue_response(status_code=200, body={"success": True, "token": "jwt_totp"})
+    client = pending.verify("123456")
+
+    mock_http_client.queue_response(status_code=200, body={"status": "ok"})
+    assert client.system.health().status == "ok"
+    assert mock_http_client.requests[2].headers["Authorization"] == "Bearer jwt_totp"
+
+
+@pytest.mark.asyncio
+async def test_async_login_client_has_resource_attributes(
+    mock_async_http_client: MockAsyncHTTPClient,
+):
+    mock_async_http_client.queue_response(
+        status_code=200, body={"success": True, "token": "jwt_async"}
+    )
+    client = await AsyncTermixClient.login(
+        base_url=BASE_URL, username="alice", password="pw", _http_client=mock_async_http_client
+    )
+    assert isinstance(client, AsyncTermixClient)
+
+    mock_async_http_client.queue_response(status_code=200, body={"username": "alice"})
+    me = await client.users.get_me()
+    assert me.username == "alice"
+
+
+@pytest.mark.asyncio
+async def test_async_totp_verified_client_has_resource_attributes(
+    mock_async_http_client: MockAsyncHTTPClient,
+):
+    mock_async_http_client.queue_response(
+        status_code=200,
+        body={"success": True, "requires_totp": True, "temp_token": "temp_a"},
+    )
+    pending = await AsyncTermixClient.login(
+        base_url=BASE_URL, username="alice", password="pw", _http_client=mock_async_http_client
+    )
+    assert isinstance(pending, AsyncPendingTOTP)
+
+    mock_async_http_client.queue_response(
+        status_code=200, body={"success": True, "token": "jwt_totp_async"}
+    )
+    client = await pending.verify("654321")
+
+    mock_async_http_client.queue_response(status_code=200, body={"status": "ok"})
+    health = await client.system.health()
+    assert health.status == "ok"

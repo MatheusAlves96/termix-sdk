@@ -97,6 +97,10 @@ class AsyncTermixClient:
             default_headers=default_headers,
         )
         self._requestor = AsyncAPIRequestor(self._options, http_client=_http_client)
+        self._init_resources()
+
+    def _init_resources(self) -> None:
+        """Async mirror of `TermixClient._init_resources` — see its docstring."""
 
         # --- generated resource attributes start ---
 
@@ -151,6 +155,7 @@ class AsyncTermixClient:
         instance = cls.__new__(cls)
         instance._options = options
         instance._requestor = requestor
+        instance._init_resources()
         return instance
 
     @classmethod
