@@ -89,7 +89,7 @@ def jwt_client(_termix_is_up: None) -> TermixClient:
     """A JWT-authenticated client, registering the smoke user if needed.
 
     The first account created on an empty instance becomes the admin
-    (verified against release-2.7.1-tag), and `api_keys.*` is admin-only,
+    (verified against release-2.8.0-tag), and `api_keys.*` is admin-only,
     so on a fresh instance this user can mint the API key the rest of the
     suite runs on.
     """

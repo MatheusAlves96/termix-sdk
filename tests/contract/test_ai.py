@@ -177,6 +177,17 @@ def test_chat_stream_contract(client, mock_http_client):
     assert events[0].json() == {"ok": True}
 
 
+def test_mark_proposal_run_in_terminal_contract(client, mock_http_client):
+    """Generated from POST /ai/proposals/{id}/mark-run-in-terminal in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body={"success": True, "summary": "x"})
+    result = client.ai.mark_proposal_run_in_terminal("x", hostId=1.0, summary="x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/ai/proposals/x/mark-run-in-terminal")
+    assert sent.json == {"hostId": 1.0, "summary": "x"}
+    assert result.to_dict() == {"success": True, "summary": "x"}
+
+
 @pytest.mark.asyncio
 async def test_async_create_provider_contract(async_client, mock_async_http_client):
     """Generated from POST /ai/providers in spec/termix-openapi.json."""
@@ -362,3 +373,15 @@ async def test_async_chat_stream_contract(async_client, mock_async_http_client):
     events = [e async for e in result]
     assert events[0].event == "message"
     assert events[0].json() == {"ok": True}
+
+
+@pytest.mark.asyncio
+async def test_async_mark_proposal_run_in_terminal_contract(async_client, mock_async_http_client):
+    """Generated from POST /ai/proposals/{id}/mark-run-in-terminal in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(status_code=200, body={"success": True, "summary": "x"})
+    result = await async_client.ai.mark_proposal_run_in_terminal("x", hostId=1.0, summary="x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "POST"
+    assert sent.url.endswith("/ai/proposals/x/mark-run-in-terminal")
+    assert sent.json == {"hostId": 1.0, "summary": "x"}
+    assert result.to_dict() == {"success": True, "summary": "x"}

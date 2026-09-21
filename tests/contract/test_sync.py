@@ -9,13 +9,13 @@ import pytest
 
 def test_pull_contract(client, mock_http_client):
     """Generated from GET /sync/{entityType} in spec/termix-openapi.json."""
-    mock_http_client.queue_response(status_code=200, body={"rows": [{}]})
+    mock_http_client.queue_response(status_code=200, body={"rows": ["x"]})
     result = client.sync.pull("x", since="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/sync/x")
     assert sent.params == {"since": "x"}
-    assert result.to_dict() == {"rows": [{}]}
+    assert result.to_dict() == {"rows": ["x"]}
 
 
 def test_push_contract(client, mock_http_client):
@@ -54,13 +54,13 @@ def test_pull_tombstones_contract(client, mock_http_client):
 @pytest.mark.asyncio
 async def test_async_pull_contract(async_client, mock_async_http_client):
     """Generated from GET /sync/{entityType} in spec/termix-openapi.json."""
-    mock_async_http_client.queue_response(status_code=200, body={"rows": [{}]})
+    mock_async_http_client.queue_response(status_code=200, body={"rows": ["x"]})
     result = await async_client.sync.pull("x", since="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/sync/x")
     assert sent.params == {"since": "x"}
-    assert result.to_dict() == {"rows": [{}]}
+    assert result.to_dict() == {"rows": ["x"]}
 
 
 @pytest.mark.asyncio

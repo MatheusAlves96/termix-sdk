@@ -1,6 +1,6 @@
 [
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "creates an automation from a valid definition",
@@ -15,7 +15,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "requires a name",
@@ -29,7 +29,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "rejects an unknown trigger kind",
@@ -50,7 +50,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "rejects an unknown operator",
@@ -65,7 +65,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "rejects an unknown step type",
@@ -80,7 +80,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "rejects duplicate step ids, including inside a branch",
@@ -95,7 +95,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "rejects an invalid cron expression",
@@ -110,7 +110,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "rejects an interval under a minute",
@@ -125,7 +125,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "registers a schedule for a schedule trigger",
@@ -137,7 +137,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "returns a webhook token once and stores only its hash",
@@ -152,7 +152,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L333:POST:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L337:POST:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /",
     "itTitle": "stores the automation against the caller, not a supplied user id",
@@ -166,7 +166,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L244:GET:/automations",
+    "routeId": "src/backend/database/routes/automations.ts#L246:GET:/automations",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "GET /",
     "itTitle": "only returns the caller's automations",
@@ -175,7 +175,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L531:DELETE:/automations/:id",
+    "routeId": "src/backend/database/routes/automations.ts#L537:DELETE:/automations/:id",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "DELETE /:id",
     "itTitle": "will not delete another user's automation",
@@ -189,7 +189,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L600:POST:/automations/:id/run",
+    "routeId": "src/backend/database/routes/automations.ts#L607:POST:/automations/:id/run",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /:id/run",
     "itTitle": "runs an owned automation",
@@ -203,7 +203,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L600:POST:/automations/:id/run",
+    "routeId": "src/backend/database/routes/automations.ts#L607:POST:/automations/:id/run",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /:id/run",
     "itTitle": "passes the dry-run flag through",
@@ -217,7 +217,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L600:POST:/automations/:id/run",
+    "routeId": "src/backend/database/routes/automations.ts#L607:POST:/automations/:id/run",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /:id/run",
     "itTitle": "refuses to run someone else's automation",
@@ -231,7 +231,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L760:POST:/automations/webhook/:token",
+    "routeId": "src/backend/database/routes/automations.ts#L770:POST:/automations/webhook/:token",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /webhook/:token",
     "itTitle": "runs the automation matching the token",
@@ -248,7 +248,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L760:POST:/automations/webhook/:token",
+    "routeId": "src/backend/database/routes/automations.ts#L770:POST:/automations/webhook/:token",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /webhook/:token",
     "itTitle": "rejects a token that does not match",
@@ -262,7 +262,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/automations.ts#L760:POST:/automations/webhook/:token",
+    "routeId": "src/backend/database/routes/automations.ts#L770:POST:/automations/webhook/:token",
     "testFile": "src/backend/tests/database/routes/automations.test.ts",
     "describeTitle": "POST /webhook/:token",
     "itTitle": "rejects a token too short to be real",
@@ -273,6 +273,122 @@
     },
     "response": {
       "status": 404
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/branding-routes.ts#L110:GET:/users/branding",
+    "testFile": "src/backend/tests/database/routes/branding-routes.test.ts",
+    "describeTitle": "GET /users/branding",
+    "itTitle": "succeeds with no auth at all, since the route registers no auth handler",
+    "response": {
+      "status": 200,
+      "body": {
+        "appName": "Termix",
+        "tagline": "",
+        "logo": null
+      },
+      "partial": false
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/branding-routes.ts#L110:GET:/users/branding",
+    "testFile": "src/backend/tests/database/routes/branding-routes.test.ts",
+    "describeTitle": "GET /users/branding",
+    "itTitle": "reflects persisted branding values",
+    "response": {
+      "status": 200,
+      "body": {
+        "appName": "Acme Ops",
+        "tagline": "Ship it",
+        "logo": "<expr>"
+      },
+      "partial": false
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/branding-routes.ts#L142:PATCH:/users/branding",
+    "testFile": "src/backend/tests/database/routes/branding-routes.test.ts",
+    "describeTitle": "PATCH /users/branding",
+    "itTitle": "rejects an unauthenticated request and persists nothing",
+    "response": {
+      "status": 401
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/branding-routes.ts#L142:PATCH:/users/branding",
+    "testFile": "src/backend/tests/database/routes/branding-routes.test.ts",
+    "describeTitle": "PATCH /users/branding",
+    "itTitle": "rejects a non-admin request and persists nothing",
+    "response": {
+      "status": 403
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/branding-routes.ts#L142:PATCH:/users/branding",
+    "testFile": "src/backend/tests/database/routes/branding-routes.test.ts",
+    "describeTitle": "PATCH /users/branding",
+    "itTitle": "persists only the allowed fields for an admin request",
+    "response": {
+      "status": 200,
+      "body": {
+        "appName": "Acme Ops",
+        "tagline": "Ship it"
+      },
+      "partial": true
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/branding-routes.ts#L142:PATCH:/users/branding",
+    "testFile": "src/backend/tests/database/routes/branding-routes.test.ts",
+    "describeTitle": "PATCH /users/branding",
+    "itTitle": "rejects unknown fields without writing anything",
+    "response": {
+      "status": 400,
+      "body": {
+        "code": "BRANDING_SETTINGS_UNKNOWN_FIELD"
+      },
+      "partial": true
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/branding-routes.ts#L142:PATCH:/users/branding",
+    "testFile": "src/backend/tests/database/routes/branding-routes.test.ts",
+    "describeTitle": "PATCH /users/branding",
+    "itTitle": "rejects an app name over the length limit",
+    "response": {
+      "status": 400,
+      "body": {
+        "code": "BRANDING_SETTINGS_INVALID",
+        "field": "appName"
+      },
+      "partial": true
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/branding-routes.ts#L142:PATCH:/users/branding",
+    "testFile": "src/backend/tests/database/routes/branding-routes.test.ts",
+    "describeTitle": "PATCH /users/branding",
+    "itTitle": "rejects malformed/non-raster logo data without persisting it",
+    "response": {
+      "status": 400,
+      "body": {
+        "code": "BRANDING_SETTINGS_INVALID",
+        "field": "logo"
+      },
+      "partial": true
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/branding-routes.ts#L142:PATCH:/users/branding",
+    "testFile": "src/backend/tests/database/routes/branding-routes.test.ts",
+    "describeTitle": "PATCH /users/branding",
+    "itTitle": "clears the logo when patched with null",
+    "response": {
+      "status": 200,
+      "body": {
+        "logo": null
+      },
+      "partial": true
     }
   },
   {
@@ -572,7 +688,25 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/user-totp-routes.ts#L326:POST:/users/totp/disable",
+    "routeId": "src/backend/database/routes/user-totp-routes.ts#L373:POST:/users/totp/disable",
+    "testFile": "src/backend/tests/database/routes/totp-disable-route.test.ts",
+    "describeTitle": "POST /totp/disable",
+    "itTitle": "reveals the existing enrollment only after re-authentication",
+    "response": {
+      "status": 401
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/user-totp-routes.ts#L373:POST:/users/totp/disable",
+    "testFile": "src/backend/tests/database/routes/totp-disable-route.test.ts",
+    "describeTitle": "POST /totp/disable",
+    "itTitle": "requires a credential before adding another authenticator",
+    "response": {
+      "status": 400
+    }
+  },
+  {
+    "routeId": "src/backend/database/routes/user-totp-routes.ts#L373:POST:/users/totp/disable",
     "testFile": "src/backend/tests/database/routes/totp-disable-route.test.ts",
     "describeTitle": "POST /totp/disable",
     "itTitle": "accepts the TOTP code on its own",
@@ -581,7 +715,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/user-totp-routes.ts#L326:POST:/users/totp/disable",
+    "routeId": "src/backend/database/routes/user-totp-routes.ts#L373:POST:/users/totp/disable",
     "testFile": "src/backend/tests/database/routes/totp-disable-route.test.ts",
     "describeTitle": "POST /totp/disable",
     "itTitle": "accepts the account password on its own",
@@ -590,7 +724,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/user-totp-routes.ts#L326:POST:/users/totp/disable",
+    "routeId": "src/backend/database/routes/user-totp-routes.ts#L373:POST:/users/totp/disable",
     "testFile": "src/backend/tests/database/routes/totp-disable-route.test.ts",
     "describeTitle": "POST /totp/disable",
     "itTitle": "accepts a backup code",
@@ -599,7 +733,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/user-totp-routes.ts#L326:POST:/users/totp/disable",
+    "routeId": "src/backend/database/routes/user-totp-routes.ts#L373:POST:/users/totp/disable",
     "testFile": "src/backend/tests/database/routes/totp-disable-route.test.ts",
     "describeTitle": "POST /totp/disable",
     "itTitle": "still refuses a wrong value",
@@ -608,7 +742,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/user-totp-routes.ts#L326:POST:/users/totp/disable",
+    "routeId": "src/backend/database/routes/user-totp-routes.ts#L373:POST:/users/totp/disable",
     "testFile": "src/backend/tests/database/routes/totp-disable-route.test.ts",
     "describeTitle": "POST /totp/disable",
     "itTitle": "refuses an empty request rather than disabling anything",
@@ -617,7 +751,7 @@
     }
   },
   {
-    "routeId": "src/backend/database/routes/user-totp-routes.ts#L326:POST:/users/totp/disable",
+    "routeId": "src/backend/database/routes/user-totp-routes.ts#L373:POST:/users/totp/disable",
     "testFile": "src/backend/tests/database/routes/totp-disable-route.test.ts",
     "describeTitle": "POST /totp/disable",
     "itTitle": "does not let an OIDC user disable it with a password",
@@ -1168,7 +1302,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L162:POST:/session-sharing/create",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L118:POST:/session-sharing/create",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "POST /session-sharing/create",
     "itTitle": "rejects a caller who does not own the live session",
@@ -1190,7 +1324,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L162:POST:/session-sharing/create",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L118:POST:/session-sharing/create",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "POST /session-sharing/create",
     "itTitle": "creates a link share for the session owner",
@@ -1212,7 +1346,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L162:POST:/session-sharing/create",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L118:POST:/session-sharing/create",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "POST /session-sharing/create",
     "itTitle": "rejects a user share when the target lacks host access",
@@ -1235,7 +1369,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L162:POST:/session-sharing/create",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L118:POST:/session-sharing/create",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "POST /session-sharing/create",
     "itTitle": "global kill switch overrides an enabled per-host toggle",
@@ -1257,7 +1391,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L162:POST:/session-sharing/create",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L118:POST:/session-sharing/create",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "POST /session-sharing/create",
     "itTitle": "rejects when the per-host toggle is off even though global is on",
@@ -1275,7 +1409,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L410:GET:/session-sharing/resolve/:linkToken",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L366:GET:/session-sharing/resolve/:linkToken",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "GET /session-sharing/resolve/:linkToken",
     "itTitle": "never includes hostname, ip, username, or hostId in the response body",
@@ -1289,7 +1423,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L410:GET:/session-sharing/resolve/:linkToken",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L366:GET:/session-sharing/resolve/:linkToken",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "GET /session-sharing/resolve/:linkToken",
     "itTitle": "returns only protocol/permissionLevel/wsPath(/connectParams) for ssh",
@@ -1308,7 +1442,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L410:GET:/session-sharing/resolve/:linkToken",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L366:GET:/session-sharing/resolve/:linkToken",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "GET /session-sharing/resolve/:linkToken",
     "itTitle": "mints a fresh join token for guac protocols",
@@ -1326,7 +1460,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L410:GET:/session-sharing/resolve/:linkToken",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L366:GET:/session-sharing/resolve/:linkToken",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "GET /session-sharing/resolve/:linkToken",
     "itTitle": "rejects an unknown link token",
@@ -1340,7 +1474,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L410:GET:/session-sharing/resolve/:linkToken",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L366:GET:/session-sharing/resolve/:linkToken",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "GET /session-sharing/resolve/:linkToken",
     "itTitle": "rejects a revoked link token",
@@ -1354,7 +1488,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L410:GET:/session-sharing/resolve/:linkToken",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L366:GET:/session-sharing/resolve/:linkToken",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "GET /session-sharing/resolve/:linkToken",
     "itTitle": "rejects an expired link token",
@@ -1368,7 +1502,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L410:GET:/session-sharing/resolve/:linkToken",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L366:GET:/session-sharing/resolve/:linkToken",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "GET /session-sharing/resolve/:linkToken",
     "itTitle": "re-checks the global kill switch at resolve time, not just at creation time",
@@ -1382,7 +1516,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L334:DELETE:/session-sharing/:shareId",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L290:DELETE:/session-sharing/:shareId",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "DELETE /session-sharing/:shareId",
     "itTitle": "allows the owner to revoke their own share",
@@ -1400,7 +1534,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L334:DELETE:/session-sharing/:shareId",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L290:DELETE:/session-sharing/:shareId",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "DELETE /session-sharing/:shareId",
     "itTitle": "rejects a non-owner, non-admin caller",
@@ -1418,7 +1552,7 @@
     }
   },
   {
-    "routeId": "src/backend/hosts/session-sharing/routes.ts#L334:DELETE:/session-sharing/:shareId",
+    "routeId": "src/backend/hosts/session-sharing/routes.ts#L290:DELETE:/session-sharing/:shareId",
     "testFile": "src/backend/tests/hosts/session-sharing/routes.test.ts",
     "describeTitle": "DELETE /session-sharing/:shareId",
     "itTitle": "allows an admin to revoke someone else's share",

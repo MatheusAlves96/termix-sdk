@@ -79,13 +79,15 @@ def test_resolve_path_contract(client, mock_http_client):
 
 def test_read_file_contract(client, mock_http_client):
     """Generated from GET /ssh/file_manager/ssh/readFile in spec/termix-openapi.json."""
-    mock_http_client.queue_response(status_code=200, body={"error": "x", "fileNotFound": True})
+    mock_http_client.queue_response(
+        status_code=200, body={"error": "x", "fileNotFound": True, "needsSudo": True}
+    )
     result = client.file_manager.read_file(sessionId="x", path="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/ssh/file_manager/ssh/readFile")
     assert sent.params == {"sessionId": "x", "path": "x"}
-    assert result.to_dict() == {"error": "x", "fileNotFound": True}
+    assert result.to_dict() == {"error": "x", "fileNotFound": True, "needsSudo": True}
 
 
 def test_write_file_contract(client, mock_http_client):
@@ -1033,14 +1035,14 @@ async def test_async_resolve_path_contract(async_client, mock_async_http_client)
 async def test_async_read_file_contract(async_client, mock_async_http_client):
     """Generated from GET /ssh/file_manager/ssh/readFile in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(
-        status_code=200, body={"error": "x", "fileNotFound": True}
+        status_code=200, body={"error": "x", "fileNotFound": True, "needsSudo": True}
     )
     result = await async_client.file_manager.read_file(sessionId="x", path="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/ssh/file_manager/ssh/readFile")
     assert sent.params == {"sessionId": "x", "path": "x"}
-    assert result.to_dict() == {"error": "x", "fileNotFound": True}
+    assert result.to_dict() == {"error": "x", "fileNotFound": True, "needsSudo": True}
 
 
 @pytest.mark.asyncio

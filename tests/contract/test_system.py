@@ -20,14 +20,14 @@ def test_health_contract(client, mock_http_client):
 def test_version_contract(client, mock_http_client):
     """Generated from GET /version in spec/termix-openapi.json."""
     mock_http_client.queue_response(
-        status_code=200, body={"localVersion": "x", "status": "update_check_disabled"}
+        status_code=200, body={"localVersion": "x", "status": "unknown"}
     )
     result = client.system.version(checkRemote="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/version")
     assert sent.params == {"checkRemote": "x"}
-    assert result.to_dict() == {"localVersion": "x", "status": "update_check_disabled"}
+    assert result.to_dict() == {"localVersion": "x", "status": "unknown"}
 
 
 def test_list_releases_contract(client, mock_http_client):
@@ -97,14 +97,14 @@ async def test_async_health_contract(async_client, mock_async_http_client):
 async def test_async_version_contract(async_client, mock_async_http_client):
     """Generated from GET /version in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(
-        status_code=200, body={"localVersion": "x", "status": "update_check_disabled"}
+        status_code=200, body={"localVersion": "x", "status": "unknown"}
     )
     result = await async_client.system.version(checkRemote="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/version")
     assert sent.params == {"checkRemote": "x"}
-    assert result.to_dict() == {"localVersion": "x", "status": "update_check_disabled"}
+    assert result.to_dict() == {"localVersion": "x", "status": "unknown"}
 
 
 @pytest.mark.asyncio

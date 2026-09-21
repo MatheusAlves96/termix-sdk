@@ -605,12 +605,14 @@ def test_list_statuses_contract(client, mock_http_client):
 
 def test_get_status_contract(client, mock_http_client):
     """Generated from GET /status/{id} in spec/termix-openapi.json."""
-    mock_http_client.queue_response(status_code=200, body={"status": "online", "lastChecked": "x"})
+    mock_http_client.queue_response(
+        status_code=200, body={"status": "online", "lastChecked": "x", "reason": "x"}
+    )
     result = client.metrics.get_status(1)
     sent = mock_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/status/1")
-    assert result.to_dict() == {"status": "online", "lastChecked": "x"}
+    assert result.to_dict() == {"status": "online", "lastChecked": "x", "reason": "x"}
 
 
 def test_clear_connections_contract(client, mock_http_client):
@@ -1463,13 +1465,13 @@ async def test_async_list_statuses_contract(async_client, mock_async_http_client
 async def test_async_get_status_contract(async_client, mock_async_http_client):
     """Generated from GET /status/{id} in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(
-        status_code=200, body={"status": "online", "lastChecked": "x"}
+        status_code=200, body={"status": "online", "lastChecked": "x", "reason": "x"}
     )
     result = await async_client.metrics.get_status(1)
     sent = mock_async_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/status/1")
-    assert result.to_dict() == {"status": "online", "lastChecked": "x"}
+    assert result.to_dict() == {"status": "online", "lastChecked": "x", "reason": "x"}
 
 
 @pytest.mark.asyncio

@@ -5,7 +5,7 @@ Unofficial Python client SDK for the [Termix](https://github.com/Termix-SSH/Term
 Generated from a spec this repo derives directly from the Termix backend
 source, not from Termix's own hand-written `openapi.json` — see
 [Generating our own Termix API spec](tools/spec-gen/docs/spec-generation-strategy.md)
-for why. As of `release-2.7.1-tag`, that covers **477 of 491** real
+for why. As of `release-2.8.0-tag`, that covers **516 of 531** real
 endpoints; the rest are either genuinely out of scope (browser-redirect
 OIDC flows, internal-only routes) or need a documented request/response
 shape the spec doesn't have (3 `file_manager` streaming-upload endpoints).

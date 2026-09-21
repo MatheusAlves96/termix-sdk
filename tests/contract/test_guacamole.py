@@ -10,7 +10,7 @@ import pytest
 def test_connect_host_contract(client, mock_http_client):
     """Generated from POST /guacamole/connect-host/{hostId} in spec/termix-openapi.json."""
     mock_http_client.queue_response(
-        status_code=200, body={"token": "x", "guacamoleConnectionId": "x"}
+        status_code=200, body={"token": "x", "termixConnectId": "x", "guacamoleConnectionId": "x"}
     )
     result = client.guacamole.connect_host(
         "x", protocol="x", promptedUsername="x", promptedPassword="x", promptedDomain="x"
@@ -24,7 +24,7 @@ def test_connect_host_contract(client, mock_http_client):
         "promptedPassword": "x",
         "promptedDomain": "x",
     }
-    assert result.to_dict() == {"token": "x", "guacamoleConnectionId": "x"}
+    assert result.to_dict() == {"token": "x", "termixConnectId": "x", "guacamoleConnectionId": "x"}
 
 
 def test_get_status_contract(client, mock_http_client):
@@ -67,11 +67,21 @@ def test_create_token_contract(client, mock_http_client):
     assert result.to_dict() == {"token": "x"}
 
 
+def test_get_connection_contract(client, mock_http_client):
+    """Generated from GET /guacamole/connection/{connectId} in spec/termix-openapi.json."""
+    mock_http_client.queue_response(status_code=200, body={"guacamoleConnectionId": "x"})
+    result = client.guacamole.get_connection("x")
+    sent = mock_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/guacamole/connection/x")
+    assert result.to_dict() == {"guacamoleConnectionId": "x"}
+
+
 @pytest.mark.asyncio
 async def test_async_connect_host_contract(async_client, mock_async_http_client):
     """Generated from POST /guacamole/connect-host/{hostId} in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(
-        status_code=200, body={"token": "x", "guacamoleConnectionId": "x"}
+        status_code=200, body={"token": "x", "termixConnectId": "x", "guacamoleConnectionId": "x"}
     )
     result = await async_client.guacamole.connect_host(
         "x", protocol="x", promptedUsername="x", promptedPassword="x", promptedDomain="x"
@@ -85,7 +95,7 @@ async def test_async_connect_host_contract(async_client, mock_async_http_client)
         "promptedPassword": "x",
         "promptedDomain": "x",
     }
-    assert result.to_dict() == {"token": "x", "guacamoleConnectionId": "x"}
+    assert result.to_dict() == {"token": "x", "termixConnectId": "x", "guacamoleConnectionId": "x"}
 
 
 @pytest.mark.asyncio
@@ -128,3 +138,14 @@ async def test_async_create_token_contract(async_client, mock_async_http_client)
         "rawOptions": "x",
     }
     assert result.to_dict() == {"token": "x"}
+
+
+@pytest.mark.asyncio
+async def test_async_get_connection_contract(async_client, mock_async_http_client):
+    """Generated from GET /guacamole/connection/{connectId} in spec/termix-openapi.json."""
+    mock_async_http_client.queue_response(status_code=200, body={"guacamoleConnectionId": "x"})
+    result = await async_client.guacamole.get_connection("x")
+    sent = mock_async_http_client.requests[0]
+    assert sent.method == "GET"
+    assert sent.url.endswith("/guacamole/connection/x")
+    assert result.to_dict() == {"guacamoleConnectionId": "x"}
