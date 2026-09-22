@@ -146,11 +146,98 @@ const RESPONSE_IGNORED_METHODS = new Set([
   "status", // never terminal by itself; only meaningful chained before a terminal method
 ]);
 
+/** A string/template literal's text, or null for anything else. */
+function literalText(arg: Node | undefined): string | null {
+  if (!arg) return null;
+  if (Node.isStringLiteral(arg) || Node.isNoSubstitutionTemplateLiteral(arg)) return arg.getLiteralText();
+  return null;
+}
+
+/**
+ * Distinct literal content-type strings an expression can evaluate to. Handles the plain
+ * literal case directly, and a `cond ? "a" : "b"` ternary (confirmed real case: `GET
+ * /audit-logs/export` picks its `Content-Type` this way — `format === "csv" ? "text/csv; ..." :
+ * "application/x-ndjson"`) by collecting both literal branches rather than giving up. Anything
+ * else (a variable, a function call) returns `[]` — no guessing at a value we can't see.
+ */
+function literalContentTypes(arg: Node | undefined): string[] {
+  if (!arg) return [];
+  const direct = literalText(arg);
+  if (direct !== null) return [direct];
+  if (Node.isConditionalExpression(arg)) {
+    return [...new Set([...literalContentTypes(arg.getWhenTrue()), ...literalContentTypes(arg.getWhenFalse())])];
+  }
+  return [];
+}
+
+/** An object-literal property's own name, with a quoted key's surrounding quotes stripped —
+ *  ts-morph's own `PropertyAssignment.getName()` keeps them (`{"Content-Type": ...}`'s name is
+ *  the 15-character string `"Content-Type"`, quote marks included), so a bare `=== "content-
+ *  type"` comparison against it never matches. Confirmed real case: this silently broke every
+ *  `res.writeHead(200, {"Content-Type": "text/event-stream"})`'s content-type detection —
+ *  including the SSE description text below, though not `is_sse` in generate.py, which never
+ *  reads this at all (see GeneratedOp.__init__'s own docstring) and was never affected. */
+function propKeyName(prop: Node & { getName(): string }): string {
+  const raw = prop.getName();
+  const quoted = raw.length >= 2 && ((raw[0] === '"' && raw.endsWith('"')) || (raw[0] === "'" && raw.endsWith("'")));
+  return quoted ? raw.slice(1, -1) : raw;
+}
+
+/** Strips `; charset=...`-style parameters down to the bare media type, e.g. for use as an
+ *  OpenAPI `content` map key or for `isTextualMediaType` below. */
+function normalizeMediaType(ct: string): string {
+  return ct.split(";")[0].trim().toLowerCase();
+}
+
+function isTextualMediaType(ct: string): boolean {
+  return ct.startsWith("text/") || ct.endsWith("+json") || ct.endsWith("+xml") || ct === "application/json" || ct === "application/xml" || ct === "application/x-ndjson";
+}
+
 interface RawResponseHit {
   statusCode: number | "default";
   finalMethod: string;
   finalArgs: Node[];
-  writeHeadContentType: string | null;
+  /** Normalized `Content-Type` value(s) the handler explicitly set for this response, from
+   *  `res.writeHead(status, {"Content-Type": ...})`, a chained `.type(...)`/`.setHeader(...)`/
+   *  `.set(...)` on the same terminal call, or (falling back) the nearest earlier standalone
+   *  `res.setHeader("Content-Type", ...)`/`.set(...)`/`.type(...)` statement in the same
+   *  function. Empty when nothing explicit was found. */
+  explicitContentTypes: string[];
+}
+
+/**
+ * Finds every standalone `res.setHeader("Content-Type", ...)` / `.set(...)` / `.type(...)`
+ * call in `fnNode` — i.e. one that ISN'T chained onto a terminal response call, so
+ * `RESPONSE_TERMINAL_METHODS`/`RESPONSE_IGNORED_METHODS` above would otherwise drop it on the
+ * floor entirely. Confirmed real case: both `GET /audit-logs/export` and `GET /termix-id/u/
+ * {handle}/ca` set their real `Content-Type` (`text/csv`/`text/plain`) this way, as its own
+ * statement well before the `res.write()`/`res.send()` call that actually sends the body —
+ * previously invisible to the generator, which fell back to `text/html` (a `.send()`-with-a-
+ * string default) or no content type at all. Returned sorted by source position so callers can
+ * find "the nearest one before this terminal call".
+ */
+function collectStandaloneContentTypeSets(fnNode: Node, resParamName: string): { pos: number; contentTypes: string[] }[] {
+  const out: { pos: number; contentTypes: string[] }[] = [];
+  for (const call of fnNode.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    const callee = call.getExpression();
+    if (!Node.isPropertyAccessExpression(callee)) continue;
+    if (callee.getExpression().getText() !== resParamName) continue;
+    const method = callee.getName();
+    const args = call.getArguments();
+    if ((method === "setHeader" || method === "set") && args.length >= 2) {
+      const key = literalText(args[0]);
+      if (key && key.toLowerCase() === "content-type") {
+        const values = literalContentTypes(args[1]);
+        if (values.length > 0) out.push({ pos: call.getStart(), contentTypes: values });
+      }
+    } else if (method === "type" && args.length >= 1 && Node.isExpressionStatement(call.getParent())) {
+      // Only a bare `res.type(...)` statement — a chained one (`res.status(500).type(...).send(...)`)
+      // is scoped to that specific terminal call and handled where the chain itself is walked.
+      const values = literalContentTypes(args[0]).filter((v) => v.includes("/"));
+      if (values.length > 0) out.push({ pos: call.getStart(), contentTypes: values });
+    }
+  }
+  return out.sort((a, b) => a.pos - b.pos);
 }
 
 /** Collects every `res.<...>` (or helper(res, ...) forwarded) terminal call in a function, up to depth 3. */
@@ -162,6 +249,8 @@ function collectResponseHits(
   out: RawResponseHit[],
 ): void {
   if (depth > 3) return;
+  const standaloneContentTypes = collectStandaloneContentTypeSets(fnNode, resParamName);
+
   for (const call of fnNode.getDescendantsOfKind(SyntaxKind.CallExpression)) {
     const parent = call.getParent();
     const isChainLink = parent && Node.isPropertyAccessExpression(parent) && parent.getExpression() === call;
@@ -187,27 +276,43 @@ function collectResponseHits(
         else statusCode = 302;
       }
 
-      let writeHeadContentType: string | null = null;
+      // Priority: `.writeHead(status, {"Content-Type": ...})`'s own header object, then a
+      // `.type(...)`/`.setHeader(...)`/`.set(...)` chained onto this SAME terminal call
+      // (scoped to exactly this response — e.g. `res.status(500).type("text/plain").send(...)`),
+      // then the nearest standalone header-setting statement earlier in the function.
+      let explicitContentTypes: string[] = [];
       if (writeHeadCall) {
         const headersArg = writeHeadCall.args.find((a) => Node.isObjectLiteralExpression(a));
         if (headersArg && Node.isObjectLiteralExpression(headersArg)) {
           for (const prop of headersArg.getProperties()) {
-            if (Node.isPropertyAssignment(prop) && prop.getName().toLowerCase() === '"content-type"'.replace(/"/g, "")) {
-              const init = prop.getInitializer();
-              if (init && (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init))) {
-                writeHeadContentType = init.getLiteralText();
-              }
+            if (Node.isPropertyAssignment(prop) && propKeyName(prop).toLowerCase() === "content-type") {
+              explicitContentTypes.push(...literalContentTypes(prop.getInitializer()));
             }
           }
         }
       }
+      if (explicitContentTypes.length === 0) {
+        const chainedTypeOrHeader = chain.calls.find((c) => c.method === "type" || c.method === "setHeader" || c.method === "set");
+        if (chainedTypeOrHeader) {
+          if (chainedTypeOrHeader.method === "type") {
+            explicitContentTypes = literalContentTypes(chainedTypeOrHeader.args[0]).filter((v) => v.includes("/"));
+          } else {
+            const key = literalText(chainedTypeOrHeader.args[0]);
+            if (key && key.toLowerCase() === "content-type") explicitContentTypes = literalContentTypes(chainedTypeOrHeader.args[1]);
+          }
+        }
+      }
+      if (explicitContentTypes.length === 0) {
+        const priorSets = standaloneContentTypes.filter((s) => s.pos < call.getStart());
+        if (priorSets.length > 0) explicitContentTypes = priorSets[priorSets.length - 1].contentTypes;
+      }
 
       if (RESPONSE_TERMINAL_METHODS.has(last.method)) {
-        out.push({ statusCode, finalMethod: last.method, finalArgs: last.args, writeHeadContentType });
+        out.push({ statusCode, finalMethod: last.method, finalArgs: last.args, explicitContentTypes });
       } else if (!RESPONSE_IGNORED_METHODS.has(last.method)) {
         // Unknown method on res/response-like object — record as an opaque response so it
         // isn't silently dropped, but don't try to interpret its arguments.
-        out.push({ statusCode, finalMethod: last.method, finalArgs: [], writeHeadContentType });
+        out.push({ statusCode, finalMethod: last.method, finalArgs: [], explicitContentTypes });
       }
       continue;
     }
@@ -227,6 +332,20 @@ function collectResponseHits(
           const targetParamName = params[resArgIndex]?.getName() ?? resParamName;
           collectResponseHits(targetFn, targetParamName, depth + 1, visited, out);
         }
+      }
+    } else if (Node.isPropertyAccessExpression(callee) && callee.getName() === "pipe") {
+      // `<readable>.pipe(res)` — Node's stream API sends the response body through internal
+      // `res.write()`/`res.end()` calls that never appear as source text, so the walk above
+      // (which only recognizes a literal `res.<method>(...)` call) sees nothing at all for a
+      // handler whose only "response" is a pipe. Confirmed real case: `POST /database/export`
+      // streams a SQLite file this way, after a standalone `res.setHeader("Content-Type",
+      // "application/x-sqlite3")` — previously this meant the operation had NO response
+      // documented at all, not just a wrong content type.
+      const arg = call.getArguments()[0];
+      if (arg && Node.isIdentifier(arg) && arg.getText() === resParamName) {
+        const priorSets = standaloneContentTypes.filter((s) => s.pos < call.getStart());
+        const explicitContentTypes = priorSets.length > 0 ? priorSets[priorSets.length - 1].contentTypes : [];
+        out.push({ statusCode: 200, finalMethod: "pipe", finalArgs: [], explicitContentTypes });
       }
     }
   }
@@ -460,53 +579,103 @@ function schemaFromExpression(exprIn: Node, ctx: AnalysisContext, depth: number)
   return { type: "unknown", confidence: "unknown" };
 }
 
-function responseHitToInfo(hit: RawResponseHit, ctx: AnalysisContext): ResponseInfo {
+function responseHitToInfo(hit: RawResponseHit, ctx: AnalysisContext): ResponseInfo[] {
+  const explicit = [...new Set(hit.explicitContentTypes.map(normalizeMediaType))];
+
   switch (hit.finalMethod) {
     case "json":
-      return {
-        status: hit.statusCode,
-        contentType: "application/json",
-        schema: hit.finalArgs[0] ? schemaFromExpression(hit.finalArgs[0], ctx, 0) : { type: "null", confidence: "handler-literal" },
-      };
+      return [
+        {
+          status: hit.statusCode,
+          contentType: "application/json",
+          schema: hit.finalArgs[0] ? schemaFromExpression(hit.finalArgs[0], ctx, 0) : { type: "null", confidence: "handler-literal" },
+        },
+      ];
     case "send": {
       const arg = hit.finalArgs[0];
-      if (!arg) return { status: hit.statusCode, contentType: null };
-      if (Node.isStringLiteral(arg) || Node.isNoSubstitutionTemplateLiteral(arg) || Node.isTemplateExpression(arg)) {
-        return { status: hit.statusCode, contentType: "text/html", schema: { type: "string", confidence: "handler-literal" } };
+      if (!arg) return [{ status: hit.statusCode, contentType: null }];
+      const isTextLiteral = Node.isStringLiteral(arg) || Node.isNoSubstitutionTemplateLiteral(arg) || Node.isTemplateExpression(arg);
+      // An explicit `Content-Type` the handler itself set wins over Express's own default
+      // (`text/html` for a string passed to `.send()`) — confirmed real case: `GET /termix-id/
+      // u/{handle}/ca` sends a plain-text PEM line via `res.send(\`${ca.publicKey} ...\`)`
+      // after `res.setHeader("Content-Type", "text/plain; charset=utf-8")`, which the old
+      // string-literal-implies-HTML heuristic was misreading as an HTML page.
+      if (explicit.length > 0) {
+        return explicit.map((contentType) => ({
+          status: hit.statusCode,
+          contentType,
+          schema: isTextualMediaType(contentType)
+            ? { type: "string", confidence: isTextLiteral ? "handler-literal" : "inferred" }
+            : { type: "string", format: "binary", confidence: "inferred" },
+        }));
       }
-      return {
-        status: hit.statusCode,
-        contentType: "application/octet-stream",
-        schema: { type: "string", format: "binary", confidence: "inferred" },
-      };
+      return [
+        {
+          status: hit.statusCode,
+          contentType: isTextLiteral ? "text/html" : "application/octet-stream",
+          schema: isTextLiteral
+            ? { type: "string", confidence: "handler-literal" }
+            : { type: "string", format: "binary", confidence: "inferred" },
+        },
+      ];
     }
     case "sendStatus":
-      return { status: hit.statusCode, contentType: null };
+      return [{ status: hit.statusCode, contentType: null }];
     case "redirect":
-      return { status: hit.statusCode, contentType: null, headers: ["Location"] };
+      return [{ status: hit.statusCode, contentType: null, headers: ["Location"] }];
     case "sendFile":
     case "download":
-      return {
-        status: 200,
-        contentType: "application/octet-stream",
-        schema: { type: "string", format: "binary", confidence: "inferred" },
-      };
+      return [
+        {
+          status: 200,
+          contentType: explicit[0] ?? "application/octet-stream",
+          schema: { type: "string", format: "binary", confidence: "inferred" },
+        },
+      ];
     case "writeHead":
     case "write":
-    case "end": {
-      const isSse = hit.writeHeadContentType?.includes("event-stream") ?? false;
-      return {
-        status: hit.statusCode,
-        contentType: hit.writeHeadContentType ?? "application/octet-stream",
-        ...(isSse ? { description: "Server-Sent Events stream; individual event payloads are not modeled." } : {}),
-      };
+    case "end":
+    case "pipe": {
+      const isSse = explicit.some((ct) => ct.includes("event-stream"));
+      if (isSse) {
+        return [
+          {
+            status: hit.statusCode,
+            contentType: explicit.find((ct) => ct.includes("event-stream"))!,
+            description: "Server-Sent Events stream; individual event payloads are not modeled.",
+          },
+        ];
+      }
+      // Confirmed real case: `GET /audit-logs/export` streams CSV/NDJSON via `res.write()`/
+      // `.end()` after an earlier `res.setHeader("Content-Type", ...)` statement — previously
+      // this branch never attached a `schema` at all (regardless of content type), which is
+      // what made the response's `content` block disappear from the spec entirely instead of
+      // just being mistyped.
+      if (explicit.length > 0) {
+        return explicit.map((contentType) => ({
+          status: hit.statusCode,
+          contentType,
+          schema: isTextualMediaType(contentType)
+            ? { type: "string", confidence: "inferred" }
+            : { type: "string", format: "binary", confidence: "inferred" },
+        }));
+      }
+      return [
+        {
+          status: hit.statusCode,
+          contentType: "application/octet-stream",
+          schema: { type: "string", format: "binary", confidence: "inferred" },
+        },
+      ];
     }
     default:
-      return {
-        status: hit.statusCode,
-        contentType: null,
-        description: `res.${hit.finalMethod}(...) — not modeled by the generator`,
-      };
+      return [
+        {
+          status: hit.statusCode,
+          contentType: null,
+          description: `res.${hit.finalMethod}(...) — not modeled by the generator`,
+        },
+      ];
   }
 }
 
@@ -524,8 +693,19 @@ function schemaKey(s: SchemaNode | undefined): string {
  * and collapsing them to a single "winner" would silently document only one.
  */
 function mergeResponses(hits: ResponseInfo[]): ResponseInfo[] {
+  // An SSE route's status-200 response can produce more than one hit at that same status: the
+  // `res.writeHead(200, {"Content-Type": "text/event-stream", ...})` that opens the stream, plus
+  // later, unrelated `res.write(...)` calls on the same open connection (a heartbeat, each event
+  // payload) that carry no `Content-Type` of their own and would otherwise fall back to a guessed
+  // `application/octet-stream` — confirmed real case: `POST /ai/chat/stream`'s heartbeat
+  // `res.write(": keepalive\n\n")` and its `send()` helper's `res.write(\`data: ...\`)`. Once any
+  // hit at a status is confirmed SSE, every other content type at that SAME status is noise from
+  // the same already-open stream, not a second real response shape — drop it before grouping.
+  const sseStatuses = new Set(hits.filter((r) => r.contentType?.includes("event-stream")).map((r) => r.status));
+  const filteredHits = sseStatuses.size > 0 ? hits.filter((r) => !sseStatuses.has(r.status) || r.contentType?.includes("event-stream")) : hits;
+
   const byKey = new Map<string, ResponseInfo & { variants: Map<string, SchemaNode> }>();
-  for (const r of hits) {
+  for (const r of filteredHits) {
     const key = `${r.status}:${r.contentType ?? ""}`;
     let entry = byKey.get(key);
     if (!entry) {
@@ -1358,7 +1538,7 @@ export function analyzeRoute(
 
   const hits: RawResponseHit[] = [];
   collectResponseHits(fn, responseParam, 0, new Set(), hits);
-  const responses = mergeResponses(hits.map((h) => responseHitToInfo(h, ctx)));
+  const responses = mergeResponses(hits.flatMap((h) => responseHitToInfo(h, ctx)));
 
   const requestBody = ["POST", "PUT", "PATCH"].includes(route.method) ? analyzeRequestBody(fn, fnText, route.middlewares, ctx) : [];
 

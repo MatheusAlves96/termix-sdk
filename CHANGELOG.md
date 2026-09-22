@@ -95,6 +95,27 @@ Breaking, all of them following a 2.8.0 handler change:
   push that line past 100 columns failed the generator's own
   `ruff check` step. 2.8.0's `PATCH /users/step-ca-settings` is the
   first one that does.
+- `audit.export()`, `termix_id.get_public_ca()` and `database.export()`
+  silently returned `None` instead of the real CSV/NDJSON, SSH-CA-key or
+  SQLite bytes: `tools/spec-gen` had no way to record a response whose
+  body comes from `res.write()`/`.end()` or `<stream>.pipe(res)` rather
+  than a single `res.json()`/`res.send()` call, so these three operations
+  reached the spec with either no response body documented at all, or
+  (`get_public_ca`) the wrong content type (`text/html`, from a
+  `.send()`-with-a-string-implies-HTML heuristic that didn't account for
+  an explicit `res.setHeader("Content-Type", ...)` earlier in the same
+  handler). `tools/sdk-gen/generate.py`'s `Operation.is_octet_stream` is
+  now spec-driven — any 2xx response with a non-JSON content type routes
+  to `_request_stream()`, not just a literal `application/octet-stream`
+  match — so a future non-JSON operation is covered without another
+  change here. Also fixed along the way: `POST /fleets/{id}/transfer/pull`
+  now documents its real `application/zip` content type instead of a
+  guessed `application/octet-stream`, and `GET /termix-id/u/{handle}`
+  and `GET /termix-id/u/{handle}/{algo}` now correctly document
+  `text/html`/`text/plain` instead of `application/octet-stream` (both
+  were already generated as `TermixStreamResponse`, and still are — this
+  only fixes what the spec says they send). Confirmed against a real
+  Termix 2.8.0 instance; `tests/contract/` regenerated to match.
 
 ## [0.1.1] - 2026-09-21
 

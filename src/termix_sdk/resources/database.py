@@ -9,8 +9,8 @@ from typing import Any, BinaryIO, Dict, List, Literal  # noqa: F401, UP035
 
 from typing_extensions import Unpack
 
-from .._object import TermixObject
 from .._request_options import RequestOptions
+from .._response import AsyncTermixStreamResponse, TermixStreamResponse
 from .._service import AsyncTermixService, TermixService
 from ..models.database import (
     DatabaseImportDataResult,
@@ -107,16 +107,13 @@ class DatabaseService(TermixService):
             response.data if response else None, last_response=response
         )
 
-    def export(self, *, options: RequestOptions | None = None) -> TermixObject | None:
+    def export(self, *, options: RequestOptions | None = None) -> TermixStreamResponse:
         """Export user data
 
         POST /database/export
         Source: src/backend/database/database.ts:671
         """
-        response = self._request("POST", "/database/export", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return self._request_stream("POST", "/database/export", options=options)
 
 
 class AsyncDatabaseService(AsyncTermixService):
@@ -206,13 +203,14 @@ class AsyncDatabaseService(AsyncTermixService):
             response.data if response else None, last_response=response
         )
 
-    async def export(self, *, options: RequestOptions | None = None) -> TermixObject | None:
+    async def export(
+        self,
+        *,
+        options: RequestOptions | None = None,
+    ) -> AsyncTermixStreamResponse:
         """Export user data
 
         POST /database/export
         Source: src/backend/database/database.ts:671
         """
-        response = await self._request("POST", "/database/export", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return await self._request_stream("POST", "/database/export", options=options)

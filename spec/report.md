@@ -1,6 +1,6 @@
 # termix-sdk spec-gen report
 
-Generated from tag `release-2.8.0-tag` (commit `fef8a5f28a5a6023ff10832acb65cbdfea81b777`) on 2026-09-21T14:33:53.411Z.
+Generated from tag `release-2.8.0-tag` (commit `fef8a5f28a5a6023ff10832acb65cbdfea81b777`) on 2026-09-22T07:51:18.551Z.
 
 ## Route counts
 
@@ -27,7 +27,7 @@ Generated from tag `release-2.8.0-tag` (commit `fef8a5f28a5a6023ff10832acb65cbdf
 
 - Routes with a resolvable handler: **535/535**
 - Opaque handlers (could not be statically resolved): **0**
-- Routes with no documented 2xx/3xx response: **1**
+- Routes with no documented 2xx/3xx response: **0**
 - Routes whose every response is `x-confidence: unknown`: **0**
 
 ### Request body completeness (docs/spec-generation-strategy-v2.md)
@@ -54,12 +54,8 @@ Generated from tag `release-2.8.0-tag` (commit `fef8a5f28a5a6023ff10832acb65cbdf
 |---|---|
 | repository-type | 1978 |
 | handler-literal | 3840 |
-| inferred | 714 |
+| inferred | 720 |
 | unknown | 349 |
-
-### Routes with no documented success response
-
-- POST /database/export — `src/backend/database/database.ts:671`
 
 ## Test suite examples (Phase 6)
 
@@ -108,7 +104,7 @@ Official spec regenerated with `npm run generate:openapi` (Termix's own release 
 ## OpenAPI lint (@redocly/cli)
 
 - Errors: **0**
-- Warnings: **832**
+- Warnings: **831**
 - Ignored: **0**
 
 Spec is structurally valid OpenAPI 3.1.

@@ -19,13 +19,13 @@ def test_list_actions_contract(client, mock_http_client):
 
 def test_export_contract(client, mock_http_client):
     """Generated from GET /audit-logs/export in spec/termix-openapi.json."""
-    mock_http_client.queue_response(status_code=200, body={"x-contract-test-placeholder": True})
+    mock_http_client.queue_response(status_code=200, body=b"binary-content-placeholder")
     result = client.audit.export(format="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/audit-logs/export")
     assert sent.params == {"format": "x"}
-    assert result.to_dict() == {"x-contract-test-placeholder": True}
+    assert result.read() == b"binary-content-placeholder"
 
 
 def test_list_contract(client, mock_http_client):
@@ -55,15 +55,13 @@ async def test_async_list_actions_contract(async_client, mock_async_http_client)
 @pytest.mark.asyncio
 async def test_async_export_contract(async_client, mock_async_http_client):
     """Generated from GET /audit-logs/export in spec/termix-openapi.json."""
-    mock_async_http_client.queue_response(
-        status_code=200, body={"x-contract-test-placeholder": True}
-    )
+    mock_async_http_client.queue_response(status_code=200, body=b"binary-content-placeholder")
     result = await async_client.audit.export(format="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "GET"
     assert sent.url.endswith("/audit-logs/export")
     assert sent.params == {"format": "x"}
-    assert result.to_dict() == {"x-contract-test-placeholder": True}
+    assert await result.read() == b"binary-content-placeholder"
 
 
 @pytest.mark.asyncio

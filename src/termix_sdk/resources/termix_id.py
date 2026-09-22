@@ -9,7 +9,6 @@ from typing import Any, Dict, List, Literal  # noqa: F401, UP035
 
 from typing_extensions import Unpack
 
-from .._object import TermixObject
 from .._request_options import RequestOptions
 from .._response import AsyncTermixStreamResponse, TermixStreamResponse
 from .._service import AsyncTermixService, TermixService
@@ -145,16 +144,13 @@ class TermixIdService(TermixService):
         handle: str,
         *,
         options: RequestOptions | None = None,
-    ) -> TermixObject | None:
+    ) -> TermixStreamResponse:
         """Get termix id u ca
 
         GET /termix-id/u/{handle}/ca
         Source: src/backend/database/routes/termix-id.ts:272
         """
-        response = self._request("GET", f"/termix-id/u/{handle}/ca", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return self._request_stream("GET", f"/termix-id/u/{handle}/ca", options=options)
 
     def get_public_identity(
         self,
@@ -436,16 +432,13 @@ class AsyncTermixIdService(AsyncTermixService):
         handle: str,
         *,
         options: RequestOptions | None = None,
-    ) -> TermixObject | None:
+    ) -> AsyncTermixStreamResponse:
         """Get termix id u ca
 
         GET /termix-id/u/{handle}/ca
         Source: src/backend/database/routes/termix-id.ts:272
         """
-        response = await self._request("GET", f"/termix-id/u/{handle}/ca", options=options)
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
-        )
+        return await self._request_stream("GET", f"/termix-id/u/{handle}/ca", options=options)
 
     async def get_public_identity(
         self,

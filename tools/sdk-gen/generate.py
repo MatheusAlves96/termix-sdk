@@ -329,22 +329,36 @@ class Operation:
 
     @property
     def is_octet_stream(self) -> bool:
-        """True for the handful of ops whose success response is a raw
-        binary/text download (`application/octet-stream`) rather than
-        JSON — `GET /termix-id/u/{handle}` (serving a raw SSH public key),
-        `GET /session_logs/{id}/content`, `GET /homepage/favicon`,
-        `POST /fleets/{id}/transfer/pull`. These get `_request_stream()`
-        and a `TermixStreamResponse` return type instead of the normal
+        """True for ops whose success response is a raw binary/text
+        download rather than JSON — any 2xx response that documents a
+        `content` type other than `application/json`. Examples: `GET
+        /termix-id/u/{handle}` (a raw SSH public key, as `text/plain` or
+        `text/html` depending on the request's `Accept` header), `GET
+        /audit-logs/export` (`text/csv` or `application/x-ndjson`
+        depending on the `format` query param), `GET /termix-id/u/
+        {handle}/ca` (`text/plain`), `GET /session_logs/{id}/content`,
+        `GET /homepage/favicon`, `POST /fleets/{id}/transfer/pull`
+        (`application/octet-stream`). These get `_request_stream()` and a
+        `TermixStreamResponse` return type instead of the normal
         parse-as-JSON path — calling the normal path on one of these
         doesn't crash (the non-JSON-body fallback in _api_requestor.py
         handles that gracefully), it just silently discards the real
         response body, which is worse.
+
+        Deliberately spec-driven rather than a fixed media-type allowlist
+        (unlike `application/octet-stream` alone, which used to be the
+        only check here): whatever non-JSON content type spec-gen
+        documents for a 2xx response is trusted as-is, so a future op
+        with a content type not seen before still gets routed here
+        instead of silently falling through to the generic branch below.
+        Unlike `is_sse` (see GeneratedOp.__init__), spec-gen *can* tell
+        us this directly — no resource-map.json override needed.
         """
         for code, r in self.op.get("responses", {}).items():
             if not code.startswith("2"):
                 continue
             content = r.get("content") or {}
-            if "application/octet-stream" in content and "application/json" not in content:
+            if content and "application/json" not in content:
                 return True
         return False
 
