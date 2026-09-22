@@ -95,6 +95,21 @@ Breaking, all of them following a 2.8.0 handler change:
   push that line past 100 columns failed the generator's own
   `ruff check` step. 2.8.0's `PATCH /users/step-ca-settings` is the
   first one that does.
+- `rbac.share_host()`, `rbac.share_credential()`, `rbac.share_folder()`
+  and `rbac.share_snippet_folder()` were missing `targets`, the field
+  that actually names who a share goes to — the real endpoint rejects a
+  call without it (`targets must be a non-empty array of { type: 'user'
+  |'role', id } entries`), so all four methods were unusable for their
+  documented purpose. The backend handlers read it via a shared
+  `parseShareTargets(req.body ?? {})` helper that plucks `body.targets`
+  out from inside its own function body rather than the handler
+  destructuring or `.`-accessing it directly, which the spec generator's
+  request-body walk didn't follow into. It now also types a field from a
+  forwarded-body helper's own return type when that helper reads exactly
+  one property off its parameter, and a frontend-typed field the backend
+  walk missed entirely (not just one it found as `unknown`) is now
+  merged in from the frontend cross-check too — which is what caught the
+  same bug in `fleets.share()`, fixed the same way here.
 
 ## [0.1.1] - 2026-09-21
 

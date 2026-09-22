@@ -23,3 +23,4 @@ class SecretSourcesUpdateParams(TypedDict, total=False):
     baseUrl: str
     token: str
     shared: bool
+    kind: str

@@ -55,6 +55,8 @@ def test_set_credential_sidebar_contract(client, mock_http_client):
         display={"density": "comfortable", "showTags": True, "trayTrigger": "always"},
         sort={"key": "default", "pinnedFirst": True},
         filters={"type": ["password"], "tags": ["x"]},
+        version=1.0,
+        openFolders=["x"],
     )
     sent = mock_http_client.requests[0]
     assert sent.method == "PUT"
@@ -63,6 +65,8 @@ def test_set_credential_sidebar_contract(client, mock_http_client):
         "display": {"density": "comfortable", "showTags": True, "trayTrigger": "always"},
         "sort": {"key": "default", "pinnedFirst": True},
         "filters": {"type": ["password"], "tags": ["x"]},
+        "version": 1.0,
+        "openFolders": ["x"],
     }
     assert result.to_dict() == {
         "success": True,
@@ -108,6 +112,9 @@ def test_set_host_sidebar_contract(client, mock_http_client):
             "features": ["tunnel"],
             "tags": ["x"],
         },
+        version=1.0,
+        groupKey="folder",
+        openFolders=["x"],
     )
     sent = mock_http_client.requests[0]
     assert sent.method == "PUT"
@@ -128,6 +135,9 @@ def test_set_host_sidebar_contract(client, mock_http_client):
             "features": ["tunnel"],
             "tags": ["x"],
         },
+        "version": 1.0,
+        "groupKey": "folder",
+        "openFolders": ["x"],
     }
     assert result.to_dict() == {
         "success": True,
@@ -315,6 +325,11 @@ def test_set_user_preferences_contract(client, mock_http_client):
         terminalDefaults="x",
         rdpDefaults="x",
         terminalMacros="x",
+        showHostTags=True,
+        hostTrayOnClick=True,
+        foldersCollapsed=True,
+        compactHostView=True,
+        statusColorScheme="x",
     )
     sent = mock_http_client.requests[0]
     assert sent.method == "PUT"
@@ -342,6 +357,11 @@ def test_set_user_preferences_contract(client, mock_http_client):
         "terminalDefaults": "x",
         "rdpDefaults": "x",
         "terminalMacros": "x",
+        "showHostTags": True,
+        "hostTrayOnClick": True,
+        "foldersCollapsed": True,
+        "compactHostView": True,
+        "statusColorScheme": "x",
     }
     assert result.to_dict() == {"success": True, "updatedAt": "x"}
 
@@ -513,6 +533,8 @@ async def test_async_set_credential_sidebar_contract(async_client, mock_async_ht
         display={"density": "comfortable", "showTags": True, "trayTrigger": "always"},
         sort={"key": "default", "pinnedFirst": True},
         filters={"type": ["password"], "tags": ["x"]},
+        version=1.0,
+        openFolders=["x"],
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "PUT"
@@ -521,6 +543,8 @@ async def test_async_set_credential_sidebar_contract(async_client, mock_async_ht
         "display": {"density": "comfortable", "showTags": True, "trayTrigger": "always"},
         "sort": {"key": "default", "pinnedFirst": True},
         "filters": {"type": ["password"], "tags": ["x"]},
+        "version": 1.0,
+        "openFolders": ["x"],
     }
     assert result.to_dict() == {
         "success": True,
@@ -567,6 +591,9 @@ async def test_async_set_host_sidebar_contract(async_client, mock_async_http_cli
             "features": ["tunnel"],
             "tags": ["x"],
         },
+        version=1.0,
+        groupKey="folder",
+        openFolders=["x"],
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "PUT"
@@ -587,6 +614,9 @@ async def test_async_set_host_sidebar_contract(async_client, mock_async_http_cli
             "features": ["tunnel"],
             "tags": ["x"],
         },
+        "version": 1.0,
+        "groupKey": "folder",
+        "openFolders": ["x"],
     }
     assert result.to_dict() == {
         "success": True,
@@ -779,6 +809,11 @@ async def test_async_set_user_preferences_contract(async_client, mock_async_http
         terminalDefaults="x",
         rdpDefaults="x",
         terminalMacros="x",
+        showHostTags=True,
+        hostTrayOnClick=True,
+        foldersCollapsed=True,
+        compactHostView=True,
+        statusColorScheme="x",
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "PUT"
@@ -806,6 +841,11 @@ async def test_async_set_user_preferences_contract(async_client, mock_async_http
         "terminalDefaults": "x",
         "rdpDefaults": "x",
         "terminalMacros": "x",
+        "showHostTags": True,
+        "hostTrayOnClick": True,
+        "foldersCollapsed": True,
+        "compactHostView": True,
+        "statusColorScheme": "x",
     }
     assert result.to_dict() == {"success": True, "updatedAt": "x"}
 

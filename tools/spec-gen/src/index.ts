@@ -132,7 +132,8 @@ async function main(): Promise<void> {
     const e4Stats = enrichRequestBodiesFromFrontend(ir, analyses, frontendCrossChecks);
     console.error(
       `[spec-gen] E4: ${e4Stats.wholeBodyRoutes} route(s) got a whole frontend-typed body, ` +
-        `${e4Stats.mergedFields} previously-unknown field(s) filled from the frontend`,
+        `${e4Stats.mergedFields} previously-unknown field(s) filled from the frontend, ` +
+        `${e4Stats.newFields} field(s) added that the backend walk missed entirely`,
     );
     const analysesOutPath = join(outDir, "termix-analysis-ir.json");
     writeFileSync(analysesOutPath, JSON.stringify(analyses, null, 2) + "\n", "utf8");

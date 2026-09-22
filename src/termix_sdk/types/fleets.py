@@ -42,6 +42,7 @@ class FleetsAddMemberParams(TypedDict, total=False):
 class FleetsShareParams(TypedDict, total=False):
     durationHours: Any
     permissionLevel: str
+    targets: list[dict[str, Any]]
 
 
 class FleetsExecuteParams(TypedDict, total=False):

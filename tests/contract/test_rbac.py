@@ -168,11 +168,17 @@ def test_share_host_contract(client, mock_http_client):
             "results": [{"type": "role", "id": "x", "accessId": 1.0, "created": True}],
         },
     )
-    result = client.rbac.share_host("x", durationHours="x", permissionLevel="x")
+    result = client.rbac.share_host(
+        "x", durationHours="x", permissionLevel="x", targets=[{"type": "role", "id": "x"}]
+    )
     sent = mock_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/rbac/host/x/share")
-    assert sent.json == {"durationHours": "x", "permissionLevel": "x"}
+    assert sent.json == {
+        "durationHours": "x",
+        "permissionLevel": "x",
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {
         "success": True,
         "message": "Host shared successfully",
@@ -317,11 +323,18 @@ def test_share_folder_contract(client, mock_http_client):
             "hostResults": [{"hostId": 1.0, "shared": True, "reason": "x"}],
         },
     )
-    result = client.rbac.share_folder(folder="x", durationHours="x", permissionLevel="x")
+    result = client.rbac.share_folder(
+        folder="x", durationHours="x", permissionLevel="x", targets=[{"type": "role", "id": "x"}]
+    )
     sent = mock_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/rbac/folder/share")
-    assert sent.json == {"folder": "x", "durationHours": "x", "permissionLevel": "x"}
+    assert sent.json == {
+        "folder": "x",
+        "durationHours": "x",
+        "permissionLevel": "x",
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {
         "success": True,
         "message": "Folder shared successfully",
@@ -457,11 +470,17 @@ def test_share_credential_contract(client, mock_http_client):
     mock_http_client.queue_response(
         status_code=200, body={"success": True, "permissionLevel": "x", "expiresAt": "x"}
     )
-    result = client.rbac.share_credential("x", durationHours=1.0, permissionLevel="x")
+    result = client.rbac.share_credential(
+        "x", durationHours=1.0, permissionLevel="x", targets=[{"type": "role", "id": "x"}]
+    )
     sent = mock_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/rbac/credential/x/share")
-    assert sent.json == {"durationHours": 1.0, "permissionLevel": "x"}
+    assert sent.json == {
+        "durationHours": 1.0,
+        "permissionLevel": "x",
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {"success": True, "permissionLevel": "x", "expiresAt": "x"}
 
 
@@ -513,11 +532,17 @@ def test_share_snippet_folder_contract(client, mock_http_client):
     mock_http_client.queue_response(
         status_code=200, body={"success": True, "expiresAt": "x", "snippetsShared": 1.0}
     )
-    result = client.rbac.share_snippet_folder(folder="x", durationHours=1.0)
+    result = client.rbac.share_snippet_folder(
+        folder="x", durationHours=1.0, targets=[{"type": "role", "id": "x"}]
+    )
     sent = mock_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/rbac/snippet-folder/share")
-    assert sent.json == {"folder": "x", "durationHours": 1.0}
+    assert sent.json == {
+        "folder": "x",
+        "durationHours": 1.0,
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {"success": True, "expiresAt": "x", "snippetsShared": 1.0}
 
 
@@ -739,11 +764,17 @@ async def test_async_share_host_contract(async_client, mock_async_http_client):
             "results": [{"type": "role", "id": "x", "accessId": 1.0, "created": True}],
         },
     )
-    result = await async_client.rbac.share_host("x", durationHours="x", permissionLevel="x")
+    result = await async_client.rbac.share_host(
+        "x", durationHours="x", permissionLevel="x", targets=[{"type": "role", "id": "x"}]
+    )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/rbac/host/x/share")
-    assert sent.json == {"durationHours": "x", "permissionLevel": "x"}
+    assert sent.json == {
+        "durationHours": "x",
+        "permissionLevel": "x",
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {
         "success": True,
         "message": "Host shared successfully",
@@ -897,12 +928,17 @@ async def test_async_share_folder_contract(async_client, mock_async_http_client)
         },
     )
     result = await async_client.rbac.share_folder(
-        folder="x", durationHours="x", permissionLevel="x"
+        folder="x", durationHours="x", permissionLevel="x", targets=[{"type": "role", "id": "x"}]
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/rbac/folder/share")
-    assert sent.json == {"folder": "x", "durationHours": "x", "permissionLevel": "x"}
+    assert sent.json == {
+        "folder": "x",
+        "durationHours": "x",
+        "permissionLevel": "x",
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {
         "success": True,
         "message": "Folder shared successfully",
@@ -1045,11 +1081,17 @@ async def test_async_share_credential_contract(async_client, mock_async_http_cli
     mock_async_http_client.queue_response(
         status_code=200, body={"success": True, "permissionLevel": "x", "expiresAt": "x"}
     )
-    result = await async_client.rbac.share_credential("x", durationHours=1.0, permissionLevel="x")
+    result = await async_client.rbac.share_credential(
+        "x", durationHours=1.0, permissionLevel="x", targets=[{"type": "role", "id": "x"}]
+    )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/rbac/credential/x/share")
-    assert sent.json == {"durationHours": 1.0, "permissionLevel": "x"}
+    assert sent.json == {
+        "durationHours": 1.0,
+        "permissionLevel": "x",
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {"success": True, "permissionLevel": "x", "expiresAt": "x"}
 
 
@@ -1104,11 +1146,17 @@ async def test_async_share_snippet_folder_contract(async_client, mock_async_http
     mock_async_http_client.queue_response(
         status_code=200, body={"success": True, "expiresAt": "x", "snippetsShared": 1.0}
     )
-    result = await async_client.rbac.share_snippet_folder(folder="x", durationHours=1.0)
+    result = await async_client.rbac.share_snippet_folder(
+        folder="x", durationHours=1.0, targets=[{"type": "role", "id": "x"}]
+    )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/rbac/snippet-folder/share")
-    assert sent.json == {"folder": "x", "durationHours": 1.0}
+    assert sent.json == {
+        "folder": "x",
+        "durationHours": 1.0,
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {"success": True, "expiresAt": "x", "snippetsShared": 1.0}
 
 
