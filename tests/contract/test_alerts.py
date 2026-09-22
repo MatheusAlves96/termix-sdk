@@ -369,10 +369,11 @@ def test_clear_dismissed_contract(client, mock_http_client):
     mock_http_client.queue_response(
         status_code=200, body={"message": "Alert undismissed successfully"}
     )
-    result = client.alerts.clear_dismissed()
+    result = client.alerts.clear_dismissed(alertId="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/alerts/dismiss")
+    assert sent.json == {"alertId": "x"}
     assert result.to_dict() == {"message": "Alert undismissed successfully"}
 
 
@@ -769,10 +770,11 @@ async def test_async_clear_dismissed_contract(async_client, mock_async_http_clie
     mock_async_http_client.queue_response(
         status_code=200, body={"message": "Alert undismissed successfully"}
     )
-    result = await async_client.alerts.clear_dismissed()
+    result = await async_client.alerts.clear_dismissed(alertId="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/alerts/dismiss")
+    assert sent.json == {"alertId": "x"}
     assert result.to_dict() == {"message": "Alert undismissed successfully"}
 
 

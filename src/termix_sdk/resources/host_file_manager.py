@@ -23,9 +23,12 @@ from ..types.host_file_manager import (
     HostFileManagerAddPinnedParams,
     HostFileManagerAddRecentParams,
     HostFileManagerAddShortcutParams,
+    HostFileManagerClearRecentParams,
     HostFileManagerListPinnedParams,
     HostFileManagerListRecentParams,
     HostFileManagerListShortcutsParams,
+    HostFileManagerRemovePinnedParams,
+    HostFileManagerRemoveShortcutParams,
 )
 
 
@@ -36,13 +39,16 @@ class HostFileManagerService(TermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostFileManagerClearRecentParams],
     ) -> HostFileManagerClearRecentResult:
         """Remove recent file
 
         DELETE /host/file_manager/recent
         Source: src/backend/database/routes/host-file-manager-bookmark-routes.ts:161
         """
-        response = self._request("DELETE", "/host/file_manager/recent", options=options)
+        response = self._request(
+            "DELETE", "/host/file_manager/recent", json_body=dict(params) or None, options=options
+        )
         return HostFileManagerClearRecentResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -119,13 +125,16 @@ class HostFileManagerService(TermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostFileManagerRemovePinnedParams],
     ) -> HostFileManagerRemovePinnedResult:
         """Remove pinned file
 
         DELETE /host/file_manager/pinned
         Source: src/backend/database/routes/host-file-manager-bookmark-routes.ts:339
         """
-        response = self._request("DELETE", "/host/file_manager/pinned", options=options)
+        response = self._request(
+            "DELETE", "/host/file_manager/pinned", json_body=dict(params) or None, options=options
+        )
         return HostFileManagerRemovePinnedResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -168,13 +177,19 @@ class HostFileManagerService(TermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostFileManagerRemoveShortcutParams],
     ) -> HostFileManagerRemoveShortcutResult:
         """Remove shortcut
 
         DELETE /host/file_manager/shortcuts
         Source: src/backend/database/routes/host-file-manager-bookmark-routes.ts:517
         """
-        response = self._request("DELETE", "/host/file_manager/shortcuts", options=options)
+        response = self._request(
+            "DELETE",
+            "/host/file_manager/shortcuts",
+            json_body=dict(params) or None,
+            options=options,
+        )
         return HostFileManagerRemoveShortcutResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -187,13 +202,16 @@ class AsyncHostFileManagerService(AsyncTermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostFileManagerClearRecentParams],
     ) -> HostFileManagerClearRecentResult:
         """Remove recent file
 
         DELETE /host/file_manager/recent
         Source: src/backend/database/routes/host-file-manager-bookmark-routes.ts:161
         """
-        response = await self._request("DELETE", "/host/file_manager/recent", options=options)
+        response = await self._request(
+            "DELETE", "/host/file_manager/recent", json_body=dict(params) or None, options=options
+        )
         return HostFileManagerClearRecentResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -270,13 +288,16 @@ class AsyncHostFileManagerService(AsyncTermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostFileManagerRemovePinnedParams],
     ) -> HostFileManagerRemovePinnedResult:
         """Remove pinned file
 
         DELETE /host/file_manager/pinned
         Source: src/backend/database/routes/host-file-manager-bookmark-routes.ts:339
         """
-        response = await self._request("DELETE", "/host/file_manager/pinned", options=options)
+        response = await self._request(
+            "DELETE", "/host/file_manager/pinned", json_body=dict(params) or None, options=options
+        )
         return HostFileManagerRemovePinnedResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -319,13 +340,19 @@ class AsyncHostFileManagerService(AsyncTermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostFileManagerRemoveShortcutParams],
     ) -> HostFileManagerRemoveShortcutResult:
         """Remove shortcut
 
         DELETE /host/file_manager/shortcuts
         Source: src/backend/database/routes/host-file-manager-bookmark-routes.ts:517
         """
-        response = await self._request("DELETE", "/host/file_manager/shortcuts", options=options)
+        response = await self._request(
+            "DELETE",
+            "/host/file_manager/shortcuts",
+            json_body=dict(params) or None,
+            options=options,
+        )
         return HostFileManagerRemoveShortcutResult.construct_from(
             response.data if response else None, last_response=response
         )

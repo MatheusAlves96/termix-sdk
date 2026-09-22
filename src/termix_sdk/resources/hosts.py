@@ -44,7 +44,9 @@ from ..models.hosts import (
 from ..types.hosts import (
     HostsBulkImportParams,
     HostsBulkUpdateParams,
+    HostsClearCommandHistoryParams,
     HostsCreateParams,
+    HostsDisableAutostartParams,
     HostsEnableAutostartParams,
     HostsEnrollParams,
     HostsExportAllParams,
@@ -70,13 +72,16 @@ class HostsService(TermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostsDisableAutostartParams],
     ) -> HostsDisableAutostartResult:
         """Disable autostart for SSH configuration
 
         DELETE /host/autostart/disable
         Source: src/backend/database/routes/host-autostart-routes.ts:212
         """
-        response = self._request("DELETE", "/host/autostart/disable", options=options)
+        response = self._request(
+            "DELETE", "/host/autostart/disable", json_body=dict(params) or None, options=options
+        )
         return HostsDisableAutostartResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -204,13 +209,16 @@ class HostsService(TermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostsClearCommandHistoryParams],
     ) -> HostsClearCommandHistoryResult:
         """Delete command from history
 
         DELETE /host/command-history
         Source: src/backend/database/routes/host-command-history-routes.ts:102
         """
-        response = self._request("DELETE", "/host/command-history", options=options)
+        response = self._request(
+            "DELETE", "/host/command-history", json_body=dict(params) or None, options=options
+        )
         return HostsClearCommandHistoryResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -591,13 +599,16 @@ class AsyncHostsService(AsyncTermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostsDisableAutostartParams],
     ) -> HostsDisableAutostartResult:
         """Disable autostart for SSH configuration
 
         DELETE /host/autostart/disable
         Source: src/backend/database/routes/host-autostart-routes.ts:212
         """
-        response = await self._request("DELETE", "/host/autostart/disable", options=options)
+        response = await self._request(
+            "DELETE", "/host/autostart/disable", json_body=dict(params) or None, options=options
+        )
         return HostsDisableAutostartResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -725,13 +736,16 @@ class AsyncHostsService(AsyncTermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[HostsClearCommandHistoryParams],
     ) -> HostsClearCommandHistoryResult:
         """Delete command from history
 
         DELETE /host/command-history
         Source: src/backend/database/routes/host-command-history-routes.ts:102
         """
-        response = await self._request("DELETE", "/host/command-history", options=options)
+        response = await self._request(
+            "DELETE", "/host/command-history", json_body=dict(params) or None, options=options
+        )
         return HostsClearCommandHistoryResult.construct_from(
             response.data if response else None, last_response=response
         )

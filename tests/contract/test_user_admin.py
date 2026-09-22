@@ -180,10 +180,11 @@ def test_get_db_health_contract(client, mock_http_client):
 def test_delete_user_contract(client, mock_http_client):
     """Generated from DELETE /users/delete-user in spec/termix-openapi.json."""
     mock_http_client.queue_response(status_code=200, body={"message": "x"})
-    result = client.user_admin.delete_user()
+    result = client.user_admin.delete_user(username="x", successorUserId="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/users/delete-user")
+    assert sent.json == {"username": "x", "successorUserId": "x"}
     assert result.to_dict() == {"message": "x"}
 
 
@@ -370,8 +371,9 @@ async def test_async_get_db_health_contract(async_client, mock_async_http_client
 async def test_async_delete_user_contract(async_client, mock_async_http_client):
     """Generated from DELETE /users/delete-user in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(status_code=200, body={"message": "x"})
-    result = await async_client.user_admin.delete_user()
+    result = await async_client.user_admin.delete_user(username="x", successorUserId="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/users/delete-user")
+    assert sent.json == {"username": "x", "successorUserId": "x"}
     assert result.to_dict() == {"message": "x"}

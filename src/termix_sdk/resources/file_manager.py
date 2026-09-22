@@ -52,6 +52,7 @@ from ..types.file_manager import (
     FileManagerCopyItemParams,
     FileManagerCreateFileParams,
     FileManagerCreateFolderParams,
+    FileManagerDeleteItemParams,
     FileManagerDisconnectParams,
     FileManagerDownloadFileParams,
     FileManagerExecuteFileParams,
@@ -698,13 +699,23 @@ class FileManagerService(TermixService):
             response.data if response else None, last_response=response
         )
 
-    def delete_item(self, *, options: RequestOptions | None = None) -> TermixObject:
+    def delete_item(
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[FileManagerDeleteItemParams],
+    ) -> TermixObject:
         """Delete a file or directory
 
         DELETE /ssh/file_manager/ssh/deleteItem
         Source: src/backend/hosts/file-manager/operation-routes.ts:405
         """
-        response = self._request("DELETE", "/ssh/file_manager/ssh/deleteItem", options=options)
+        response = self._request(
+            "DELETE",
+            "/ssh/file_manager/ssh/deleteItem",
+            json_body=dict(params) or None,
+            options=options,
+        )
         return TermixObject.construct_from(
             response.data if response else None, last_response=response
         )
@@ -1396,14 +1407,22 @@ class AsyncFileManagerService(AsyncTermixService):
             response.data if response else None, last_response=response
         )
 
-    async def delete_item(self, *, options: RequestOptions | None = None) -> TermixObject:
+    async def delete_item(
+        self,
+        *,
+        options: RequestOptions | None = None,
+        **params: Unpack[FileManagerDeleteItemParams],
+    ) -> TermixObject:
         """Delete a file or directory
 
         DELETE /ssh/file_manager/ssh/deleteItem
         Source: src/backend/hosts/file-manager/operation-routes.ts:405
         """
         response = await self._request(
-            "DELETE", "/ssh/file_manager/ssh/deleteItem", options=options
+            "DELETE",
+            "/ssh/file_manager/ssh/deleteItem",
+            json_body=dict(params) or None,
+            options=options,
         )
         return TermixObject.construct_from(
             response.data if response else None, last_response=response

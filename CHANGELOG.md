@@ -95,6 +95,18 @@ Breaking, all of them following a 2.8.0 handler change:
   push that line past 100 columns failed the generator's own
   `ruff check` step. 2.8.0's `PATCH /users/step-ca-settings` is the
   first one that does.
+- `user_admin.delete_user()` accepted no parameters at all, so there was
+  no way to tell it which user to delete. The generator only ever
+  analyzed a request body for `POST`/`PUT`/`PATCH` handlers, on the
+  (until now, unchallenged) assumption that `DELETE` never carries one —
+  so every `DELETE` route reached the spec with no `requestBody`
+  regardless of what its handler actually read off `req.body`. It now
+  also analyzes `DELETE` handlers, which gives `delete_user()` its real
+  `username` (required) and `successorUserId` fields and surfaces eight
+  other previously-undocumented `DELETE` bodies: `alerts.clear_dismissed()`,
+  `hosts.disable_autostart()`, `hosts.clear_command_history()`,
+  `host_file_manager.{clear_recent,remove_pinned,remove_shortcut}()`,
+  `users.delete_account()` and `file_manager.delete_item()`.
 
 ## [0.1.1] - 2026-09-21
 
