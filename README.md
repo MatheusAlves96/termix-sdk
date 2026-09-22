@@ -127,7 +127,7 @@ except TermixError as e:
 
 <!-- routes-table start -->
 
-**516** of **531** endpoints documented in [`spec/termix-openapi.json`](spec/termix-openapi.json) have a generated SDK call below, grouped by resource module (`client.<module>`). Every one also exists on `AsyncTermixClient` as an async twin — see [Async](#async). **14** are additionally exercised against a real Termix instance by the [live smoke suite](CONTRIBUTING.md#live-smoke) (marked ✅ below) — every other row is verified only against a synthetic contract test in `tests/contract/`, not a live instance. Rebuilt automatically by `python tools/sdk-gen/generate.py` (see [Development](#development)); don't edit this section by hand.
+**516** of **531** endpoints documented in [`spec/termix-openapi.json`](spec/termix-openapi.json) have a generated SDK call below, grouped by resource module (`client.<module>`). Every one also exists on `AsyncTermixClient` as an async twin — see [Async](#async). **53** are additionally exercised against a real Termix instance by the [live smoke suite](CONTRIBUTING.md#live-smoke) (marked ✅ below) — every other row is verified only against a synthetic contract test in `tests/contract/`, not a live instance. Rebuilt automatically by `python tools/sdk-gen/generate.py` (see [Development](#development)); don't edit this section by hand.
 
 <details>
 <summary><code>client.ai</code> (14 operations)</summary>
@@ -152,7 +152,7 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.alerts</code> (16 operations)</summary>
+<summary><code>client.alerts</code> (16 operations, 4 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
@@ -167,10 +167,10 @@ except TermixError as e:
 | DELETE | `/alerts/dismiss` | `client.alerts.clear_dismissed()` |  |
 | POST | `/alerts/dismiss` | `client.alerts.dismiss(**params)` |  |
 | GET | `/alerts/dismissed` | `client.alerts.list_dismissed()` |  |
-| GET | `/notification-channels` | `client.alerts.list_channels()` |  |
-| POST | `/notification-channels` | `client.alerts.create_channel(**params)` |  |
-| DELETE | `/notification-channels/{id}` | `client.alerts.delete_channel(id)` |  |
-| PUT | `/notification-channels/{id}` | `client.alerts.update_channel(id, **params)` |  |
+| GET | `/notification-channels` | `client.alerts.list_channels()` | ✅ |
+| POST | `/notification-channels` | `client.alerts.create_channel(**params)` | ✅ |
+| DELETE | `/notification-channels/{id}` | `client.alerts.delete_channel(id)` | ✅ |
+| PUT | `/notification-channels/{id}` | `client.alerts.update_channel(id, **params)` | ✅ |
 | POST | `/notification-channels/{id}/test` | `client.alerts.test_channel(id)` |  |
 
 </details>
@@ -239,27 +239,27 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.credentials</code> (17 operations)</summary>
+<summary><code>client.credentials</code> (17 operations, 14 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/credentials` | `client.credentials.list()` |  |
-| POST | `/credentials` | `client.credentials.create(**params)` |  |
-| POST | `/credentials/detect-key-type` | `client.credentials.detect_key_type(**params)` |  |
-| POST | `/credentials/detect-public-key-type` | `client.credentials.detect_public_key_type(**params)` |  |
+| GET | `/credentials` | `client.credentials.list()` | ✅ |
+| POST | `/credentials` | `client.credentials.create(**params)` | ✅ |
+| POST | `/credentials/detect-key-type` | `client.credentials.detect_key_type(**params)` | ✅ |
+| POST | `/credentials/detect-public-key-type` | `client.credentials.detect_public_key_type(**params)` | ✅ |
 | GET | `/credentials/folders` | `client.credentials.list_folders()` |  |
-| PUT | `/credentials/folders/rename` | `client.credentials.rename_folder(**params)` |  |
-| POST | `/credentials/generate-key-pair` | `client.credentials.generate_key_pair(**params)` |  |
-| POST | `/credentials/generate-public-key` | `client.credentials.generate_public_key(**params)` |  |
-| PUT | `/credentials/reorder` | `client.credentials.reorder(**params)` |  |
-| POST | `/credentials/validate-key-pair` | `client.credentials.validate_key_pair(**params)` |  |
-| DELETE | `/credentials/{id}` | `client.credentials.delete(id)` |  |
-| GET | `/credentials/{id}` | `client.credentials.retrieve(id)` |  |
-| PUT | `/credentials/{id}` | `client.credentials.update(id, **params)` |  |
+| PUT | `/credentials/folders/rename` | `client.credentials.rename_folder(**params)` | ✅ |
+| POST | `/credentials/generate-key-pair` | `client.credentials.generate_key_pair(**params)` | ✅ |
+| POST | `/credentials/generate-public-key` | `client.credentials.generate_public_key(**params)` | ✅ |
+| PUT | `/credentials/reorder` | `client.credentials.reorder(**params)` | ✅ |
+| POST | `/credentials/validate-key-pair` | `client.credentials.validate_key_pair(**params)` | ✅ |
+| DELETE | `/credentials/{id}` | `client.credentials.delete(id)` | ✅ |
+| GET | `/credentials/{id}` | `client.credentials.retrieve(id)` | ✅ |
+| PUT | `/credentials/{id}` | `client.credentials.update(id, **params)` | ✅ |
 | POST | `/credentials/{id}/apply-to-host/{hostId}` | `client.credentials.apply_to_host(id, host_id)` |  |
 | POST | `/credentials/{id}/deploy-to-host` | `client.credentials.deploy_to_host(id, **params)` |  |
-| POST | `/credentials/{id}/duplicate` | `client.credentials.duplicate(id, **params)` |  |
-| GET | `/credentials/{id}/hosts` | `client.credentials.hosts(id)` |  |
+| POST | `/credentials/{id}/duplicate` | `client.credentials.duplicate(id, **params)` | ✅ |
+| GET | `/credentials/{id}/hosts` | `client.credentials.hosts(id)` | ✅ |
 
 </details>
 
@@ -605,16 +605,16 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.open_tabs</code> (6 operations)</summary>
+<summary><code>client.open_tabs</code> (6 operations, 6 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/open-tabs` | `client.open_tabs.list()` |  |
-| POST | `/open-tabs` | `client.open_tabs.upsert(**params)` |  |
-| PUT | `/open-tabs` | `client.open_tabs.replace_all(**params)` |  |
-| GET | `/open-tabs/active-sessions` | `client.open_tabs.list_active_sessions()` |  |
-| DELETE | `/open-tabs/{id}` | `client.open_tabs.delete(id)` |  |
-| PATCH | `/open-tabs/{id}` | `client.open_tabs.update(id, **params)` |  |
+| GET | `/open-tabs` | `client.open_tabs.list()` | ✅ |
+| POST | `/open-tabs` | `client.open_tabs.upsert(**params)` | ✅ |
+| PUT | `/open-tabs` | `client.open_tabs.replace_all(**params)` | ✅ |
+| GET | `/open-tabs/active-sessions` | `client.open_tabs.list_active_sessions()` | ✅ |
+| DELETE | `/open-tabs/{id}` | `client.open_tabs.delete(id)` | ✅ |
+| PATCH | `/open-tabs/{id}` | `client.open_tabs.update(id, **params)` | ✅ |
 
 </details>
 
@@ -882,14 +882,14 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.tunnel_presets</code> (4 operations)</summary>
+<summary><code>client.tunnel_presets</code> (4 operations, 4 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/c2s-tunnel-presets` | `client.tunnel_presets.list()` |  |
-| POST | `/c2s-tunnel-presets` | `client.tunnel_presets.create(**params)` |  |
-| DELETE | `/c2s-tunnel-presets/{id}` | `client.tunnel_presets.delete(id)` |  |
-| PUT | `/c2s-tunnel-presets/{id}` | `client.tunnel_presets.update(id, **params)` |  |
+| GET | `/c2s-tunnel-presets` | `client.tunnel_presets.list()` | ✅ |
+| POST | `/c2s-tunnel-presets` | `client.tunnel_presets.create(**params)` | ✅ |
+| DELETE | `/c2s-tunnel-presets/{id}` | `client.tunnel_presets.delete(id)` | ✅ |
+| PUT | `/c2s-tunnel-presets/{id}` | `client.tunnel_presets.update(id, **params)` | ✅ |
 
 </details>
 
@@ -971,21 +971,21 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.workspaces</code> (11 operations)</summary>
+<summary><code>client.workspaces</code> (11 operations, 11 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/workspaces` | `client.workspaces.list()` |  |
-| POST | `/workspaces` | `client.workspaces.create(**params)` |  |
-| GET | `/workspaces/last-session` | `client.workspaces.get_last_session()` |  |
-| PUT | `/workspaces/last-session` | `client.workspaces.save_last_session(**params)` |  |
-| DELETE | `/workspaces/{id}` | `client.workspaces.delete(id)` |  |
-| PATCH | `/workspaces/{id}` | `client.workspaces.update(id, **params)` |  |
-| POST | `/workspaces/{id}/apply` | `client.workspaces.apply(id)` |  |
-| PUT | `/workspaces/{id}/content` | `client.workspaces.set_content(id, **params)` |  |
-| POST | `/workspaces/{id}/duplicate` | `client.workspaces.duplicate(id, **params)` |  |
-| POST | `/workspaces/{id}/set-default` | `client.workspaces.set_default(id)` |  |
-| POST | `/workspaces/{id}/unset-default` | `client.workspaces.unset_default(id)` |  |
+| GET | `/workspaces` | `client.workspaces.list()` | ✅ |
+| POST | `/workspaces` | `client.workspaces.create(**params)` | ✅ |
+| GET | `/workspaces/last-session` | `client.workspaces.get_last_session()` | ✅ |
+| PUT | `/workspaces/last-session` | `client.workspaces.save_last_session(**params)` | ✅ |
+| DELETE | `/workspaces/{id}` | `client.workspaces.delete(id)` | ✅ |
+| PATCH | `/workspaces/{id}` | `client.workspaces.update(id, **params)` | ✅ |
+| POST | `/workspaces/{id}/apply` | `client.workspaces.apply(id)` | ✅ |
+| PUT | `/workspaces/{id}/content` | `client.workspaces.set_content(id, **params)` | ✅ |
+| POST | `/workspaces/{id}/duplicate` | `client.workspaces.duplicate(id, **params)` | ✅ |
+| POST | `/workspaces/{id}/set-default` | `client.workspaces.set_default(id)` | ✅ |
+| POST | `/workspaces/{id}/unset-default` | `client.workspaces.unset_default(id)` | ✅ |
 
 </details>
 <!-- routes-table end -->

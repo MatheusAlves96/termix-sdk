@@ -162,6 +162,23 @@ def _cleanup(live: TermixClient, run_prefix: str) -> None:
         data = snippet if isinstance(snippet, dict) else snippet.to_dict()
         if str(data.get("name", "")).startswith(run_prefix):
             _ignore_missing(lambda: live.snippets.delete(str(data["id"])))
+    for workspace in live.workspaces.list():
+        if str(workspace.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.workspaces.delete(str(workspace["id"])))
+    for preset in live.tunnel_presets.list():
+        if str(preset.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.tunnel_presets.delete(str(preset["id"])))
+    for credential in live.credentials.list():
+        if str(credential.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.credentials.delete(str(credential["id"])))
+    for channel in live.alerts.list_channels():
+        data = channel.to_dict()
+        if str(data.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.alerts.delete_channel(str(data["id"])))
+    for tab in live.open_tabs.list():
+        data = tab.to_dict()
+        if str(data.get("id", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.open_tabs.delete(str(data["id"])))
 
 
 def _ignore_missing(call: Any) -> None:

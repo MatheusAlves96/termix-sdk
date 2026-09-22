@@ -202,7 +202,15 @@ create/retrieve/update/list/delete; snippets
 create/retrieve/update/list/delete; the bootstrap API key showing up in
 `api_keys.list()`; `NotFoundError` on an unknown id; `AuthenticationError`
 on a bad API key; and that `login()` returns a client whose resources
-actually work.
+actually work. Also full CRUD (plus each resource's own extra ops, minus
+anything that would open a real SSH session) on the other modules that
+are pure JSON with no external dependency: `workspaces`, `tunnel_presets`,
+`open_tabs`, `alerts` notification channels, and `credentials` (skipping
+`apply_to_host`/`deploy_to_host`, which do connect to a real host over
+SSH). README.md's "Routes covered" table's "Live-tested" column is
+generated straight from this suite's source — see
+`tools/sdk-gen/generate.py`'s `find_live_tested_ops()` — so it never
+needs updating by hand when this list grows.
 
 The suite registers its own `ci` user on the empty instance (the first
 account created is the admin, which is what lets it mint an API key),

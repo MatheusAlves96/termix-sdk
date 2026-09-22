@@ -1,8 +1,12 @@
 """Smoke suite: the SDK against a real Termix instance (sync client).
 
-Scope is deliberately narrow — auth, the central read/write endpoints and
-the error mapping. Nothing here opens an SSH session, a Docker container
-or a tmux session; see CONTRIBUTING.md, "Live smoke", for why.
+Scope is deliberately narrow — auth, error mapping, and CRUD on the
+resources that are pure JSON with no external dependency (nothing else to
+stand up, nothing side-effecting outside the row itself). Nothing here
+opens an SSH session, a Docker container or a tmux session, drives a
+third-party integration (Tailscale, Proxmox, an AI provider, 1Password),
+or touches admin-only/instance-wide state; see CONTRIBUTING.md, "Live
+smoke", for why.
 """
 
 from __future__ import annotations
@@ -97,6 +101,139 @@ def test_snippets_crud(client: TermixClient, run_prefix: str) -> None:
     client.snippets.delete(snippet_id)
     with pytest.raises(NotFoundError):
         client.snippets.retrieve(snippet_id)
+
+
+def test_workspaces_crud(client: TermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-workspace"
+    created = client.workspaces.create(name=name, color="#336699", payload={"tabs": []})
+    workspace_id = str(created.to_dict()["id"])
+
+    assert workspace_id in [str(w["id"]) for w in client.workspaces.list()]
+
+    renamed = f"{name}-renamed"
+    client.workspaces.update(workspace_id, name=renamed)
+    client.workspaces.set_content(workspace_id, payload={"tabs": [{"id": "1"}]})
+
+    duplicate = client.workspaces.duplicate(workspace_id, name=f"{renamed}-dup")
+    duplicate_id = str(duplicate.to_dict()["id"])
+    assert duplicate.to_dict()["payload"] == {"tabs": [{"id": "1"}]}
+
+    client.workspaces.set_default(workspace_id)
+    assert any(str(w["id"]) == workspace_id and w["isDefault"] for w in client.workspaces.list())
+    client.workspaces.unset_default(workspace_id)
+
+    applied = client.workspaces.apply(workspace_id)
+    assert str(applied.to_dict()["id"]) == workspace_id
+
+    client.workspaces.save_last_session(payload={"tabs": []})
+    assert client.workspaces.get_last_session() is not None
+
+    client.workspaces.delete(workspace_id)
+    client.workspaces.delete(duplicate_id)
+    with pytest.raises(NotFoundError):
+        client.workspaces.update(workspace_id, name="gone")
+
+
+def test_tunnel_presets_crud(client: TermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-tunnel-preset"
+    created = client.tunnel_presets.create(name=name, config=[])
+    preset_id = str(created.to_dict()["id"])
+
+    assert name in [p["name"] for p in client.tunnel_presets.list()]
+
+    renamed = f"{name}-renamed"
+    client.tunnel_presets.update(preset_id, name=renamed)
+    assert renamed in [p["name"] for p in client.tunnel_presets.list()]
+
+    client.tunnel_presets.delete(preset_id)
+    with pytest.raises(NotFoundError):
+        client.tunnel_presets.update(preset_id, name="gone")
+
+
+def test_open_tabs_crud(client: TermixClient, run_prefix: str) -> None:
+    tab_id = f"{run_prefix}-tab"
+    label = f"{run_prefix} tab"
+    client.open_tabs.upsert(id=tab_id, tabType="home", label=label, tabOrder=0)
+
+    tabs = {t.to_dict()["id"]: t.to_dict() for t in client.open_tabs.list()}
+    assert tabs[tab_id]["label"] == label
+
+    client.open_tabs.update(tab_id, label=f"{label}-renamed")
+    tabs = {t.to_dict()["id"]: t.to_dict() for t in client.open_tabs.list()}
+    assert tabs[tab_id]["label"] == f"{label}-renamed"
+
+    assert client.open_tabs.list_active_sessions() == []
+
+    client.open_tabs.replace_all(
+        tabs=[{"id": tab_id, "tabType": "home", "label": label, "tabOrder": 0}]
+    )
+    tabs = {t.to_dict()["id"]: t.to_dict() for t in client.open_tabs.list()}
+    assert tabs[tab_id]["label"] == label
+
+    client.open_tabs.delete(tab_id)
+    assert tab_id not in {t.to_dict()["id"] for t in client.open_tabs.list()}
+
+
+def test_alerts_notification_channels_crud(client: TermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-channel"
+    created = client.alerts.create_channel(
+        name=name, type="webhook", config={"url": "https://example.invalid/webhook"}, enabled=False
+    )
+    channel_id = str(created.to_dict()["id"])
+
+    assert name in [c.to_dict()["name"] for c in client.alerts.list_channels()]
+
+    renamed = f"{name}-renamed"
+    client.alerts.update_channel(channel_id, name=renamed)
+    assert renamed in [c.to_dict()["name"] for c in client.alerts.list_channels()]
+
+    client.alerts.delete_channel(channel_id)
+    with pytest.raises(NotFoundError):
+        client.alerts.update_channel(channel_id, name="gone")
+
+
+def test_credentials_crud(client: TermixClient, run_prefix: str) -> None:
+    """Excludes `apply_to_host`/`deploy_to_host`: both connect to a real host
+    over SSH, out of scope for this suite (see the module docstring).
+    """
+    name = f"{run_prefix}-credential"
+    created = client.credentials.create(
+        name=name, authType="password", username="root", password="hunter2"
+    )
+    credential_id = str(created.to_dict()["id"])
+
+    assert client.credentials.retrieve(credential_id).name == name
+    assert name in [c["name"] for c in client.credentials.list()]
+    assert client.credentials.hosts(credential_id) == []
+    client.credentials.rename_folder(oldName=f"{run_prefix}-old", newName=f"{run_prefix}-new")
+
+    key_pair = client.credentials.generate_key_pair(keyType="ssh-rsa", keySize=2048)
+    private_key, public_key = key_pair.privateKey, key_pair.publicKey
+
+    assert client.credentials.generate_public_key(privateKey=private_key).publicKey == public_key
+    assert client.credentials.detect_key_type(privateKey=private_key).keyType == "ssh-rsa"
+    assert client.credentials.detect_public_key_type(publicKey=public_key).keyType == "ssh-rsa"
+    assert client.credentials.validate_key_pair(
+        privateKey=private_key, publicKey=public_key
+    ).isValid
+
+    renamed = f"{name}-renamed"
+    client.credentials.update(credential_id, name=renamed)
+    assert client.credentials.retrieve(credential_id).name == renamed
+
+    duplicate = client.credentials.duplicate(credential_id, name=f"{renamed}-dup")
+    duplicate_id = str(duplicate.to_dict()["id"])
+    client.credentials.reorder(
+        positions=[
+            {"id": int(credential_id), "sortOrder": 0},
+            {"id": int(duplicate_id), "sortOrder": 1},
+        ]
+    )
+
+    client.credentials.delete(credential_id)
+    client.credentials.delete(duplicate_id)
+    with pytest.raises(NotFoundError):
+        client.credentials.retrieve(credential_id)
 
 
 def test_unknown_id_raises_not_found(client: TermixClient) -> None:
