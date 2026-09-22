@@ -198,6 +198,24 @@ def _cleanup(live: TermixClient, run_prefix: str) -> None:
     identity = me.get("identity")
     if identity and str(identity.get("handle", "")).startswith(run_prefix):
         _ignore_missing(live.termix_id.delete)
+    for provider in live.sso.list_providers_admin():
+        data = provider.to_dict()
+        if str(data.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.sso.delete_provider(str(data["id"])))
+    for room in live.collab.list_rooms().to_dict()["rooms"]:
+        if str(room.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.collab.delete_room(str(room["id"])))
+    for user in live.user_admin.list().to_dict()["users"]:
+        username = str(user.get("username", ""))
+        if username.startswith(run_prefix):
+            # user_admin.delete_user() can't specify a target yet (see
+            # tests/live/test_smoke.py's test_user_admin_lifecycle) — the
+            # low-level escape hatch sends the real body.
+            _ignore_missing(
+                lambda: live.request(
+                    "DELETE", "/users/delete-user", json_body={"username": username}
+                )
+            )
 
 
 def _ignore_missing(call: Any) -> None:

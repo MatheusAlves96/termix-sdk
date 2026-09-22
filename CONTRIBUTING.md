@@ -218,17 +218,47 @@ get/set, not `list`/`retrieve`/`delete`/`get_content`, which need a real
 session log row only a real SSH session creates), and `termix_id`
 (identity, keys, CA, cert issuance — not `get_public_ca`, see below, and
 not `delete_key`, which the real backend always answers with a 500 even
-though it does delete the row).
+though it does delete the row); `tailscale.list_devices()`; `sso`
+providers (not `ldap_login`, which needs a real LDAP server); `user_admin`
+(a full second-user lifecycle, not `disable_user_totp`, which needs a
+user with TOTP already enrolled); `instance_settings` (get/set on all its
+settings except `acme_ssl_request`, a real Let's Encrypt request, and
+`manual_ssl_upload`, which needs a real cert/key pair); `database`
+(`migration_status`/`migration_history`/`preview_export`, not `export` —
+see below — or `import_data`/`restore`, both of which overwrite the
+entire database); `rbac` role assignment, snippet sharing, and host
+access management (see below for why the share itself sometimes goes
+through the low-level `request()` escape hatch); and `collab` rooms
+(create/list/get/invite/guest-link/remove-member/end/delete, not
+`present`, which needs a real SSH-backed session).
 
-Two live-only findings this suite surfaced, tracked as follow-ups rather
-than worked around here: `audit.export()` and `termix_id.get_public_ca()`
-both silently return `None` because their real response
-(`text/csv`/`text/plain`) isn't documented as `application/octet-stream`
-in the spec, so `generate.py`'s `is_octet_stream` check misses them; and
-the SDK's httpx clients don't set `follow_redirects=True`, so any 3xx
-response — e.g. `GET /session_logs` redirecting to `/session_logs/` —
-silently becomes an empty `None` instead of an error or the real data
-(`session_logs.list()` is skipped here for exactly that reason).
+`secret_sources` is entirely absent: the official Docker image's nginx
+config doesn't proxy `/secret-sources` to the Express backend at all
+(`GET` falls through to the SPA's `index.html`, `POST` 405s) — confirmed
+against a real instance. That's a packaging gap in the upstream Termix
+image, not something the SDK or this suite can route around.
+
+Three live-only findings this suite surfaced, tracked as follow-ups
+rather than worked around here:
+
+- `audit.export()`, `termix_id.get_public_ca()`, and `database.export()`
+  all silently return `None` because their real response (`text/csv`,
+  `text/plain`, and `application/x-sqlite3` respectively) isn't
+  documented as `application/octet-stream` in the spec, so
+  `generate.py`'s `is_octet_stream` check misses all three.
+- The SDK's httpx clients don't set `follow_redirects=True`, so any 3xx
+  response — e.g. `GET /session_logs` redirecting to `/session_logs/` —
+  silently becomes an empty `None` instead of an error or the real data
+  (`session_logs.list()` is skipped here for exactly that reason).
+- `user_admin.delete_user()` and four of the five `rbac.share_*()`
+  methods (`share_host`, `share_credential`, `share_folder`,
+  `share_snippet_folder` — `share_snippet` is fine) are generated with no
+  way to specify their real target: the spec never documents
+  `delete_user`'s request body (`{"username": ...}`) or these four
+  `share_*` ops' real `{"targets": [{"type": "user"|"role", "id": ...}]}`
+  field. `test_user_admin_lifecycle` and `test_rbac_host_access_management`
+  work around both via the low-level `client.request()` escape hatch,
+  with a docstring pointing back here.
 
 README.md's "Routes covered" table's "Live-tested" column is
 generated straight from this suite's source — see

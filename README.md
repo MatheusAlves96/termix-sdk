@@ -127,7 +127,7 @@ except TermixError as e:
 
 <!-- routes-table start -->
 
-**516** of **531** endpoints documented in [`spec/termix-openapi.json`](spec/termix-openapi.json) have a generated SDK call below, grouped by resource module (`client.<module>`). Every one also exists on `AsyncTermixClient` as an async twin — see [Async](#async). **115** are additionally exercised against a real Termix instance by the [live smoke suite](CONTRIBUTING.md#live-smoke) (marked ✅ below) — every other row is verified only against a synthetic contract test in `tests/contract/`, not a live instance. Rebuilt automatically by `python tools/sdk-gen/generate.py` (see [Development](#development)); don't edit this section by hand.
+**516** of **531** endpoints documented in [`spec/termix-openapi.json`](spec/termix-openapi.json) have a generated SDK call below, grouped by resource module (`client.<module>`). Every one also exists on `AsyncTermixClient` as an async twin — see [Async](#async). **151** are additionally exercised against a real Termix instance by the [live smoke suite](CONTRIBUTING.md#live-smoke) (marked ✅ below) — every other row is verified only against a synthetic contract test in `tests/contract/`, not a live instance. Rebuilt automatically by `python tools/sdk-gen/generate.py` (see [Development](#development)); don't edit this section by hand.
 
 <details>
 <summary><code>client.ai</code> (14 operations)</summary>
@@ -215,23 +215,23 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.collab</code> (16 operations)</summary>
+<summary><code>client.collab</code> (16 operations, 9 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
 | GET | `/collab/guest/{token}` | `client.collab.get_guest_stage(token)` |  |
-| GET | `/collab/rooms` | `client.collab.list_rooms()` |  |
-| POST | `/collab/rooms` | `client.collab.create_room(**params)` |  |
-| DELETE | `/collab/rooms/{id}` | `client.collab.delete_room(id)` |  |
-| GET | `/collab/rooms/{id}` | `client.collab.get_room(id)` |  |
+| GET | `/collab/rooms` | `client.collab.list_rooms()` | ✅ |
+| POST | `/collab/rooms` | `client.collab.create_room(**params)` | ✅ |
+| DELETE | `/collab/rooms/{id}` | `client.collab.delete_room(id)` | ✅ |
+| GET | `/collab/rooms/{id}` | `client.collab.get_room(id)` | ✅ |
 | POST | `/collab/rooms/{id}/control` | `client.collab.set_control(id, **params)` |  |
 | POST | `/collab/rooms/{id}/control/request` | `client.collab.request_control(id)` |  |
-| GET | `/collab/rooms/{id}/control/requests` | `client.collab.list_control_requests(id)` |  |
+| GET | `/collab/rooms/{id}/control/requests` | `client.collab.list_control_requests(id)` | ✅ |
 | DELETE | `/collab/rooms/{id}/control/requests/{userId}` | `client.collab.delete_control_request(id, user_id)` |  |
-| POST | `/collab/rooms/{id}/end` | `client.collab.end_room(id)` |  |
-| POST | `/collab/rooms/{id}/guest-link` | `client.collab.set_guest_link(id, **params)` |  |
-| POST | `/collab/rooms/{id}/members` | `client.collab.invite_members(id, **params)` |  |
-| DELETE | `/collab/rooms/{id}/members/{userId}` | `client.collab.remove_member(id, user_id)` |  |
+| POST | `/collab/rooms/{id}/end` | `client.collab.end_room(id)` | ✅ |
+| POST | `/collab/rooms/{id}/guest-link` | `client.collab.set_guest_link(id, **params)` | ✅ |
+| POST | `/collab/rooms/{id}/members` | `client.collab.invite_members(id, **params)` | ✅ |
+| DELETE | `/collab/rooms/{id}/members/{userId}` | `client.collab.remove_member(id, user_id)` | ✅ |
 | POST | `/collab/rooms/{id}/present` | `client.collab.present(id, **params)` |  |
 | GET | `/collab/rooms/{id}/stage` | `client.collab.get_stage(id)` |  |
 | POST | `/collab/rooms/{id}/stop` | `client.collab.stop_presenting(id)` |  |
@@ -280,15 +280,15 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.database</code> (6 operations)</summary>
+<summary><code>client.database</code> (6 operations, 3 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
 | POST | `/database/export` | `client.database.export()` |  |
-| POST | `/database/export/preview` | `client.database.preview_export(**params)` |  |
+| POST | `/database/export/preview` | `client.database.preview_export(**params)` | ✅ |
 | POST | `/database/import` | `client.database.import_data(file)` |  |
-| GET | `/database/migration/history` | `client.database.migration_history()` |  |
-| GET | `/database/migration/status` | `client.database.migration_status()` |  |
+| GET | `/database/migration/history` | `client.database.migration_history()` | ✅ |
+| GET | `/database/migration/status` | `client.database.migration_status()` | ✅ |
 | POST | `/database/restore` | `client.database.restore(**params)` |  |
 
 </details>
@@ -663,7 +663,7 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.rbac</code> (27 operations, 6 live-tested)</summary>
+<summary><code>client.rbac</code> (27 operations, 17 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
@@ -675,9 +675,9 @@ except TermixError as e:
 | POST | `/rbac/folder/share` | `client.rbac.share_folder(**params)` |  |
 | GET | `/rbac/host-access/{hostId}/auth/{protocol}` | `client.rbac.get_host_access_auth(host_id, protocol)` |  |
 | PUT | `/rbac/host-access/{hostId}/auth/{protocol}` | `client.rbac.set_host_access_auth(host_id, protocol, **params)` |  |
-| GET | `/rbac/host/{id}/access` | `client.rbac.list_host_access(id)` |  |
-| DELETE | `/rbac/host/{id}/access/{accessId}` | `client.rbac.delete_host_access(id, access_id)` |  |
-| PATCH | `/rbac/host/{id}/access/{accessId}` | `client.rbac.update_host_access(id, access_id, **params)` |  |
+| GET | `/rbac/host/{id}/access` | `client.rbac.list_host_access(id)` | ✅ |
+| DELETE | `/rbac/host/{id}/access/{accessId}` | `client.rbac.delete_host_access(id, access_id)` | ✅ |
+| PATCH | `/rbac/host/{id}/access/{accessId}` | `client.rbac.update_host_access(id, access_id, **params)` | ✅ |
 | POST | `/rbac/host/{id}/share` | `client.rbac.share_host(id, **params)` |  |
 | GET | `/rbac/permissions/catalog` | `client.rbac.permissions_catalog()` | ✅ |
 | GET | `/rbac/roles` | `client.rbac.list_roles()` | ✅ |
@@ -685,15 +685,15 @@ except TermixError as e:
 | DELETE | `/rbac/roles/{id}` | `client.rbac.delete_role(id)` | ✅ |
 | PUT | `/rbac/roles/{id}` | `client.rbac.update_role(id, **params)` | ✅ |
 | GET | `/rbac/roles/{id}/members` | `client.rbac.list_role_members(id)` | ✅ |
-| GET | `/rbac/shared-hosts` | `client.rbac.list_shared_hosts()` |  |
-| GET | `/rbac/shared-snippets` | `client.rbac.list_shared_snippets()` |  |
+| GET | `/rbac/shared-hosts` | `client.rbac.list_shared_hosts()` | ✅ |
+| GET | `/rbac/shared-snippets` | `client.rbac.list_shared_snippets()` | ✅ |
 | POST | `/rbac/snippet-folder/share` | `client.rbac.share_snippet_folder(**params)` |  |
-| GET | `/rbac/snippet/{id}/access` | `client.rbac.list_snippet_access(id)` |  |
-| DELETE | `/rbac/snippet/{id}/access/{accessId}` | `client.rbac.delete_snippet_access(id, access_id)` |  |
-| POST | `/rbac/snippet/{id}/share` | `client.rbac.share_snippet(id, **params)` |  |
-| GET | `/rbac/users/{userId}/roles` | `client.rbac.list_user_roles(user_id)` |  |
-| POST | `/rbac/users/{userId}/roles` | `client.rbac.assign_role(user_id, **params)` |  |
-| DELETE | `/rbac/users/{userId}/roles/{roleId}` | `client.rbac.revoke_role(user_id, role_id)` |  |
+| GET | `/rbac/snippet/{id}/access` | `client.rbac.list_snippet_access(id)` | ✅ |
+| DELETE | `/rbac/snippet/{id}/access/{accessId}` | `client.rbac.delete_snippet_access(id, access_id)` | ✅ |
+| POST | `/rbac/snippet/{id}/share` | `client.rbac.share_snippet(id, **params)` | ✅ |
+| GET | `/rbac/users/{userId}/roles` | `client.rbac.list_user_roles(user_id)` | ✅ |
+| POST | `/rbac/users/{userId}/roles` | `client.rbac.assign_role(user_id, **params)` | ✅ |
+| DELETE | `/rbac/users/{userId}/roles/{roleId}` | `client.rbac.revoke_role(user_id, role_id)` | ✅ |
 
 </details>
 
@@ -760,16 +760,16 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.sso</code> (6 operations)</summary>
+<summary><code>client.sso</code> (6 operations, 4 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
 | POST | `/users/ldap/login` | `client.sso.ldap_login(**params)` |  |
 | GET | `/users/sso-providers` | `client.sso.list_providers()` |  |
-| POST | `/users/sso-providers` | `client.sso.create_provider(**params)` |  |
-| GET | `/users/sso-providers/admin` | `client.sso.list_providers_admin()` |  |
-| DELETE | `/users/sso-providers/{id}` | `client.sso.delete_provider(id)` |  |
-| PUT | `/users/sso-providers/{id}` | `client.sso.update_provider(id, **params)` |  |
+| POST | `/users/sso-providers` | `client.sso.create_provider(**params)` | ✅ |
+| GET | `/users/sso-providers/admin` | `client.sso.list_providers_admin()` | ✅ |
+| DELETE | `/users/sso-providers/{id}` | `client.sso.delete_provider(id)` | ✅ |
+| PUT | `/users/sso-providers/{id}` | `client.sso.update_provider(id, **params)` | ✅ |
 
 </details>
 
@@ -797,11 +797,11 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.tailscale</code> (1 operation)</summary>
+<summary><code>client.tailscale</code> (1 operation, 1 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/tailscale/devices` | `client.tailscale.list_devices()` |  |
+| GET | `/tailscale/devices` | `client.tailscale.list_devices()` | ✅ |
 
 </details>
 
@@ -894,20 +894,20 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.user_admin</code> (10 operations)</summary>
+<summary><code>client.user_admin</code> (10 operations, 8 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| POST | `/users/admin-create` | `client.user_admin.create_user(**params)` |  |
-| GET | `/users/admin/export/{userId}` | `client.user_admin.export_user(user_id)` |  |
-| POST | `/users/admin/reset-password` | `client.user_admin.reset_user_password(**params)` |  |
+| POST | `/users/admin-create` | `client.user_admin.create_user(**params)` | ✅ |
+| GET | `/users/admin/export/{userId}` | `client.user_admin.export_user(user_id)` | ✅ |
+| POST | `/users/admin/reset-password` | `client.user_admin.reset_user_password(**params)` | ✅ |
 | POST | `/users/admin/totp/disable` | `client.user_admin.disable_user_totp(**params)` |  |
-| GET | `/users/count` | `client.user_admin.count()` |  |
-| GET | `/users/db-health` | `client.user_admin.get_db_health()` |  |
+| GET | `/users/count` | `client.user_admin.count()` | ✅ |
+| GET | `/users/db-health` | `client.user_admin.get_db_health()` | ✅ |
 | DELETE | `/users/delete-user` | `client.user_admin.delete_user()` |  |
-| GET | `/users/list` | `client.user_admin.list()` |  |
-| POST | `/users/make-admin` | `client.user_admin.make_admin(**params)` |  |
-| POST | `/users/remove-admin` | `client.user_admin.remove_admin(**params)` |  |
+| GET | `/users/list` | `client.user_admin.list()` | ✅ |
+| POST | `/users/make-admin` | `client.user_admin.make_admin(**params)` | ✅ |
+| POST | `/users/remove-admin` | `client.user_admin.remove_admin(**params)` | ✅ |
 
 </details>
 

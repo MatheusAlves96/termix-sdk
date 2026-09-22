@@ -455,6 +455,299 @@ def test_termix_id_identity_and_ca(client: TermixClient, run_prefix: str) -> Non
         client.termix_id.update(description="gone")
 
 
+def test_tailscale_list_devices(client: TermixClient) -> None:
+    devices = client.tailscale.list_devices().to_dict()
+    assert devices["hasApiKey"] is False
+    assert devices["devices"] == []
+
+
+def test_sso_providers_crud(client: TermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-sso-provider"
+    created = client.sso.create_provider(
+        name=name, type="github", enabled=False, config={"client_id": "x", "client_secret": "y"}
+    )
+    provider_id = str(created.to_dict()["id"])
+
+    admin_providers = client.sso.list_providers_admin()
+    assert name in [p.to_dict()["name"] for p in admin_providers]
+
+    renamed = f"{name}-renamed"
+    client.sso.update_provider(provider_id, name=renamed)
+    admin_providers = client.sso.list_providers_admin()
+    assert renamed in [p.to_dict()["name"] for p in admin_providers]
+
+    client.sso.delete_provider(provider_id)
+    with pytest.raises(NotFoundError):
+        client.sso.update_provider(provider_id, name="gone")
+
+
+def test_user_admin_lifecycle(client: TermixClient, run_prefix: str) -> None:
+    """Excludes `disable_user_totp()`: needs a user with TOTP already
+    enabled, which only a real TOTP enrollment creates — out of scope for
+    this suite.
+
+    Works around `delete_user()` at the end via the low-level `request()`
+    escape hatch: the generated method takes no parameters at all to say
+    *which* user to delete (a spec/generator gap — see the flagged
+    follow-up task), even though the real endpoint requires a JSON body
+    `{"username": ...}`.
+    """
+    baseline_count = client.user_admin.count().to_dict()["count"]
+
+    username = f"{run_prefix}-second-user"
+    client.user_admin.create_user(username=username, password="Live-Smoke-User1")
+    users = client.user_admin.list().to_dict()["users"]
+    user_id = next(u["userId"] for u in users if u["username"] == username)
+    assert client.user_admin.count().to_dict()["count"] == baseline_count + 1
+
+    client.user_admin.make_admin(userId=user_id)
+    client.user_admin.remove_admin(userId=user_id)
+
+    exported = client.user_admin.export_user(user_id)
+    assert exported.to_dict()["username"] == username
+
+    client.user_admin.reset_user_password(
+        userId=user_id, newPassword="New-Live-Smoke-User1", confirmDataWipe=True
+    )
+
+    assert client.user_admin.get_db_health().to_dict()["status"] == "ok"
+
+    client.request("DELETE", "/users/delete-user", json_body={"username": username})
+    assert client.user_admin.count().to_dict()["count"] == baseline_count
+
+
+def test_instance_settings_get_and_set(client: TermixClient) -> None:
+    """Excludes `acme_ssl_request()` (issues a real Let's Encrypt
+    certificate) and `manual_ssl_upload()` (needs a real cert/key pair) —
+    both out of scope for this suite.
+    """
+    iset = client.instance_settings
+
+    iset.update_host_defaults(theme="dark", fontSize=14)
+    assert iset.get_host_defaults().theme == "dark"
+
+    iset.update_guacamole_settings(enabled=True, url="localhost:4822")
+    assert iset.get_guacamole_settings().enabled is True
+
+    iset.update_log_level(level="debug")
+    assert iset.get_log_level().level == "debug"
+    iset.update_log_level(level="info")
+
+    iset.update_session_timeout(timeoutHours=48)
+    assert iset.get_session_timeout().timeoutHours == 48
+    iset.update_session_timeout(timeoutHours=24)
+
+    iset.update_tailscale_settings(apiKey="", apiBaseUrl="")
+    assert iset.get_tailscale_settings().hasApiKey is False
+
+    iset.update_command_history_enabled(enabled=True)
+    assert iset.get_command_history_enabled().enabled is True
+
+    iset.update_analytics_enabled(enabled=True)
+    assert iset.get_analytics_enabled().enabled is True
+
+    iset.update_session_sharing_enabled(enabled=True)
+    assert iset.get_session_sharing_enabled().enabled is True
+
+    iset.update_ai_enabled(enabled=False)
+    assert iset.get_ai_enabled().enabled is False
+
+    endpoints = ["localhost", "127.0.0.1", "::1", "host.docker.internal"]
+    iset.update_ai_private_endpoints(hosts=endpoints)
+    assert iset.get_ai_private_endpoints().hosts == endpoints
+
+    assert isinstance(iset.get_setup_required().setup_required, bool)
+
+    iset.update_registration_allowed(allowed=True)
+    assert iset.get_registration_allowed().allowed is True
+
+    iset.update_oidc_auto_provision(enabled=False)
+    assert iset.get_oidc_auto_provision().enabled is False
+
+    iset.update_oidc_silent_login_default(enabled=False)
+    assert iset.get_oidc_silent_login_default().enabled is False
+
+    iset.update_password_login_allowed(allowed=True)
+    assert iset.get_password_login_allowed().allowed is True
+
+    iset.update_password_reset_allowed(allowed=True)
+    assert iset.get_password_reset_allowed().allowed is True
+
+    iset.set_oidc_config(
+        client_id="x",
+        client_secret="y",
+        issuer_url="https://idp.invalid",
+        authorization_url="https://idp.invalid/auth",
+        token_url="https://idp.invalid/token",
+        userinfo_url="https://idp.invalid/userinfo",
+        identifier_path="sub",
+        name_path="name",
+        scopes="openid email profile",
+        allowed_users="",
+        admin_group="",
+        group_claim="",
+    )
+    assert iset.get_oidc_config() is not None
+    assert iset.get_oidc_config_admin().client_id == "x"
+    iset.delete_oidc_config()
+    assert iset.get_oidc_config() is None
+
+    iset.update_branding(appName="Termix", tagline="live smoke")
+    assert iset.get_branding().tagline == "live smoke"
+
+    iset.update_audit_forwarding(url="")
+    assert iset.get_audit_forwarding().url == ""
+
+    iset.update_step_ca_settings(caUrl="", fingerprint="", provisioner="")
+    assert iset.get_step_ca_settings().caUrl == ""
+
+
+def test_database_read_only(client: TermixClient) -> None:
+    """Excludes `export()` (a spec/generator gap, not exercised here — see
+    the flagged follow-up task) and `import_data()`/`restore()` (both
+    overwrite the entire database — destructive, and would corrupt every
+    other test's data on this shared instance).
+    """
+    assert "migrationStatus" in client.database.migration_status().to_dict()
+    assert "files" in client.database.migration_history().to_dict()
+
+    preview = client.database.preview_export(scope="all", includeCredentials=False)
+    assert preview.to_dict()["preview"] is True
+
+
+def test_rbac_role_assignment(client: TermixClient, run_prefix: str) -> None:
+    username = f"{run_prefix}-rbac-user"
+    client.user_admin.create_user(username=username, password="Live-Smoke-Rbac1")
+    user_id = next(
+        u["userId"]
+        for u in client.user_admin.list().to_dict()["users"]
+        if u["username"] == username
+    )
+
+    role_name = f"{run_prefix}-rbac-role"
+    role = client.rbac.create_role(name=role_name, displayName="Live Smoke Role")
+    role_id = str(role.to_dict()["roleId"])
+
+    client.rbac.assign_role(user_id, roleId=int(role_id))
+    roles = client.rbac.list_user_roles(user_id).to_dict()["roles"]
+    assert role_name in [r["roleName"] for r in roles]
+
+    client.rbac.revoke_role(user_id, role_id)
+    roles = client.rbac.list_user_roles(user_id).to_dict()["roles"]
+    assert role_name not in [r["roleName"] for r in roles]
+
+    client.rbac.delete_role(role_id)
+    # See test_user_admin_lifecycle's docstring for why this isn't
+    # user_admin.delete_user(username=...).
+    client.request("DELETE", "/users/delete-user", json_body={"username": username})
+
+
+def test_rbac_snippet_sharing(client: TermixClient, run_prefix: str) -> None:
+    username = f"{run_prefix}-snippet-share-user"
+    client.user_admin.create_user(username=username, password="Live-Smoke-Share1")
+    user_id = next(
+        u["userId"]
+        for u in client.user_admin.list().to_dict()["users"]
+        if u["username"] == username
+    )
+
+    snippet = client.snippets.create(name=f"{run_prefix}-shared-snippet", content="echo hi")
+    snippet_id = str(snippet.id)
+
+    shared = client.rbac.share_snippet(
+        snippet_id, targetType="user", targetUserId=user_id, durationHours=1
+    )
+    assert shared.success is True
+
+    access = client.rbac.list_snippet_access(snippet_id).to_dict()["accessList"]
+    assert access[0]["userId"] == user_id
+    access_id = str(access[0]["id"])
+
+    assert "sharedSnippets" in client.rbac.list_shared_snippets().to_dict()
+
+    client.rbac.delete_snippet_access(snippet_id, access_id)
+    assert client.rbac.list_snippet_access(snippet_id).to_dict()["accessList"] == []
+
+    client.snippets.delete(snippet_id)
+    client.request("DELETE", "/users/delete-user", json_body={"username": username})
+
+
+def test_rbac_host_access_management(client: TermixClient, run_prefix: str) -> None:
+    """`share_host()` can't specify a target yet — its generated params are
+    missing the real `targets` array field (a spec/generator gap — see the
+    flagged follow-up task) — so the share itself goes through the
+    low-level `request()` escape hatch. Everything after that (the actual
+    point of this test) exercises the real generated
+    list/update/delete-access methods.
+    """
+    username = f"{run_prefix}-host-share-user"
+    client.user_admin.create_user(username=username, password="Live-Smoke-Share1")
+    user_id = next(
+        u["userId"]
+        for u in client.user_admin.list().to_dict()["users"]
+        if u["username"] == username
+    )
+
+    host_name = f"{run_prefix}-shared-host"
+    host = client.hosts.create(
+        ip="10.0.0.12", port=22, username="root", authType="password", name=host_name
+    )
+    host_id = str(host.to_dict()["id"])
+
+    client.request(
+        "POST",
+        f"/rbac/host/{host_id}/share",
+        json_body={"targets": [{"type": "user", "id": user_id}], "permissionLevel": "view"},
+    )
+
+    access = client.rbac.list_host_access(host_id).to_dict()["accessList"]
+    assert access[0]["userId"] == user_id
+    access_id = str(access[0]["id"])
+
+    client.rbac.update_host_access(host_id, access_id, permissionLevel="connect")
+    access = client.rbac.list_host_access(host_id).to_dict()["accessList"]
+    assert access[0]["permissionLevel"] == "connect"
+
+    assert "sharedHosts" in client.rbac.list_shared_hosts().to_dict()
+
+    client.rbac.delete_host_access(host_id, access_id)
+    assert client.rbac.list_host_access(host_id).to_dict()["accessList"] == []
+
+    client.hosts.delete(host_id)
+    client.request("DELETE", "/users/delete-user", json_body={"username": username})
+
+
+def test_collab_rooms(client: TermixClient, run_prefix: str) -> None:
+    username = f"{run_prefix}-collab-user"
+    client.user_admin.create_user(username=username, password="Live-Smoke-Collab1")
+    user_id = next(
+        u["userId"]
+        for u in client.user_admin.list().to_dict()["users"]
+        if u["username"] == username
+    )
+
+    name = f"{run_prefix}-room"
+    created = client.collab.create_room(name=name, persistent=True)
+    room_id = created.to_dict()["room"]["id"]
+
+    assert room_id in [r["id"] for r in client.collab.list_rooms().to_dict()["rooms"]]
+
+    room = client.collab.get_room(room_id).to_dict()
+    assert room["isHost"] is True
+
+    client.collab.invite_members(room_id, userIds=[user_id])
+    client.collab.set_guest_link(room_id, enabled=True)
+    client.collab.remove_member(room_id, user_id)
+    assert client.collab.list_control_requests(room_id).to_dict()["requests"] == []
+
+    client.collab.end_room(room_id)
+    client.collab.delete_room(room_id)
+    with pytest.raises(NotFoundError):
+        client.collab.get_room(room_id)
+
+    client.request("DELETE", "/users/delete-user", json_body={"username": username})
+
+
 def test_unknown_id_raises_not_found(client: TermixClient) -> None:
     with pytest.raises(NotFoundError) as excinfo:
         client.hosts.retrieve("999999999")
