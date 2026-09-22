@@ -182,7 +182,7 @@ class HTTPXClient(HTTPClient):
     def __init__(self, *, verify: bool = True, timeout: float = 30.0) -> None:
         super().__init__(verify=verify, timeout=timeout)
         _require_httpx()
-        self._client = httpx.Client(verify=verify, timeout=timeout)
+        self._client = httpx.Client(verify=verify, timeout=timeout, follow_redirects=True)
 
     def request(
         self,
@@ -327,7 +327,7 @@ class AsyncHTTPXClient(AsyncHTTPClient):
     def __init__(self, *, verify: bool = True, timeout: float = 30.0) -> None:
         super().__init__(verify=verify, timeout=timeout)
         _require_httpx()
-        self._client = httpx.AsyncClient(verify=verify, timeout=timeout)
+        self._client = httpx.AsyncClient(verify=verify, timeout=timeout, follow_redirects=True)
 
     async def request(
         self,
