@@ -203,11 +203,34 @@ create/retrieve/update/list/delete; the bootstrap API key showing up in
 `api_keys.list()`; `NotFoundError` on an unknown id; `AuthenticationError`
 on a bad API key; and that `login()` returns a client whose resources
 actually work. Also full CRUD (plus each resource's own extra ops, minus
-anything that would open a real SSH session) on the other modules that
-are pure JSON with no external dependency: `workspaces`, `tunnel_presets`,
-`open_tabs`, `alerts` notification channels, and `credentials` (skipping
-`apply_to_host`/`deploy_to_host`, which do connect to a real host over
-SSH). README.md's "Routes covered" table's "Live-tested" column is
+anything that would open a real SSH session, run untrusted code, or hit a
+third party) on the other modules that are pure JSON with no external
+dependency: `workspaces`, `tunnel_presets`, `open_tabs`, `alerts`
+notification channels, `credentials` (skipping `apply_to_host`/
+`deploy_to_host`, which do connect to a real host over SSH),
+`network_topology`, `preferences`, `dashboard` (service links and
+activity — the latter against a throwaway host), `homepage` (items and
+layout, not `ping`/`proxy`/`rss`/`get_favicon`, which fetch an arbitrary
+URL), `audit` (`list`/`list_actions`, not `export` — see below), `vault`
+profiles, `rbac` roles, `automations` (CRUD, not `run`/`trigger_webhook`,
+which actually execute the automation), `session_logs` (retention
+get/set, not `list`/`retrieve`/`delete`/`get_content`, which need a real
+session log row only a real SSH session creates), and `termix_id`
+(identity, keys, CA, cert issuance — not `get_public_ca`, see below, and
+not `delete_key`, which the real backend always answers with a 500 even
+though it does delete the row).
+
+Two live-only findings this suite surfaced, tracked as follow-ups rather
+than worked around here: `audit.export()` and `termix_id.get_public_ca()`
+both silently return `None` because their real response
+(`text/csv`/`text/plain`) isn't documented as `application/octet-stream`
+in the spec, so `generate.py`'s `is_octet_stream` check misses them; and
+the SDK's httpx clients don't set `follow_redirects=True`, so any 3xx
+response — e.g. `GET /session_logs` redirecting to `/session_logs/` —
+silently becomes an empty `None` instead of an error or the real data
+(`session_logs.list()` is skipped here for exactly that reason).
+
+README.md's "Routes covered" table's "Live-tested" column is
 generated straight from this suite's source — see
 `tools/sdk-gen/generate.py`'s `find_live_tested_ops()` — so it never
 needs updating by hand when this list grows.

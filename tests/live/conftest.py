@@ -179,6 +179,25 @@ def _cleanup(live: TermixClient, run_prefix: str) -> None:
         data = tab.to_dict()
         if str(data.get("id", "")).startswith(run_prefix):
             _ignore_missing(lambda: live.open_tabs.delete(str(data["id"])))
+    for link in live.dashboard.list_service_links():
+        if str(link.get("label", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.dashboard.delete_service_link(str(link["id"])))
+    for item in live.homepage.list_items():
+        if str(item.get("title", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.homepage.delete_item(str(item["id"])))
+    for profile in live.vault.list_profiles():
+        if str(profile.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.vault.delete_profile(str(profile["id"])))
+    for role in live.rbac.list_roles().to_dict()["roles"]:
+        if str(role.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.rbac.delete_role(str(role["id"])))
+    for automation in live.automations.list():
+        if str(automation.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.automations.delete(str(automation["id"])))
+    me = live.termix_id.get_me().to_dict()
+    identity = me.get("identity")
+    if identity and str(identity.get("handle", "")).startswith(run_prefix):
+        _ignore_missing(live.termix_id.delete)
 
 
 def _ignore_missing(call: Any) -> None:

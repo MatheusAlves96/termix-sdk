@@ -127,7 +127,7 @@ except TermixError as e:
 
 <!-- routes-table start -->
 
-**516** of **531** endpoints documented in [`spec/termix-openapi.json`](spec/termix-openapi.json) have a generated SDK call below, grouped by resource module (`client.<module>`). Every one also exists on `AsyncTermixClient` as an async twin — see [Async](#async). **53** are additionally exercised against a real Termix instance by the [live smoke suite](CONTRIBUTING.md#live-smoke) (marked ✅ below) — every other row is verified only against a synthetic contract test in `tests/contract/`, not a live instance. Rebuilt automatically by `python tools/sdk-gen/generate.py` (see [Development](#development)); don't edit this section by hand.
+**516** of **531** endpoints documented in [`spec/termix-openapi.json`](spec/termix-openapi.json) have a generated SDK call below, grouped by resource module (`client.<module>`). Every one also exists on `AsyncTermixClient` as an async twin — see [Async](#async). **115** are additionally exercised against a real Termix instance by the [live smoke suite](CONTRIBUTING.md#live-smoke) (marked ✅ below) — every other row is verified only against a synthetic contract test in `tests/contract/`, not a live instance. Rebuilt automatically by `python tools/sdk-gen/generate.py` (see [Development](#development)); don't edit this section by hand.
 
 <details>
 <summary><code>client.ai</code> (14 operations)</summary>
@@ -187,29 +187,29 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.audit</code> (3 operations)</summary>
+<summary><code>client.audit</code> (3 operations, 2 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/audit-logs` | `client.audit.list(**params)` |  |
-| GET | `/audit-logs/actions` | `client.audit.list_actions()` |  |
+| GET | `/audit-logs` | `client.audit.list(**params)` | ✅ |
+| GET | `/audit-logs/actions` | `client.audit.list_actions()` | ✅ |
 | GET | `/audit-logs/export` | `client.audit.export(**params)` |  |
 
 </details>
 
 <details>
-<summary><code>client.automations</code> (9 operations)</summary>
+<summary><code>client.automations</code> (9 operations, 6 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/automations` | `client.automations.list()` |  |
-| POST | `/automations` | `client.automations.create(**params)` |  |
-| GET | `/automations/runs/history` | `client.automations.list_run_history(**params)` |  |
+| GET | `/automations` | `client.automations.list()` | ✅ |
+| POST | `/automations` | `client.automations.create(**params)` | ✅ |
+| GET | `/automations/runs/history` | `client.automations.list_run_history(**params)` | ✅ |
 | GET | `/automations/runs/{runId}/steps` | `client.automations.list_run_steps(run_id)` |  |
 | POST | `/automations/webhook/{token}` | `client.automations.trigger_webhook(token)` |  |
-| DELETE | `/automations/{id}` | `client.automations.delete(id)` |  |
-| GET | `/automations/{id}` | `client.automations.retrieve(id)` |  |
-| PUT | `/automations/{id}` | `client.automations.update(id, **params)` |  |
+| DELETE | `/automations/{id}` | `client.automations.delete(id)` | ✅ |
+| GET | `/automations/{id}` | `client.automations.retrieve(id)` | ✅ |
+| PUT | `/automations/{id}` | `client.automations.update(id, **params)` | ✅ |
 | POST | `/automations/{id}/run` | `client.automations.run(id, **params)` |  |
 
 </details>
@@ -264,18 +264,18 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.dashboard</code> (8 operations)</summary>
+<summary><code>client.dashboard</code> (8 operations, 8 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| POST | `/activity/log` | `client.dashboard.log_activity(**params)` |  |
-| GET | `/activity/recent` | `client.dashboard.list_recent_activity(**params)` |  |
-| DELETE | `/activity/reset` | `client.dashboard.reset_activity()` |  |
-| GET | `/service-links` | `client.dashboard.list_service_links()` |  |
-| POST | `/service-links` | `client.dashboard.create_service_link(**params)` |  |
-| DELETE | `/service-links/{id}` | `client.dashboard.delete_service_link(id)` |  |
-| PUT | `/service-links/{id}` | `client.dashboard.update_service_link(id, **params)` |  |
-| GET | `/uptime` | `client.dashboard.uptime()` |  |
+| POST | `/activity/log` | `client.dashboard.log_activity(**params)` | ✅ |
+| GET | `/activity/recent` | `client.dashboard.list_recent_activity(**params)` | ✅ |
+| DELETE | `/activity/reset` | `client.dashboard.reset_activity()` | ✅ |
+| GET | `/service-links` | `client.dashboard.list_service_links()` | ✅ |
+| POST | `/service-links` | `client.dashboard.create_service_link(**params)` | ✅ |
+| DELETE | `/service-links/{id}` | `client.dashboard.delete_service_link(id)` | ✅ |
+| PUT | `/service-links/{id}` | `client.dashboard.update_service_link(id, **params)` | ✅ |
+| GET | `/uptime` | `client.dashboard.uptime()` | ✅ |
 
 </details>
 
@@ -409,17 +409,17 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.homepage</code> (10 operations)</summary>
+<summary><code>client.homepage</code> (10 operations, 6 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
 | GET | `/homepage/favicon` | `client.homepage.get_favicon(**params)` |  |
-| GET | `/homepage/items` | `client.homepage.list_items()` |  |
-| POST | `/homepage/items` | `client.homepage.create_item(**params)` |  |
-| DELETE | `/homepage/items/{id}` | `client.homepage.delete_item(id)` |  |
-| PUT | `/homepage/items/{id}` | `client.homepage.update_item(id, **params)` |  |
-| GET | `/homepage/layout` | `client.homepage.get_layout()` |  |
-| PUT | `/homepage/layout` | `client.homepage.set_layout(**params)` |  |
+| GET | `/homepage/items` | `client.homepage.list_items()` | ✅ |
+| POST | `/homepage/items` | `client.homepage.create_item(**params)` | ✅ |
+| DELETE | `/homepage/items/{id}` | `client.homepage.delete_item(id)` | ✅ |
+| PUT | `/homepage/items/{id}` | `client.homepage.update_item(id, **params)` | ✅ |
+| GET | `/homepage/layout` | `client.homepage.get_layout()` | ✅ |
+| PUT | `/homepage/layout` | `client.homepage.set_layout(**params)` | ✅ |
 | GET | `/homepage/ping` | `client.homepage.ping(**params)` |  |
 | GET | `/homepage/proxy` | `client.homepage.proxy(**params)` |  |
 | GET | `/homepage/rss` | `client.homepage.rss(**params)` |  |
@@ -595,12 +595,12 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.network_topology</code> (2 operations)</summary>
+<summary><code>client.network_topology</code> (2 operations, 2 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/network-topology` | `client.network_topology.get()` |  |
-| POST | `/network-topology` | `client.network_topology.save(**params)` |  |
+| GET | `/network-topology` | `client.network_topology.get()` | ✅ |
+| POST | `/network-topology` | `client.network_topology.save(**params)` | ✅ |
 
 </details>
 
@@ -619,20 +619,20 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.preferences</code> (10 operations)</summary>
+<summary><code>client.preferences</code> (10 operations, 10 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/credential-sidebar/preferences` | `client.preferences.get_credential_sidebar()` |  |
-| PUT | `/credential-sidebar/preferences` | `client.preferences.set_credential_sidebar(**params)` |  |
-| GET | `/host-sidebar/preferences` | `client.preferences.get_host_sidebar()` |  |
-| PUT | `/host-sidebar/preferences` | `client.preferences.set_host_sidebar(**params)` |  |
-| GET | `/ui-preferences` | `client.preferences.get_ui_preferences()` |  |
-| PUT | `/ui-preferences` | `client.preferences.set_ui_preferences(**params)` |  |
-| GET | `/user-preferences` | `client.preferences.get_user_preferences()` |  |
-| PUT | `/user-preferences` | `client.preferences.set_user_preferences(**params)` |  |
-| GET | `/users/touch-input-settings` | `client.preferences.get_touch_input_settings()` |  |
-| PATCH | `/users/touch-input-settings` | `client.preferences.update_touch_input_settings(**params)` |  |
+| GET | `/credential-sidebar/preferences` | `client.preferences.get_credential_sidebar()` | ✅ |
+| PUT | `/credential-sidebar/preferences` | `client.preferences.set_credential_sidebar(**params)` | ✅ |
+| GET | `/host-sidebar/preferences` | `client.preferences.get_host_sidebar()` | ✅ |
+| PUT | `/host-sidebar/preferences` | `client.preferences.set_host_sidebar(**params)` | ✅ |
+| GET | `/ui-preferences` | `client.preferences.get_ui_preferences()` | ✅ |
+| PUT | `/ui-preferences` | `client.preferences.set_ui_preferences(**params)` | ✅ |
+| GET | `/user-preferences` | `client.preferences.get_user_preferences()` | ✅ |
+| PUT | `/user-preferences` | `client.preferences.set_user_preferences(**params)` | ✅ |
+| GET | `/users/touch-input-settings` | `client.preferences.get_touch_input_settings()` | ✅ |
+| PATCH | `/users/touch-input-settings` | `client.preferences.update_touch_input_settings(**params)` | ✅ |
 
 </details>
 
@@ -663,7 +663,7 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.rbac</code> (27 operations)</summary>
+<summary><code>client.rbac</code> (27 operations, 6 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
@@ -679,12 +679,12 @@ except TermixError as e:
 | DELETE | `/rbac/host/{id}/access/{accessId}` | `client.rbac.delete_host_access(id, access_id)` |  |
 | PATCH | `/rbac/host/{id}/access/{accessId}` | `client.rbac.update_host_access(id, access_id, **params)` |  |
 | POST | `/rbac/host/{id}/share` | `client.rbac.share_host(id, **params)` |  |
-| GET | `/rbac/permissions/catalog` | `client.rbac.permissions_catalog()` |  |
-| GET | `/rbac/roles` | `client.rbac.list_roles()` |  |
-| POST | `/rbac/roles` | `client.rbac.create_role(**params)` |  |
-| DELETE | `/rbac/roles/{id}` | `client.rbac.delete_role(id)` |  |
-| PUT | `/rbac/roles/{id}` | `client.rbac.update_role(id, **params)` |  |
-| GET | `/rbac/roles/{id}/members` | `client.rbac.list_role_members(id)` |  |
+| GET | `/rbac/permissions/catalog` | `client.rbac.permissions_catalog()` | ✅ |
+| GET | `/rbac/roles` | `client.rbac.list_roles()` | ✅ |
+| POST | `/rbac/roles` | `client.rbac.create_role(**params)` | ✅ |
+| DELETE | `/rbac/roles/{id}` | `client.rbac.delete_role(id)` | ✅ |
+| PUT | `/rbac/roles/{id}` | `client.rbac.update_role(id, **params)` | ✅ |
+| GET | `/rbac/roles/{id}/members` | `client.rbac.list_role_members(id)` | ✅ |
 | GET | `/rbac/shared-hosts` | `client.rbac.list_shared_hosts()` |  |
 | GET | `/rbac/shared-snippets` | `client.rbac.list_shared_snippets()` |  |
 | POST | `/rbac/snippet-folder/share` | `client.rbac.share_snippet_folder(**params)` |  |
@@ -711,13 +711,13 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.session_logs</code> (6 operations)</summary>
+<summary><code>client.session_logs</code> (6 operations, 2 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
 | GET | `/session_logs` | `client.session_logs.list()` |  |
-| GET | `/session_logs/retention` | `client.session_logs.get_retention()` |  |
-| PUT | `/session_logs/retention` | `client.session_logs.set_retention(**params)` |  |
+| GET | `/session_logs/retention` | `client.session_logs.get_retention()` | ✅ |
+| PUT | `/session_logs/retention` | `client.session_logs.set_retention(**params)` | ✅ |
 | DELETE | `/session_logs/{id}` | `client.session_logs.delete(id)` |  |
 | GET | `/session_logs/{id}` | `client.session_logs.retrieve(id)` |  |
 | GET | `/session_logs/{id}/content` | `client.session_logs.get_content(id)` |  |
@@ -821,28 +821,28 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.termix_id</code> (18 operations)</summary>
+<summary><code>client.termix_id</code> (18 operations, 16 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| DELETE | `/termix-id` | `client.termix_id.delete()` |  |
-| POST | `/termix-id` | `client.termix_id.create(**params)` |  |
-| PUT | `/termix-id` | `client.termix_id.update(**params)` |  |
-| DELETE | `/termix-id/ca` | `client.termix_id.delete_ca()` |  |
-| GET | `/termix-id/ca` | `client.termix_id.get_ca()` |  |
-| POST | `/termix-id/ca` | `client.termix_id.create_ca(**params)` |  |
-| POST | `/termix-id/ca/rotate` | `client.termix_id.rotate_ca(**params)` |  |
-| GET | `/termix-id/check/{handle}` | `client.termix_id.check_handle(handle)` |  |
-| POST | `/termix-id/keys` | `client.termix_id.create_key(**params)` |  |
-| POST | `/termix-id/keys/generate` | `client.termix_id.generate_key(**params)` |  |
+| DELETE | `/termix-id` | `client.termix_id.delete()` | ✅ |
+| POST | `/termix-id` | `client.termix_id.create(**params)` | ✅ |
+| PUT | `/termix-id` | `client.termix_id.update(**params)` | ✅ |
+| DELETE | `/termix-id/ca` | `client.termix_id.delete_ca()` | ✅ |
+| GET | `/termix-id/ca` | `client.termix_id.get_ca()` | ✅ |
+| POST | `/termix-id/ca` | `client.termix_id.create_ca(**params)` | ✅ |
+| POST | `/termix-id/ca/rotate` | `client.termix_id.rotate_ca(**params)` | ✅ |
+| GET | `/termix-id/check/{handle}` | `client.termix_id.check_handle(handle)` | ✅ |
+| POST | `/termix-id/keys` | `client.termix_id.create_key(**params)` | ✅ |
+| POST | `/termix-id/keys/generate` | `client.termix_id.generate_key(**params)` | ✅ |
 | DELETE | `/termix-id/keys/{id}` | `client.termix_id.delete_key(id)` |  |
-| PATCH | `/termix-id/keys/{id}` | `client.termix_id.update_key(id, **params)` |  |
-| POST | `/termix-id/keys/{id}/certificate` | `client.termix_id.issue_certificate(id, **params)` |  |
-| GET | `/termix-id/linked-credentials` | `client.termix_id.list_linked_credentials()` |  |
-| GET | `/termix-id/me` | `client.termix_id.get_me()` |  |
-| GET | `/termix-id/u/{handle}` | `client.termix_id.get_public_identity(handle)` |  |
+| PATCH | `/termix-id/keys/{id}` | `client.termix_id.update_key(id, **params)` | ✅ |
+| POST | `/termix-id/keys/{id}/certificate` | `client.termix_id.issue_certificate(id, **params)` | ✅ |
+| GET | `/termix-id/linked-credentials` | `client.termix_id.list_linked_credentials()` | ✅ |
+| GET | `/termix-id/me` | `client.termix_id.get_me()` | ✅ |
+| GET | `/termix-id/u/{handle}` | `client.termix_id.get_public_identity(handle)` | ✅ |
 | GET | `/termix-id/u/{handle}/ca` | `client.termix_id.get_public_ca(handle)` |  |
-| GET | `/termix-id/u/{handle}/{algo}` | `client.termix_id.get_public_key(handle, algo)` |  |
+| GET | `/termix-id/u/{handle}/{algo}` | `client.termix_id.get_public_key(handle, algo)` | ✅ |
 
 </details>
 
@@ -945,14 +945,14 @@ except TermixError as e:
 </details>
 
 <details>
-<summary><code>client.vault</code> (4 operations)</summary>
+<summary><code>client.vault</code> (4 operations, 4 live-tested)</summary>
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| GET | `/vault/profiles` | `client.vault.list_profiles()` |  |
-| POST | `/vault/profiles` | `client.vault.create_profile(**params)` |  |
-| DELETE | `/vault/profiles/{id}` | `client.vault.delete_profile(id)` |  |
-| PUT | `/vault/profiles/{id}` | `client.vault.update_profile(id, **params)` |  |
+| GET | `/vault/profiles` | `client.vault.list_profiles()` | ✅ |
+| POST | `/vault/profiles` | `client.vault.create_profile(**params)` | ✅ |
+| DELETE | `/vault/profiles/{id}` | `client.vault.delete_profile(id)` | ✅ |
+| PUT | `/vault/profiles/{id}` | `client.vault.update_profile(id, **params)` | ✅ |
 
 </details>
 

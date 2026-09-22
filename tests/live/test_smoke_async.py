@@ -8,6 +8,7 @@ this suite's scope.
 
 from __future__ import annotations
 
+import json
 import warnings
 from typing import Any
 
@@ -247,6 +248,236 @@ async def test_credentials_crud(async_client: AsyncTermixClient, run_prefix: str
     await async_client.credentials.delete(duplicate_id)
     with pytest.raises(NotFoundError):
         await async_client.credentials.retrieve(credential_id)
+
+
+async def test_network_topology_save_and_get(async_client: AsyncTermixClient) -> None:
+    saved = await async_client.network_topology.save(
+        topology=json.dumps({"nodes": [], "edges": []})
+    )
+    assert saved.to_dict()["success"] is True
+
+    got = await async_client.network_topology.get()
+    assert got is not None
+    assert got.to_dict() == {"nodes": [], "edges": []}
+
+
+async def test_preferences_get_and_set(async_client: AsyncTermixClient) -> None:
+    await async_client.preferences.set_credential_sidebar(display={}, sort={}, filters={})
+    assert (await async_client.preferences.get_credential_sidebar()).to_dict()["preferences"]
+
+    await async_client.preferences.set_host_sidebar(display={}, sort={}, filters={})
+    assert (await async_client.preferences.get_host_sidebar()).to_dict()["preferences"]
+
+    await async_client.preferences.set_ui_preferences(overrides={}, onboarding={})
+    assert (await async_client.preferences.get_ui_preferences()).to_dict()["preferences"]
+
+    await async_client.preferences.set_user_preferences(theme="dark")
+    assert (await async_client.preferences.get_user_preferences()).theme == "dark"
+
+    await async_client.preferences.update_touch_input_settings(enabled=True)
+    assert (await async_client.preferences.get_touch_input_settings()).enabled is True
+
+
+async def test_dashboard_service_links_and_activity(
+    async_client: AsyncTermixClient, run_prefix: str
+) -> None:
+    name = f"{run_prefix}-link-async"
+    created = await async_client.dashboard.create_service_link(
+        label=name, url="https://example.invalid"
+    )
+    link_id = str(created.to_dict()["id"])
+
+    links = await async_client.dashboard.list_service_links()
+    assert name in [link["label"] for link in links]
+
+    renamed = f"{name}-renamed"
+    await async_client.dashboard.update_service_link(link_id, label=renamed)
+    links = await async_client.dashboard.list_service_links()
+    assert renamed in [link["label"] for link in links]
+
+    await async_client.dashboard.delete_service_link(link_id)
+    with pytest.raises(NotFoundError):
+        await async_client.dashboard.update_service_link(link_id, label="gone")
+
+    host_name = f"{run_prefix}-dashboard-host-async"
+    host = await async_client.hosts.create(
+        ip="10.0.0.11", port=22, username="root", authType="password", name=host_name
+    )
+    host_id = str(host.to_dict()["id"])
+
+    await async_client.dashboard.log_activity(
+        type="terminal", hostId=int(host_id), hostName=host_name
+    )
+    activity = await async_client.dashboard.list_recent_activity()
+    assert host_name in [a["hostName"] for a in activity]
+
+    await async_client.dashboard.reset_activity()
+    assert (await async_client.dashboard.list_recent_activity()) == []
+
+    assert (await async_client.dashboard.uptime()).to_dict()["uptimeSeconds"] >= 0
+
+    await async_client.hosts.delete(host_id)
+
+
+async def test_homepage_items_and_layout(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-item-async"
+    created = await async_client.homepage.create_item(
+        typeId="bookmark", title=name, config={"url": "https://example.invalid"}
+    )
+    item_id = str(created.to_dict()["id"])
+
+    items = await async_client.homepage.list_items()
+    assert name in [item["title"] for item in items]
+
+    renamed = f"{name}-renamed"
+    await async_client.homepage.update_item(item_id, title=renamed)
+    items = await async_client.homepage.list_items()
+    assert renamed in [item["title"] for item in items]
+
+    await async_client.homepage.set_layout(
+        entries=[{"id": item_id, "x": 0, "y": 0}], pan={"x": 0, "y": 0}, zoom=1.0
+    )
+    layout = await async_client.homepage.get_layout()
+    assert layout is not None
+    assert layout.to_dict()["layout"]["entries"] == [{"id": item_id, "x": 0, "y": 0}]
+
+    await async_client.homepage.delete_item(item_id)
+    with pytest.raises(NotFoundError):
+        await async_client.homepage.update_item(item_id, title="gone")
+
+
+async def test_audit_list(async_client: AsyncTermixClient) -> None:
+    """Excludes `export()`: see `test_smoke.py`'s sync version of this test."""
+    actions = (await async_client.audit.list_actions()).to_dict()["actions"]
+    assert "login" in actions
+
+    logs = (await async_client.audit.list()).to_dict()
+    assert any(entry["action"] == "login" for entry in logs["logs"])
+
+
+async def test_vault_profiles_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-vault-profile-async"
+    created = await async_client.vault.create_profile(
+        name=name, vaultAddr="https://vault.invalid:8200", sshRole=f"{run_prefix}-role-async"
+    )
+    profile_id = str(created.to_dict()["id"])
+
+    profiles = await async_client.vault.list_profiles()
+    assert name in [p["name"] for p in profiles]
+
+    renamed = f"{name}-renamed"
+    await async_client.vault.update_profile(profile_id, name=renamed)
+    profiles = await async_client.vault.list_profiles()
+    assert renamed in [p["name"] for p in profiles]
+
+    await async_client.vault.delete_profile(profile_id)
+    with pytest.raises(NotFoundError):
+        await async_client.vault.update_profile(profile_id, name="gone")
+
+
+async def test_rbac_roles_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    catalog = (await async_client.rbac.permissions_catalog()).to_dict()["catalog"]
+    assert catalog
+
+    name = f"{run_prefix}-role-async"
+    created = await async_client.rbac.create_role(name=name, displayName="Explore Role")
+    role_id = str(created.to_dict()["roleId"])
+
+    roles = (await async_client.rbac.list_roles()).to_dict()["roles"]
+    assert name in [r["name"] for r in roles]
+
+    await async_client.rbac.update_role(role_id, displayName="Explore Role Renamed")
+    members = await async_client.rbac.list_role_members(role_id)
+    assert members.to_dict()["members"] == []
+
+    await async_client.rbac.delete_role(role_id)
+    with pytest.raises(NotFoundError):
+        await async_client.rbac.update_role(role_id, displayName="gone")
+
+
+async def test_automations_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    """Excludes `run()`/`trigger_webhook()`: see the sync version of this test."""
+    name = f"{run_prefix}-automation-async"
+    definition = {"version": 1, "trigger": {"kind": "webhook"}, "steps": []}
+    created = await async_client.automations.create(name=name, enabled=False, definition=definition)
+    automation_id = str(created.to_dict()["id"])
+
+    automations = await async_client.automations.list()
+    assert name in [a["name"] for a in automations]
+    assert (await async_client.automations.retrieve(automation_id)).name == name
+
+    renamed = f"{name}-renamed"
+    await async_client.automations.update(automation_id, name=renamed)
+    assert (await async_client.automations.retrieve(automation_id)).name == renamed
+
+    history = await async_client.automations.list_run_history(automationId=automation_id)
+    assert history == []
+
+    await async_client.automations.delete(automation_id)
+    with pytest.raises(NotFoundError):
+        await async_client.automations.retrieve(automation_id)
+
+
+async def test_session_logs_retention(async_client: AsyncTermixClient) -> None:
+    """Excludes `list()`/`retrieve()`/`delete()`/`get_content()`: see the
+    sync version of this test.
+    """
+    await async_client.session_logs.set_retention(retentionDays=30)
+    assert (await async_client.session_logs.get_retention()).retentionDays == 30
+
+
+async def test_termix_id_identity_and_ca(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    """Excludes `get_public_ca()` and `delete_key()`: see the sync version
+    of this test for why.
+    """
+    handle = f"{run_prefix}-id-async"
+    assert (await async_client.termix_id.check_handle(handle=handle)).available is True
+
+    await async_client.termix_id.create(handle=handle, description="live smoke identity")
+    me = await async_client.termix_id.get_me()
+    assert me.to_dict()["identity"]["handle"] == handle
+
+    generated = await async_client.termix_id.generate_key(
+        type="ed25519", label="generated", saveCredential=False
+    )
+    generated_key_id = str(generated.to_dict()["key"]["id"])
+    await async_client.termix_id.create_key(
+        label="imported",
+        publicKey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklm",
+    )
+
+    identity_public_key = generated.to_dict()["key"]["publicKey"]
+    key_stream = await async_client.termix_id.get_public_key(handle=handle, algo="ed25519")
+    assert identity_public_key.encode() in (await key_stream.read())
+    identity_stream = await async_client.termix_id.get_public_identity(handle=handle)
+    assert handle.encode() in (await identity_stream.read())
+
+    await async_client.termix_id.update_key(generated_key_id, label="generated-renamed")
+
+    await async_client.termix_id.create_ca(validityDays=365)
+    ca = await async_client.termix_id.get_ca()
+    assert ca.to_dict()["ca"] is not None
+    await async_client.termix_id.rotate_ca(validityDays=365)
+    linked = await async_client.termix_id.list_linked_credentials()
+    assert linked.to_dict()["credentialIds"] == []
+
+    cert = await async_client.termix_id.issue_certificate(
+        generated_key_id, validityDays=1, principals=["root"]
+    )
+    assert cert.to_dict()["principals"] == ["root"]
+
+    await async_client.termix_id.delete_ca()
+    ca = await async_client.termix_id.get_ca()
+    assert ca.to_dict()["ca"] is None
+
+    renamed_description = "renamed live smoke identity"
+    await async_client.termix_id.update(description=renamed_description)
+    me = await async_client.termix_id.get_me()
+    assert me.to_dict()["identity"]["description"] == renamed_description
+
+    await async_client.termix_id.delete()
+    with pytest.raises(NotFoundError):
+        await async_client.termix_id.update(description="gone")
 
 
 async def test_unknown_id_raises_not_found(async_client: AsyncTermixClient) -> None:
