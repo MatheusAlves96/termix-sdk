@@ -10,10 +10,11 @@ import pytest
 def test_clear_recent_contract(client, mock_http_client):
     """Generated from DELETE /host/file_manager/recent in spec/termix-openapi.json."""
     mock_http_client.queue_response(status_code=200, body={"message": "Recent file removed"})
-    result = client.host_file_manager.clear_recent()
+    result = client.host_file_manager.clear_recent(hostId=1, path="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/file_manager/recent")
+    assert sent.json == {"hostId": 1, "path": "x"}
     assert result.to_dict() == {"message": "Recent file removed"}
 
 
@@ -64,10 +65,11 @@ def test_add_pinned_contract(client, mock_http_client):
 def test_remove_pinned_contract(client, mock_http_client):
     """Generated from DELETE /host/file_manager/pinned in spec/termix-openapi.json."""
     mock_http_client.queue_response(status_code=200, body={"message": "Pinned file removed"})
-    result = client.host_file_manager.remove_pinned()
+    result = client.host_file_manager.remove_pinned(hostId=1, path="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/file_manager/pinned")
+    assert sent.json == {"hostId": 1, "path": "x"}
     assert result.to_dict() == {"message": "Pinned file removed"}
 
 
@@ -96,10 +98,11 @@ def test_add_shortcut_contract(client, mock_http_client):
 def test_remove_shortcut_contract(client, mock_http_client):
     """Generated from DELETE /host/file_manager/shortcuts in spec/termix-openapi.json."""
     mock_http_client.queue_response(status_code=200, body={"message": "Shortcut removed"})
-    result = client.host_file_manager.remove_shortcut()
+    result = client.host_file_manager.remove_shortcut(hostId=1, path="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/file_manager/shortcuts")
+    assert sent.json == {"hostId": 1, "path": "x"}
     assert result.to_dict() == {"message": "Shortcut removed"}
 
 
@@ -107,10 +110,11 @@ def test_remove_shortcut_contract(client, mock_http_client):
 async def test_async_clear_recent_contract(async_client, mock_async_http_client):
     """Generated from DELETE /host/file_manager/recent in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(status_code=200, body={"message": "Recent file removed"})
-    result = await async_client.host_file_manager.clear_recent()
+    result = await async_client.host_file_manager.clear_recent(hostId=1, path="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/file_manager/recent")
+    assert sent.json == {"hostId": 1, "path": "x"}
     assert result.to_dict() == {"message": "Recent file removed"}
 
 
@@ -166,10 +170,11 @@ async def test_async_add_pinned_contract(async_client, mock_async_http_client):
 async def test_async_remove_pinned_contract(async_client, mock_async_http_client):
     """Generated from DELETE /host/file_manager/pinned in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(status_code=200, body={"message": "Pinned file removed"})
-    result = await async_client.host_file_manager.remove_pinned()
+    result = await async_client.host_file_manager.remove_pinned(hostId=1, path="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/file_manager/pinned")
+    assert sent.json == {"hostId": 1, "path": "x"}
     assert result.to_dict() == {"message": "Pinned file removed"}
 
 
@@ -201,8 +206,9 @@ async def test_async_add_shortcut_contract(async_client, mock_async_http_client)
 async def test_async_remove_shortcut_contract(async_client, mock_async_http_client):
     """Generated from DELETE /host/file_manager/shortcuts in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(status_code=200, body={"message": "Shortcut removed"})
-    result = await async_client.host_file_manager.remove_shortcut()
+    result = await async_client.host_file_manager.remove_shortcut(hostId=1, path="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/file_manager/shortcuts")
+    assert sent.json == {"hostId": 1, "path": "x"}
     assert result.to_dict() == {"message": "Shortcut removed"}

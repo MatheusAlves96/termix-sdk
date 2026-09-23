@@ -86,10 +86,11 @@ def test_delete_account_contract(client, mock_http_client):
     mock_http_client.queue_response(
         status_code=200, body={"message": "Account deleted successfully"}
     )
-    result = client.users.delete_account()
+    result = client.users.delete_account(password="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/users/delete-account")
+    assert sent.json == {"password": "x"}
     assert result.to_dict() == {"message": "Account deleted successfully"}
 
 
@@ -481,10 +482,11 @@ async def test_async_delete_account_contract(async_client, mock_async_http_clien
     mock_async_http_client.queue_response(
         status_code=200, body={"message": "Account deleted successfully"}
     )
-    result = await async_client.users.delete_account()
+    result = await async_client.users.delete_account(password="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/users/delete-account")
+    assert sent.json == {"password": "x"}
     assert result.to_dict() == {"message": "Account deleted successfully"}
 
 

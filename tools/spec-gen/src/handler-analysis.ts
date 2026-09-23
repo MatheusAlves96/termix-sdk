@@ -1323,7 +1323,7 @@ export function analyzeRoute(
     const pathParams = analyzePathParams(route.path, fnText).map((p) =>
       p.name === "id" ? { ...p, type: "integer" as const } : p,
     );
-    const requestBody = ["POST", "PUT", "PATCH"].includes(route.method)
+    const requestBody = ["POST", "PUT", "PATCH", "DELETE"].includes(route.method)
       ? analyzeRequestBody(managerCb, fnText, route.middlewares, ctx)
       : [];
     return {
@@ -1360,7 +1360,14 @@ export function analyzeRoute(
   collectResponseHits(fn, responseParam, 0, new Set(), hits);
   const responses = mergeResponses(hits.map((h) => responseHitToInfo(h, ctx)));
 
-  const requestBody = ["POST", "PUT", "PATCH"].includes(route.method) ? analyzeRequestBody(fn, fnText, route.middlewares, ctx) : [];
+  // DELETE is included alongside the more obviously body-bearing verbs: a handful of DELETE
+  // routes (e.g. /users/delete-user, /users/delete-account, /alerts/dismiss) genuinely read
+  // req.body for fields a path/query param can't carry (a username, a confirmation password).
+  // analyzeRequestBody only returns fields it actually finds read off req.body in the handler,
+  // so including DELETE here can't invent a body for a route that never reads one.
+  const requestBody = ["POST", "PUT", "PATCH", "DELETE"].includes(route.method)
+    ? analyzeRequestBody(fn, fnText, route.middlewares, ctx)
+    : [];
 
   return {
     routeId: route.id,

@@ -164,7 +164,7 @@ except TermixError as e:
 | DELETE | `/alert-rules/{id}` | `client.alerts.delete_rule(id)` |  |
 | PUT | `/alert-rules/{id}` | `client.alerts.update_rule(id, **params)` |  |
 | GET | `/alerts` | `client.alerts.list()` |  |
-| DELETE | `/alerts/dismiss` | `client.alerts.clear_dismissed()` |  |
+| DELETE | `/alerts/dismiss` | `client.alerts.clear_dismissed(**params)` |  |
 | POST | `/alerts/dismiss` | `client.alerts.dismiss(**params)` |  |
 | GET | `/alerts/dismissed` | `client.alerts.list_dismissed()` |  |
 | GET | `/notification-channels` | `client.alerts.list_channels()` | ✅ |
@@ -344,7 +344,7 @@ except TermixError as e:
 | POST | `/ssh/file_manager/ssh/copyItem` | `client.file_manager.copy_item(**params)` |  |
 | POST | `/ssh/file_manager/ssh/createFile` | `client.file_manager.create_file(**params)` |  |
 | POST | `/ssh/file_manager/ssh/createFolder` | `client.file_manager.create_folder(**params)` |  |
-| DELETE | `/ssh/file_manager/ssh/deleteItem` | `client.file_manager.delete_item()` |  |
+| DELETE | `/ssh/file_manager/ssh/deleteItem` | `client.file_manager.delete_item(**params)` |  |
 | POST | `/ssh/file_manager/ssh/disconnect` | `client.file_manager.disconnect(**params)` |  |
 | POST | `/ssh/file_manager/ssh/downloadFile` | `client.file_manager.download_file(**params)` |  |
 | POST | `/ssh/file_manager/ssh/executeFile` | `client.file_manager.execute_file(**params)` |  |
@@ -431,13 +431,13 @@ except TermixError as e:
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| DELETE | `/host/file_manager/pinned` | `client.host_file_manager.remove_pinned()` |  |
+| DELETE | `/host/file_manager/pinned` | `client.host_file_manager.remove_pinned(**params)` |  |
 | GET | `/host/file_manager/pinned` | `client.host_file_manager.list_pinned(**params)` |  |
 | POST | `/host/file_manager/pinned` | `client.host_file_manager.add_pinned(**params)` |  |
-| DELETE | `/host/file_manager/recent` | `client.host_file_manager.clear_recent()` |  |
+| DELETE | `/host/file_manager/recent` | `client.host_file_manager.clear_recent(**params)` |  |
 | GET | `/host/file_manager/recent` | `client.host_file_manager.list_recent(**params)` |  |
 | POST | `/host/file_manager/recent` | `client.host_file_manager.add_recent(**params)` |  |
-| DELETE | `/host/file_manager/shortcuts` | `client.host_file_manager.remove_shortcut()` |  |
+| DELETE | `/host/file_manager/shortcuts` | `client.host_file_manager.remove_shortcut(**params)` |  |
 | GET | `/host/file_manager/shortcuts` | `client.host_file_manager.list_shortcuts(**params)` |  |
 | POST | `/host/file_manager/shortcuts` | `client.host_file_manager.add_shortcut(**params)` |  |
 
@@ -448,12 +448,12 @@ except TermixError as e:
 
 | Method | Path | SDK call | Live-tested |
 |---|---|---|---|
-| DELETE | `/host/autostart/disable` | `client.hosts.disable_autostart()` |  |
+| DELETE | `/host/autostart/disable` | `client.hosts.disable_autostart(**params)` |  |
 | POST | `/host/autostart/enable` | `client.hosts.enable_autostart(**params)` |  |
 | GET | `/host/autostart/status` | `client.hosts.get_autostart_status()` |  |
 | POST | `/host/bulk-import` | `client.hosts.bulk_import(**params)` |  |
 | PATCH | `/host/bulk-update` | `client.hosts.bulk_update(**params)` |  |
-| DELETE | `/host/command-history` | `client.hosts.clear_command_history()` |  |
+| DELETE | `/host/command-history` | `client.hosts.clear_command_history(**params)` |  |
 | GET | `/host/command-history/{hostId}` | `client.hosts.get_command_history(host_id)` |  |
 | GET | `/host/db/host` | `client.hosts.list()` | ✅ |
 | POST | `/host/db/host` | `client.hosts.create(**params)` | ✅ |
@@ -904,7 +904,7 @@ except TermixError as e:
 | POST | `/users/admin/totp/disable` | `client.user_admin.disable_user_totp(**params)` |  |
 | GET | `/users/count` | `client.user_admin.count()` | ✅ |
 | GET | `/users/db-health` | `client.user_admin.get_db_health()` | ✅ |
-| DELETE | `/users/delete-user` | `client.user_admin.delete_user()` |  |
+| DELETE | `/users/delete-user` | `client.user_admin.delete_user(**params)` |  |
 | GET | `/users/list` | `client.user_admin.list()` | ✅ |
 | POST | `/users/make-admin` | `client.user_admin.make_admin(**params)` | ✅ |
 | POST | `/users/remove-admin` | `client.user_admin.remove_admin(**params)` | ✅ |
@@ -920,7 +920,7 @@ except TermixError as e:
 | POST | `/users/complete-reset` | `client.users.complete_reset(**params)` |  |
 | POST | `/users/create` | `client.users.register(**params)` |  |
 | GET | `/users/data-status` | `client.users.get_data_status()` |  |
-| DELETE | `/users/delete-account` | `client.users.delete_account()` |  |
+| DELETE | `/users/delete-account` | `client.users.delete_account(**params)` |  |
 | POST | `/users/initiate-reset` | `client.users.initiate_reset(**params)` |  |
 | POST | `/users/link-oidc-to-password` | `client.users.link_oidc_to_password(**params)` |  |
 | POST | `/users/logout` | `client.users.logout()` |  |

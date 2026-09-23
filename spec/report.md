@@ -1,6 +1,6 @@
 # termix-sdk spec-gen report
 
-Generated from tag `release-2.8.0-tag` (commit `fef8a5f28a5a6023ff10832acb65cbdfea81b777`) on 2026-09-21T14:33:53.411Z.
+Generated from tag `release-2.8.0-tag` (commit `fef8a5f28a5a6023ff10832acb65cbdfea81b777`) on 2026-09-22T07:26:39.670Z.
 
 ## Route counts
 
@@ -44,9 +44,9 @@ Generated from tag `release-2.8.0-tag` (commit `fef8a5f28a5a6023ff10832acb65cbdf
 | repository-type | 12 |
 | handler-literal | 78 |
 | frontend-type | 346 |
-| matched-type | 444 |
-| inferred | 711 |
-| unknown | 100 |
+| matched-type | 453 |
+| inferred | 723 |
+| unknown | 105 |
 
 ### Response field confidence
 

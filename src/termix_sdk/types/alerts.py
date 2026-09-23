@@ -54,3 +54,7 @@ class AlertsListFiringsParams(TypedDict, total=False):
 
 class AlertsDismissParams(TypedDict, total=False):
     alertId: str
+
+
+class AlertsClearDismissedParams(TypedDict, total=False):
+    alertId: str

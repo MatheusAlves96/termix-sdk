@@ -856,10 +856,13 @@ def test_delete_item_contract(client, mock_http_client):
             },
         },
     )
-    result = client.file_manager.delete_item()
+    result = client.file_manager.delete_item(
+        sessionId="x", path="x", isDirectory="x", permanent="x"
+    )
     sent = mock_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/ssh/file_manager/ssh/deleteItem")
+    assert sent.json == {"sessionId": "x", "path": "x", "isDirectory": "x", "permanent": "x"}
     assert result.to_dict() == {
         "message": "Item moved to trash",
         "path": "x",
@@ -1845,10 +1848,13 @@ async def test_async_delete_item_contract(async_client, mock_async_http_client):
             },
         },
     )
-    result = await async_client.file_manager.delete_item()
+    result = await async_client.file_manager.delete_item(
+        sessionId="x", path="x", isDirectory="x", permanent="x"
+    )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/ssh/file_manager/ssh/deleteItem")
+    assert sent.json == {"sessionId": "x", "path": "x", "isDirectory": "x", "permanent": "x"}
     assert result.to_dict() == {
         "message": "Item moved to trash",
         "path": "x",
