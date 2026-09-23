@@ -2,11 +2,13 @@
 
 The async client has its own requestor and transport, so "the sync one
 works" says nothing about it — the `login()` regression this suite was
-born from was present in both.
+born from was present in both. See `test_smoke.py`'s module docstring for
+this suite's scope.
 """
 
 from __future__ import annotations
 
+import json
 import warnings
 from typing import Any
 
@@ -101,6 +103,664 @@ async def test_snippets_crud(async_client: AsyncTermixClient, run_prefix: str) -
     await async_client.snippets.delete(snippet_id)
     with pytest.raises(NotFoundError):
         await async_client.snippets.retrieve(snippet_id)
+
+
+async def test_workspaces_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-workspace-async"
+    created = await async_client.workspaces.create(name=name, color="#336699", payload={"tabs": []})
+    workspace_id = str(created.to_dict()["id"])
+
+    assert workspace_id in [str(w["id"]) for w in await async_client.workspaces.list()]
+
+    renamed = f"{name}-renamed"
+    await async_client.workspaces.update(workspace_id, name=renamed)
+    await async_client.workspaces.set_content(workspace_id, payload={"tabs": [{"id": "1"}]})
+
+    duplicate = await async_client.workspaces.duplicate(workspace_id, name=f"{renamed}-dup")
+    duplicate_id = str(duplicate.to_dict()["id"])
+    assert duplicate.to_dict()["payload"] == {"tabs": [{"id": "1"}]}
+
+    await async_client.workspaces.set_default(workspace_id)
+    workspaces = await async_client.workspaces.list()
+    assert any(str(w["id"]) == workspace_id and w["isDefault"] for w in workspaces)
+    await async_client.workspaces.unset_default(workspace_id)
+
+    applied = await async_client.workspaces.apply(workspace_id)
+    assert str(applied.to_dict()["id"]) == workspace_id
+
+    await async_client.workspaces.save_last_session(payload={"tabs": []})
+    assert (await async_client.workspaces.get_last_session()) is not None
+
+    await async_client.workspaces.delete(workspace_id)
+    await async_client.workspaces.delete(duplicate_id)
+    with pytest.raises(NotFoundError):
+        await async_client.workspaces.update(workspace_id, name="gone")
+
+
+async def test_tunnel_presets_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-tunnel-preset-async"
+    created = await async_client.tunnel_presets.create(name=name, config=[])
+    preset_id = str(created.to_dict()["id"])
+
+    assert name in [p["name"] for p in await async_client.tunnel_presets.list()]
+
+    renamed = f"{name}-renamed"
+    await async_client.tunnel_presets.update(preset_id, name=renamed)
+    assert renamed in [p["name"] for p in await async_client.tunnel_presets.list()]
+
+    await async_client.tunnel_presets.delete(preset_id)
+    with pytest.raises(NotFoundError):
+        await async_client.tunnel_presets.update(preset_id, name="gone")
+
+
+async def test_open_tabs_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    tab_id = f"{run_prefix}-tab-async"
+    label = f"{run_prefix} tab async"
+    await async_client.open_tabs.upsert(id=tab_id, tabType="home", label=label, tabOrder=0)
+
+    tabs = {t.to_dict()["id"]: t.to_dict() for t in await async_client.open_tabs.list()}
+    assert tabs[tab_id]["label"] == label
+
+    await async_client.open_tabs.update(tab_id, label=f"{label}-renamed")
+    tabs = {t.to_dict()["id"]: t.to_dict() for t in await async_client.open_tabs.list()}
+    assert tabs[tab_id]["label"] == f"{label}-renamed"
+
+    assert (await async_client.open_tabs.list_active_sessions()) == []
+
+    await async_client.open_tabs.replace_all(
+        tabs=[{"id": tab_id, "tabType": "home", "label": label, "tabOrder": 0}]
+    )
+    tabs = {t.to_dict()["id"]: t.to_dict() for t in await async_client.open_tabs.list()}
+    assert tabs[tab_id]["label"] == label
+
+    await async_client.open_tabs.delete(tab_id)
+    remaining = await async_client.open_tabs.list()
+    assert tab_id not in {t.to_dict()["id"] for t in remaining}
+
+
+async def test_alerts_notification_channels_crud(
+    async_client: AsyncTermixClient, run_prefix: str
+) -> None:
+    name = f"{run_prefix}-channel-async"
+    created = await async_client.alerts.create_channel(
+        name=name, type="webhook", config={"url": "https://example.invalid/webhook"}, enabled=False
+    )
+    channel_id = str(created.to_dict()["id"])
+
+    channels = await async_client.alerts.list_channels()
+    assert name in [c.to_dict()["name"] for c in channels]
+
+    renamed = f"{name}-renamed"
+    await async_client.alerts.update_channel(channel_id, name=renamed)
+    channels = await async_client.alerts.list_channels()
+    assert renamed in [c.to_dict()["name"] for c in channels]
+
+    await async_client.alerts.delete_channel(channel_id)
+    with pytest.raises(NotFoundError):
+        await async_client.alerts.update_channel(channel_id, name="gone")
+
+
+async def test_credentials_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    """Excludes `apply_to_host`/`deploy_to_host`: both connect to a real host
+    over SSH, out of scope for this suite (see test_smoke.py's docstring).
+    """
+    name = f"{run_prefix}-credential-async"
+    created = await async_client.credentials.create(
+        name=name, authType="password", username="root", password="hunter2"
+    )
+    credential_id = str(created.to_dict()["id"])
+
+    assert (await async_client.credentials.retrieve(credential_id)).name == name
+    assert name in [c["name"] for c in await async_client.credentials.list()]
+    assert (await async_client.credentials.hosts(credential_id)) == []
+    await async_client.credentials.rename_folder(
+        oldName=f"{run_prefix}-old", newName=f"{run_prefix}-new"
+    )
+
+    key_pair = await async_client.credentials.generate_key_pair(keyType="ssh-rsa", keySize=2048)
+    private_key, public_key = key_pair.privateKey, key_pair.publicKey
+
+    generated_public = await async_client.credentials.generate_public_key(privateKey=private_key)
+    assert generated_public.publicKey == public_key
+    detected = await async_client.credentials.detect_key_type(privateKey=private_key)
+    assert detected.keyType == "ssh-rsa"
+    detected_public = await async_client.credentials.detect_public_key_type(publicKey=public_key)
+    assert detected_public.keyType == "ssh-rsa"
+    validated = await async_client.credentials.validate_key_pair(
+        privateKey=private_key, publicKey=public_key
+    )
+    assert validated.isValid
+
+    renamed = f"{name}-renamed"
+    await async_client.credentials.update(credential_id, name=renamed)
+    assert (await async_client.credentials.retrieve(credential_id)).name == renamed
+
+    duplicate = await async_client.credentials.duplicate(credential_id, name=f"{renamed}-dup")
+    duplicate_id = str(duplicate.to_dict()["id"])
+    await async_client.credentials.reorder(
+        positions=[
+            {"id": int(credential_id), "sortOrder": 0},
+            {"id": int(duplicate_id), "sortOrder": 1},
+        ]
+    )
+
+    await async_client.credentials.delete(credential_id)
+    await async_client.credentials.delete(duplicate_id)
+    with pytest.raises(NotFoundError):
+        await async_client.credentials.retrieve(credential_id)
+
+
+async def test_network_topology_save_and_get(async_client: AsyncTermixClient) -> None:
+    saved = await async_client.network_topology.save(
+        topology=json.dumps({"nodes": [], "edges": []})
+    )
+    assert saved.to_dict()["success"] is True
+
+    got = await async_client.network_topology.get()
+    assert got is not None
+    assert got.to_dict() == {"nodes": [], "edges": []}
+
+
+async def test_preferences_get_and_set(async_client: AsyncTermixClient) -> None:
+    await async_client.preferences.set_credential_sidebar(display={}, sort={}, filters={})
+    assert (await async_client.preferences.get_credential_sidebar()).to_dict()["preferences"]
+
+    await async_client.preferences.set_host_sidebar(display={}, sort={}, filters={})
+    assert (await async_client.preferences.get_host_sidebar()).to_dict()["preferences"]
+
+    await async_client.preferences.set_ui_preferences(overrides={}, onboarding={})
+    assert (await async_client.preferences.get_ui_preferences()).to_dict()["preferences"]
+
+    await async_client.preferences.set_user_preferences(theme="dark")
+    assert (await async_client.preferences.get_user_preferences()).theme == "dark"
+
+    await async_client.preferences.update_touch_input_settings(enabled=True)
+    assert (await async_client.preferences.get_touch_input_settings()).enabled is True
+
+
+async def test_dashboard_service_links_and_activity(
+    async_client: AsyncTermixClient, run_prefix: str
+) -> None:
+    name = f"{run_prefix}-link-async"
+    created = await async_client.dashboard.create_service_link(
+        label=name, url="https://example.invalid"
+    )
+    link_id = str(created.to_dict()["id"])
+
+    links = await async_client.dashboard.list_service_links()
+    assert name in [link["label"] for link in links]
+
+    renamed = f"{name}-renamed"
+    await async_client.dashboard.update_service_link(link_id, label=renamed)
+    links = await async_client.dashboard.list_service_links()
+    assert renamed in [link["label"] for link in links]
+
+    await async_client.dashboard.delete_service_link(link_id)
+    with pytest.raises(NotFoundError):
+        await async_client.dashboard.update_service_link(link_id, label="gone")
+
+    host_name = f"{run_prefix}-dashboard-host-async"
+    host = await async_client.hosts.create(
+        ip="10.0.0.11", port=22, username="root", authType="password", name=host_name
+    )
+    host_id = str(host.to_dict()["id"])
+
+    await async_client.dashboard.log_activity(
+        type="terminal", hostId=int(host_id), hostName=host_name
+    )
+    activity = await async_client.dashboard.list_recent_activity()
+    assert host_name in [a["hostName"] for a in activity]
+
+    await async_client.dashboard.reset_activity()
+    assert (await async_client.dashboard.list_recent_activity()) == []
+
+    assert (await async_client.dashboard.uptime()).to_dict()["uptimeSeconds"] >= 0
+
+    await async_client.hosts.delete(host_id)
+
+
+async def test_homepage_items_and_layout(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-item-async"
+    created = await async_client.homepage.create_item(
+        typeId="bookmark", title=name, config={"url": "https://example.invalid"}
+    )
+    item_id = str(created.to_dict()["id"])
+
+    items = await async_client.homepage.list_items()
+    assert name in [item["title"] for item in items]
+
+    renamed = f"{name}-renamed"
+    await async_client.homepage.update_item(item_id, title=renamed)
+    items = await async_client.homepage.list_items()
+    assert renamed in [item["title"] for item in items]
+
+    await async_client.homepage.set_layout(
+        entries=[{"id": item_id, "x": 0, "y": 0}], pan={"x": 0, "y": 0}, zoom=1.0
+    )
+    layout = await async_client.homepage.get_layout()
+    assert layout is not None
+    assert layout.to_dict()["layout"]["entries"] == [{"id": item_id, "x": 0, "y": 0}]
+
+    await async_client.homepage.delete_item(item_id)
+    with pytest.raises(NotFoundError):
+        await async_client.homepage.update_item(item_id, title="gone")
+
+
+async def test_audit_list(async_client: AsyncTermixClient) -> None:
+    """Excludes `export()`: see `test_smoke.py`'s sync version of this test."""
+    actions = (await async_client.audit.list_actions()).to_dict()["actions"]
+    assert "login" in actions
+
+    logs = (await async_client.audit.list()).to_dict()
+    assert any(entry["action"] == "login" for entry in logs["logs"])
+
+
+async def test_vault_profiles_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-vault-profile-async"
+    created = await async_client.vault.create_profile(
+        name=name, vaultAddr="https://vault.invalid:8200", sshRole=f"{run_prefix}-role-async"
+    )
+    profile_id = str(created.to_dict()["id"])
+
+    profiles = await async_client.vault.list_profiles()
+    assert name in [p["name"] for p in profiles]
+
+    renamed = f"{name}-renamed"
+    await async_client.vault.update_profile(profile_id, name=renamed)
+    profiles = await async_client.vault.list_profiles()
+    assert renamed in [p["name"] for p in profiles]
+
+    await async_client.vault.delete_profile(profile_id)
+    with pytest.raises(NotFoundError):
+        await async_client.vault.update_profile(profile_id, name="gone")
+
+
+async def test_rbac_roles_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    catalog = (await async_client.rbac.permissions_catalog()).to_dict()["catalog"]
+    assert catalog
+
+    name = f"{run_prefix}-role-async"
+    created = await async_client.rbac.create_role(name=name, displayName="Explore Role")
+    role_id = str(created.to_dict()["roleId"])
+
+    roles = (await async_client.rbac.list_roles()).to_dict()["roles"]
+    assert name in [r["name"] for r in roles]
+
+    await async_client.rbac.update_role(role_id, displayName="Explore Role Renamed")
+    members = await async_client.rbac.list_role_members(role_id)
+    assert members.to_dict()["members"] == []
+
+    await async_client.rbac.delete_role(role_id)
+    with pytest.raises(NotFoundError):
+        await async_client.rbac.update_role(role_id, displayName="gone")
+
+
+async def test_automations_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    """Excludes `run()`/`trigger_webhook()`: see the sync version of this test."""
+    name = f"{run_prefix}-automation-async"
+    definition = {"version": 1, "trigger": {"kind": "webhook"}, "steps": []}
+    created = await async_client.automations.create(name=name, enabled=False, definition=definition)
+    automation_id = str(created.to_dict()["id"])
+
+    automations = await async_client.automations.list()
+    assert name in [a["name"] for a in automations]
+    assert (await async_client.automations.retrieve(automation_id)).name == name
+
+    renamed = f"{name}-renamed"
+    await async_client.automations.update(automation_id, name=renamed)
+    assert (await async_client.automations.retrieve(automation_id)).name == renamed
+
+    history = await async_client.automations.list_run_history(automationId=automation_id)
+    assert history == []
+
+    await async_client.automations.delete(automation_id)
+    with pytest.raises(NotFoundError):
+        await async_client.automations.retrieve(automation_id)
+
+
+async def test_session_logs_retention(async_client: AsyncTermixClient) -> None:
+    """Excludes `list()`/`retrieve()`/`delete()`/`get_content()`: see the
+    sync version of this test.
+    """
+    await async_client.session_logs.set_retention(retentionDays=30)
+    assert (await async_client.session_logs.get_retention()).retentionDays == 30
+
+
+async def test_termix_id_identity_and_ca(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    """Excludes `get_public_ca()` and `delete_key()`: see the sync version
+    of this test for why.
+    """
+    handle = f"{run_prefix}-id-async"
+    assert (await async_client.termix_id.check_handle(handle=handle)).available is True
+
+    await async_client.termix_id.create(handle=handle, description="live smoke identity")
+    me = await async_client.termix_id.get_me()
+    assert me.to_dict()["identity"]["handle"] == handle
+
+    generated = await async_client.termix_id.generate_key(
+        type="ed25519", label="generated", saveCredential=False
+    )
+    generated_key_id = str(generated.to_dict()["key"]["id"])
+    await async_client.termix_id.create_key(
+        label="imported",
+        publicKey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklm",
+    )
+
+    identity_public_key = generated.to_dict()["key"]["publicKey"]
+    key_stream = await async_client.termix_id.get_public_key(handle=handle, algo="ed25519")
+    assert identity_public_key.encode() in (await key_stream.read())
+    identity_stream = await async_client.termix_id.get_public_identity(handle=handle)
+    assert handle.encode() in (await identity_stream.read())
+
+    await async_client.termix_id.update_key(generated_key_id, label="generated-renamed")
+
+    await async_client.termix_id.create_ca(validityDays=365)
+    ca = await async_client.termix_id.get_ca()
+    assert ca.to_dict()["ca"] is not None
+    await async_client.termix_id.rotate_ca(validityDays=365)
+    linked = await async_client.termix_id.list_linked_credentials()
+    assert linked.to_dict()["credentialIds"] == []
+
+    cert = await async_client.termix_id.issue_certificate(
+        generated_key_id, validityDays=1, principals=["root"]
+    )
+    assert cert.to_dict()["principals"] == ["root"]
+
+    await async_client.termix_id.delete_ca()
+    ca = await async_client.termix_id.get_ca()
+    assert ca.to_dict()["ca"] is None
+
+    renamed_description = "renamed live smoke identity"
+    await async_client.termix_id.update(description=renamed_description)
+    me = await async_client.termix_id.get_me()
+    assert me.to_dict()["identity"]["description"] == renamed_description
+
+    await async_client.termix_id.delete()
+    with pytest.raises(NotFoundError):
+        await async_client.termix_id.update(description="gone")
+
+
+async def test_tailscale_list_devices(async_client: AsyncTermixClient) -> None:
+    devices = (await async_client.tailscale.list_devices()).to_dict()
+    assert devices["hasApiKey"] is False
+    assert devices["devices"] == []
+
+
+async def test_sso_providers_crud(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    name = f"{run_prefix}-sso-provider-async"
+    created = await async_client.sso.create_provider(
+        name=name, type="github", enabled=False, config={"client_id": "x", "client_secret": "y"}
+    )
+    provider_id = str(created.to_dict()["id"])
+
+    admin_providers = await async_client.sso.list_providers_admin()
+    assert name in [p.to_dict()["name"] for p in admin_providers]
+
+    renamed = f"{name}-renamed"
+    await async_client.sso.update_provider(provider_id, name=renamed)
+    admin_providers = await async_client.sso.list_providers_admin()
+    assert renamed in [p.to_dict()["name"] for p in admin_providers]
+
+    await async_client.sso.delete_provider(provider_id)
+    with pytest.raises(NotFoundError):
+        await async_client.sso.update_provider(provider_id, name="gone")
+
+
+async def test_user_admin_lifecycle(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    """Excludes `disable_user_totp()` and works around `delete_user()`: see
+    the sync version of this test for why.
+    """
+    baseline_count = (await async_client.user_admin.count()).to_dict()["count"]
+
+    username = f"{run_prefix}-second-user-async"
+    await async_client.user_admin.create_user(username=username, password="Live-Smoke-User1")
+    users = (await async_client.user_admin.list()).to_dict()["users"]
+    user_id = next(u["userId"] for u in users if u["username"] == username)
+    count = (await async_client.user_admin.count()).to_dict()["count"]
+    assert count == baseline_count + 1
+
+    await async_client.user_admin.make_admin(userId=user_id)
+    await async_client.user_admin.remove_admin(userId=user_id)
+
+    exported = await async_client.user_admin.export_user(user_id)
+    assert exported.to_dict()["username"] == username
+
+    await async_client.user_admin.reset_user_password(
+        userId=user_id, newPassword="New-Live-Smoke-User1", confirmDataWipe=True
+    )
+
+    health = await async_client.user_admin.get_db_health()
+    assert health.to_dict()["status"] == "ok"
+
+    await async_client.request("DELETE", "/users/delete-user", json_body={"username": username})
+    count = (await async_client.user_admin.count()).to_dict()["count"]
+    assert count == baseline_count
+
+
+async def test_instance_settings_get_and_set(async_client: AsyncTermixClient) -> None:
+    """Excludes `acme_ssl_request()`/`manual_ssl_upload()`: see the sync
+    version of this test for why.
+    """
+    iset = async_client.instance_settings
+
+    await iset.update_host_defaults(theme="dark", fontSize=14)
+    assert (await iset.get_host_defaults()).theme == "dark"
+
+    await iset.update_guacamole_settings(enabled=True, url="localhost:4822")
+    assert (await iset.get_guacamole_settings()).enabled is True
+
+    await iset.update_log_level(level="debug")
+    assert (await iset.get_log_level()).level == "debug"
+    await iset.update_log_level(level="info")
+
+    await iset.update_session_timeout(timeoutHours=48)
+    assert (await iset.get_session_timeout()).timeoutHours == 48
+    await iset.update_session_timeout(timeoutHours=24)
+
+    await iset.update_tailscale_settings(apiKey="", apiBaseUrl="")
+    assert (await iset.get_tailscale_settings()).hasApiKey is False
+
+    await iset.update_command_history_enabled(enabled=True)
+    assert (await iset.get_command_history_enabled()).enabled is True
+
+    await iset.update_analytics_enabled(enabled=True)
+    assert (await iset.get_analytics_enabled()).enabled is True
+
+    await iset.update_session_sharing_enabled(enabled=True)
+    assert (await iset.get_session_sharing_enabled()).enabled is True
+
+    await iset.update_ai_enabled(enabled=False)
+    assert (await iset.get_ai_enabled()).enabled is False
+
+    endpoints = ["localhost", "127.0.0.1", "::1", "host.docker.internal"]
+    await iset.update_ai_private_endpoints(hosts=endpoints)
+    assert (await iset.get_ai_private_endpoints()).hosts == endpoints
+
+    setup_required = await iset.get_setup_required()
+    assert isinstance(setup_required.setup_required, bool)
+
+    await iset.update_registration_allowed(allowed=True)
+    assert (await iset.get_registration_allowed()).allowed is True
+
+    await iset.update_oidc_auto_provision(enabled=False)
+    assert (await iset.get_oidc_auto_provision()).enabled is False
+
+    await iset.update_oidc_silent_login_default(enabled=False)
+    assert (await iset.get_oidc_silent_login_default()).enabled is False
+
+    await iset.update_password_login_allowed(allowed=True)
+    assert (await iset.get_password_login_allowed()).allowed is True
+
+    await iset.update_password_reset_allowed(allowed=True)
+    assert (await iset.get_password_reset_allowed()).allowed is True
+
+    await iset.set_oidc_config(
+        client_id="x",
+        client_secret="y",
+        issuer_url="https://idp.invalid",
+        authorization_url="https://idp.invalid/auth",
+        token_url="https://idp.invalid/token",
+        userinfo_url="https://idp.invalid/userinfo",
+        identifier_path="sub",
+        name_path="name",
+        scopes="openid email profile",
+        allowed_users="",
+        admin_group="",
+        group_claim="",
+    )
+    assert (await iset.get_oidc_config()) is not None
+    assert (await iset.get_oidc_config_admin()).client_id == "x"
+    await iset.delete_oidc_config()
+    assert (await iset.get_oidc_config()) is None
+
+    await iset.update_branding(appName="Termix", tagline="live smoke")
+    assert (await iset.get_branding()).tagline == "live smoke"
+
+    await iset.update_audit_forwarding(url="")
+    assert (await iset.get_audit_forwarding()).url == ""
+
+    await iset.update_step_ca_settings(caUrl="", fingerprint="", provisioner="")
+    assert (await iset.get_step_ca_settings()).caUrl == ""
+
+
+async def test_database_read_only(async_client: AsyncTermixClient) -> None:
+    """Excludes `export()`/`import_data()`/`restore()`: see the sync
+    version of this test for why.
+    """
+    status = await async_client.database.migration_status()
+    assert "migrationStatus" in status.to_dict()
+
+    history = await async_client.database.migration_history()
+    assert "files" in history.to_dict()
+
+    preview = await async_client.database.preview_export(scope="all", includeCredentials=False)
+    assert preview.to_dict()["preview"] is True
+
+
+async def test_rbac_role_assignment(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    username = f"{run_prefix}-rbac-user-async"
+    await async_client.user_admin.create_user(username=username, password="Live-Smoke-Rbac1")
+    users = (await async_client.user_admin.list()).to_dict()["users"]
+    user_id = next(u["userId"] for u in users if u["username"] == username)
+
+    role_name = f"{run_prefix}-rbac-role-async"
+    role = await async_client.rbac.create_role(name=role_name, displayName="Live Smoke Role")
+    role_id = str(role.to_dict()["roleId"])
+
+    await async_client.rbac.assign_role(user_id, roleId=int(role_id))
+    roles = (await async_client.rbac.list_user_roles(user_id)).to_dict()["roles"]
+    assert role_name in [r["roleName"] for r in roles]
+
+    await async_client.rbac.revoke_role(user_id, role_id)
+    roles = (await async_client.rbac.list_user_roles(user_id)).to_dict()["roles"]
+    assert role_name not in [r["roleName"] for r in roles]
+
+    await async_client.rbac.delete_role(role_id)
+    await async_client.request("DELETE", "/users/delete-user", json_body={"username": username})
+
+
+async def test_rbac_snippet_sharing(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    username = f"{run_prefix}-snippet-share-user-async"
+    await async_client.user_admin.create_user(username=username, password="Live-Smoke-Share1")
+    users = (await async_client.user_admin.list()).to_dict()["users"]
+    user_id = next(u["userId"] for u in users if u["username"] == username)
+
+    snippet = await async_client.snippets.create(
+        name=f"{run_prefix}-shared-snippet-async", content="echo hi"
+    )
+    snippet_id = str(snippet.id)
+
+    shared = await async_client.rbac.share_snippet(
+        snippet_id, targetType="user", targetUserId=user_id, durationHours=1
+    )
+    assert shared.success is True
+
+    access = (await async_client.rbac.list_snippet_access(snippet_id)).to_dict()["accessList"]
+    assert access[0]["userId"] == user_id
+    access_id = str(access[0]["id"])
+
+    shared_snippets = await async_client.rbac.list_shared_snippets()
+    assert "sharedSnippets" in shared_snippets.to_dict()
+
+    await async_client.rbac.delete_snippet_access(snippet_id, access_id)
+    access = (await async_client.rbac.list_snippet_access(snippet_id)).to_dict()["accessList"]
+    assert access == []
+
+    await async_client.snippets.delete(snippet_id)
+    await async_client.request("DELETE", "/users/delete-user", json_body={"username": username})
+
+
+async def test_rbac_host_access_management(
+    async_client: AsyncTermixClient, run_prefix: str
+) -> None:
+    """`share_host()`'s `targets` gap: see the sync version of this test for
+    why the share itself goes through the low-level `request()` escape
+    hatch.
+    """
+    username = f"{run_prefix}-host-share-user-async"
+    await async_client.user_admin.create_user(username=username, password="Live-Smoke-Share1")
+    users = (await async_client.user_admin.list()).to_dict()["users"]
+    user_id = next(u["userId"] for u in users if u["username"] == username)
+
+    host_name = f"{run_prefix}-shared-host-async"
+    host = await async_client.hosts.create(
+        ip="10.0.0.13", port=22, username="root", authType="password", name=host_name
+    )
+    host_id = str(host.to_dict()["id"])
+
+    await async_client.request(
+        "POST",
+        f"/rbac/host/{host_id}/share",
+        json_body={"targets": [{"type": "user", "id": user_id}], "permissionLevel": "view"},
+    )
+
+    access = (await async_client.rbac.list_host_access(host_id)).to_dict()["accessList"]
+    assert access[0]["userId"] == user_id
+    access_id = str(access[0]["id"])
+
+    await async_client.rbac.update_host_access(host_id, access_id, permissionLevel="connect")
+    access = (await async_client.rbac.list_host_access(host_id)).to_dict()["accessList"]
+    assert access[0]["permissionLevel"] == "connect"
+
+    shared_hosts = await async_client.rbac.list_shared_hosts()
+    assert "sharedHosts" in shared_hosts.to_dict()
+
+    await async_client.rbac.delete_host_access(host_id, access_id)
+    access = (await async_client.rbac.list_host_access(host_id)).to_dict()["accessList"]
+    assert access == []
+
+    await async_client.hosts.delete(host_id)
+    await async_client.request("DELETE", "/users/delete-user", json_body={"username": username})
+
+
+async def test_collab_rooms(async_client: AsyncTermixClient, run_prefix: str) -> None:
+    username = f"{run_prefix}-collab-user-async"
+    await async_client.user_admin.create_user(username=username, password="Live-Smoke-Collab1")
+    users = (await async_client.user_admin.list()).to_dict()["users"]
+    user_id = next(u["userId"] for u in users if u["username"] == username)
+
+    name = f"{run_prefix}-room-async"
+    created = await async_client.collab.create_room(name=name, persistent=True)
+    room_id = created.to_dict()["room"]["id"]
+
+    rooms = (await async_client.collab.list_rooms()).to_dict()["rooms"]
+    assert room_id in [r["id"] for r in rooms]
+
+    room = (await async_client.collab.get_room(room_id)).to_dict()
+    assert room["isHost"] is True
+
+    await async_client.collab.invite_members(room_id, userIds=[user_id])
+    await async_client.collab.set_guest_link(room_id, enabled=True)
+    await async_client.collab.remove_member(room_id, user_id)
+    control_requests = await async_client.collab.list_control_requests(room_id)
+    assert control_requests.to_dict()["requests"] == []
+
+    await async_client.collab.end_room(room_id)
+    await async_client.collab.delete_room(room_id)
+    with pytest.raises(NotFoundError):
+        await async_client.collab.get_room(room_id)
+
+    await async_client.request("DELETE", "/users/delete-user", json_body={"username": username})
 
 
 async def test_unknown_id_raises_not_found(async_client: AsyncTermixClient) -> None:
