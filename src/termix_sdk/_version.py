@@ -1,4 +1,4 @@
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 SPEC_VERSION = "release-2.8.0-tag"
 """The Termix release tag `spec/termix-openapi.json` was generated from.
