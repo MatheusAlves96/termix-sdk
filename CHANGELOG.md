@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-23
+
 Regenerated against Termix `release-2.8.0-tag` (`SPEC_VERSION` bumped
 from `release-2.7.1-tag`). 531 operations in the spec, up from 491; none
 were removed. 516 of them are now exposed, up from 477.
