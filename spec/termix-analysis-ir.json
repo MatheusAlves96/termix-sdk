@@ -960,7 +960,8 @@
     "responses": [
       {
         "status": 200,
-        "contentType": "application/octet-stream"
+        "contentType": "text/event-stream",
+        "description": "Server-Sent Events stream; individual event payloads are not modeled."
       },
       {
         "status": 400,
@@ -2665,6 +2666,15 @@
     "headers": [],
     "requestBody": [],
     "responses": [
+      {
+        "status": 200,
+        "contentType": "application/x-sqlite3",
+        "schema": {
+          "type": "string",
+          "format": "binary",
+          "confidence": "inferred"
+        }
+      },
       {
         "status": 403,
         "contentType": "application/json",
@@ -5038,7 +5048,19 @@
     "responses": [
       {
         "status": 200,
-        "contentType": "application/octet-stream"
+        "contentType": "text/csv",
+        "schema": {
+          "type": "string",
+          "confidence": "inferred"
+        }
+      },
+      {
+        "status": 200,
+        "contentType": "application/x-ndjson",
+        "schema": {
+          "type": "string",
+          "confidence": "inferred"
+        }
       },
       {
         "status": 403,
@@ -9792,7 +9814,7 @@
     "responses": [
       {
         "status": 200,
-        "contentType": "application/octet-stream",
+        "contentType": "application/zip",
         "schema": {
           "type": "string",
           "format": "binary",
@@ -24253,7 +24275,8 @@
     "responses": [
       {
         "status": 200,
-        "contentType": "application/octet-stream"
+        "contentType": "text/event-stream",
+        "description": "Server-Sent Events stream; individual event payloads are not modeled."
       },
       {
         "status": 400,
@@ -34138,7 +34161,7 @@
     "responses": [
       {
         "status": 200,
-        "contentType": "text/html",
+        "contentType": "text/plain",
         "schema": {
           "type": "string",
           "confidence": "handler-literal"
@@ -34146,7 +34169,7 @@
       },
       {
         "status": 404,
-        "contentType": "text/html",
+        "contentType": "text/plain",
         "schema": {
           "type": "string",
           "confidence": "handler-literal"
@@ -34154,7 +34177,7 @@
       },
       {
         "status": 500,
-        "contentType": "text/html",
+        "contentType": "text/plain",
         "schema": {
           "type": "string",
           "confidence": "handler-literal"
@@ -34183,16 +34206,23 @@
     "responses": [
       {
         "status": 200,
-        "contentType": "application/octet-stream",
+        "contentType": "text/html",
         "schema": {
           "type": "string",
-          "format": "binary",
+          "confidence": "inferred"
+        }
+      },
+      {
+        "status": 200,
+        "contentType": "text/plain",
+        "schema": {
+          "type": "string",
           "confidence": "inferred"
         }
       },
       {
         "status": 404,
-        "contentType": "text/html",
+        "contentType": "text/plain",
         "schema": {
           "type": "string",
           "confidence": "handler-literal"
@@ -34200,7 +34230,7 @@
       },
       {
         "status": 500,
-        "contentType": "text/html",
+        "contentType": "text/plain",
         "schema": {
           "type": "string",
           "confidence": "handler-literal"
@@ -34233,16 +34263,23 @@
     "responses": [
       {
         "status": 200,
-        "contentType": "application/octet-stream",
+        "contentType": "text/html",
         "schema": {
           "type": "string",
-          "format": "binary",
+          "confidence": "inferred"
+        }
+      },
+      {
+        "status": 200,
+        "contentType": "text/plain",
+        "schema": {
+          "type": "string",
           "confidence": "inferred"
         }
       },
       {
         "status": 404,
-        "contentType": "text/html",
+        "contentType": "text/plain",
         "schema": {
           "type": "string",
           "confidence": "handler-literal"
@@ -34250,7 +34287,7 @@
       },
       {
         "status": 500,
-        "contentType": "text/html",
+        "contentType": "text/plain",
         "schema": {
           "type": "string",
           "confidence": "handler-literal"
@@ -54517,6 +54554,15 @@
         "description": "res.destroy(...) — not modeled by the generator"
       },
       {
+        "status": 200,
+        "contentType": "application/octet-stream",
+        "schema": {
+          "type": "string",
+          "format": "binary",
+          "confidence": "inferred"
+        }
+      },
+      {
         "status": 400,
         "contentType": "application/json",
         "schema": {
@@ -71145,7 +71191,8 @@
     "responses": [
       {
         "status": 200,
-        "contentType": "application/octet-stream"
+        "contentType": "text/event-stream",
+        "description": "Server-Sent Events stream; individual event payloads are not modeled."
       },
       {
         "status": 401,

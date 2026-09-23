@@ -9,8 +9,8 @@ from typing import Any, Dict, List, Literal  # noqa: F401, UP035
 
 from typing_extensions import Unpack
 
-from .._object import TermixObject
 from .._request_options import RequestOptions
+from .._response import AsyncTermixStreamResponse, TermixStreamResponse
 from .._service import AsyncTermixService, TermixService
 from ..models.audit import AuditListActionsResult, AuditListResult
 from ..types.audit import AuditExportParams, AuditListParams
@@ -35,17 +35,14 @@ class AuditService(TermixService):
         *,
         options: RequestOptions | None = None,
         **params: Unpack[AuditExportParams],
-    ) -> TermixObject | None:
+    ) -> TermixStreamResponse:
         """Export audit logs
 
         GET /audit-logs/export
         Source: src/backend/database/routes/audit-log-routes.ts:180
         """
-        response = self._request(
+        return self._request_stream(
             "GET", "/audit-logs/export", query=dict(params) or None, options=options
-        )
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
         )
 
     def list(
@@ -88,17 +85,14 @@ class AsyncAuditService(AsyncTermixService):
         *,
         options: RequestOptions | None = None,
         **params: Unpack[AuditExportParams],
-    ) -> TermixObject | None:
+    ) -> AsyncTermixStreamResponse:
         """Export audit logs
 
         GET /audit-logs/export
         Source: src/backend/database/routes/audit-log-routes.ts:180
         """
-        response = await self._request(
+        return await self._request_stream(
             "GET", "/audit-logs/export", query=dict(params) or None, options=options
-        )
-        return TermixObject.construct_from(
-            response.data if response else None, last_response=response
         )
 
     async def list(

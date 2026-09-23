@@ -8,7 +8,7 @@
   "x-termix-source": {
     "tag": "release-2.8.0-tag",
     "commit": "fef8a5f28a5a6023ff10832acb65cbdfea81b777",
-    "generatedAt": "2026-09-23T08:54:18.367Z"
+    "generatedAt": "2026-09-23T09:02:41.703Z"
   },
   "servers": [
     {
@@ -1422,7 +1422,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Server-Sent Events stream; individual event payloads are not modeled."
           },
           "400": {
             "description": "Bad request",
@@ -3497,6 +3497,18 @@
           "Database"
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/x-sqlite3": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary",
+                  "x-confidence": "inferred"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -6462,7 +6474,21 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "x-confidence": "inferred"
+                }
+              },
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string",
+                  "x-confidence": "inferred"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden",
@@ -12917,7 +12943,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/octet-stream": {
+              "application/zip": {
                 "schema": {
                   "type": "string",
                   "format": "binary",
@@ -30990,7 +31016,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Server-Sent Events stream; individual event payloads are not modeled."
           },
           "400": {
             "description": "Bad request",
@@ -43680,7 +43706,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "text/html": {
+              "text/plain": {
                 "schema": {
                   "type": "string",
                   "x-confidence": "handler-literal"
@@ -43691,7 +43717,7 @@
           "404": {
             "description": "Not found",
             "content": {
-              "text/html": {
+              "text/plain": {
                 "schema": {
                   "type": "string",
                   "x-confidence": "handler-literal"
@@ -43702,7 +43728,7 @@
           "500": {
             "description": "Internal server error",
             "content": {
-              "text/html": {
+              "text/plain": {
                 "schema": {
                   "type": "string",
                   "x-confidence": "handler-literal"
@@ -43745,10 +43771,15 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/octet-stream": {
+              "text/html": {
                 "schema": {
                   "type": "string",
-                  "format": "binary",
+                  "x-confidence": "inferred"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string",
                   "x-confidence": "inferred"
                 }
               }
@@ -43757,7 +43788,7 @@
           "404": {
             "description": "Not found",
             "content": {
-              "text/html": {
+              "text/plain": {
                 "schema": {
                   "type": "string",
                   "x-confidence": "handler-literal"
@@ -43768,7 +43799,7 @@
           "500": {
             "description": "Internal server error",
             "content": {
-              "text/html": {
+              "text/plain": {
                 "schema": {
                   "type": "string",
                   "x-confidence": "handler-literal"
@@ -43819,10 +43850,15 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/octet-stream": {
+              "text/html": {
                 "schema": {
                   "type": "string",
-                  "format": "binary",
+                  "x-confidence": "inferred"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "type": "string",
                   "x-confidence": "inferred"
                 }
               }
@@ -43831,7 +43867,7 @@
           "404": {
             "description": "Not found",
             "content": {
-              "text/html": {
+              "text/plain": {
                 "schema": {
                   "type": "string",
                   "x-confidence": "handler-literal"
@@ -43842,7 +43878,7 @@
           "500": {
             "description": "Internal server error",
             "content": {
-              "text/html": {
+              "text/plain": {
                 "schema": {
                   "type": "string",
                   "x-confidence": "handler-literal"
@@ -70267,7 +70303,16 @@
         },
         "responses": {
           "200": {
-            "description": "res.destroy(...) — not modeled by the generator"
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary",
+                  "x-confidence": "inferred"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request",
@@ -90417,7 +90462,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Server-Sent Events stream; individual event payloads are not modeled."
           },
           "401": {
             "description": "Unauthorized",

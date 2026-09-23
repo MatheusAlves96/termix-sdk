@@ -254,48 +254,67 @@ export function buildOpenApiDocument(
           }
         : undefined;
 
-    const responses: Record<string, JsonSchema> =
-      analysis && analysis.responses.length > 0
-        ? Object.fromEntries(
-            analysis.responses.map((r) => {
-              const key = r.status === "default" ? "default" : String(r.status);
-              const body: JsonSchema = {
-                description: r.description ?? STATUS_DESCRIPTIONS[r.status as number] ?? "Response",
-              };
-              const statusExamples = routeExamples.filter(
-                (e) => e.response?.body !== undefined && String(e.response.status ?? "") === key,
-              );
-              // Phase 7: when the static handler analysis came up empty for a 2xx response,
-              // the frontend's own declared return type (e.g. `Promise<SSHHost>`) is a real,
-              // human-written fact about the same endpoint — better than nothing.
-              const isSuccess = typeof r.status === "number" && r.status >= 200 && r.status < 300;
-              const effectiveSchema =
-                isSuccess && (!r.schema || r.schema.confidence === "unknown") && frontendReturnType
-                  ? frontendReturnType
-                  : r.schema;
-              if (r.contentType && effectiveSchema) {
-                const content: JsonSchema = { schema: schemaNodeToJsonSchema(effectiveSchema) };
-                if (statusExamples.length > 0) {
-                  content.examples = Object.fromEntries(
-                    statusExamples.map((e, i) => [
-                      exampleKey(e.itTitle, i),
-                      {
-                        summary: e.itTitle,
-                        description: `From \`${e.testFile}\` (${e.describeTitle})${e.response?.partial ? " — partial match (toMatchObject), other fields may also be present" : ""}`,
-                        value: e.response?.body,
-                      },
-                    ]),
-                  );
-                }
-                body.content = { [r.contentType]: content };
-              }
-              if (r.headers && r.headers.length > 0) {
-                body.headers = Object.fromEntries(r.headers.map((h) => [h, { schema: { type: "string" } }]));
-              }
-              return [key, body];
-            }),
-          )
-        : { default: { description: "Response not analyzed" } };
+    const responses: Record<string, JsonSchema> = {};
+    if (analysis && analysis.responses.length > 0) {
+      for (const r of analysis.responses) {
+        const key = r.status === "default" ? "default" : String(r.status);
+        const statusExamples = routeExamples.filter(
+          (e) => e.response?.body !== undefined && String(e.response.status ?? "") === key,
+        );
+        // Phase 7: when the static handler analysis came up empty for a 2xx response,
+        // the frontend's own declared return type (e.g. `Promise<SSHHost>`) is a real,
+        // human-written fact about the same endpoint — better than nothing.
+        const isSuccess = typeof r.status === "number" && r.status >= 200 && r.status < 300;
+        const effectiveSchema =
+          isSuccess && (!r.schema || r.schema.confidence === "unknown") && frontendReturnType
+            ? frontendReturnType
+            : r.schema;
+        let content: JsonSchema | undefined;
+        if (r.contentType && effectiveSchema) {
+          content = { schema: schemaNodeToJsonSchema(effectiveSchema) };
+          if (statusExamples.length > 0) {
+            content.examples = Object.fromEntries(
+              statusExamples.map((e, i) => [
+                exampleKey(e.itTitle, i),
+                {
+                  summary: e.itTitle,
+                  description: `From \`${e.testFile}\` (${e.describeTitle})${e.response?.partial ? " — partial match (toMatchObject), other fields may also be present" : ""}`,
+                  value: e.response?.body,
+                },
+              ]),
+            );
+          }
+        }
+        const headers = r.headers && r.headers.length > 0 ? Object.fromEntries(r.headers.map((h) => [h, { schema: { type: "string" } }])) : undefined;
+
+        // Two ResponseInfo can share a status (e.g. `GET /audit-logs/export`'s 200 is
+        // `text/csv` OR `application/x-ndjson` depending on the `format` query param) —
+        // mergeResponses (handler-analysis.ts) keeps those as separate entries since their
+        // contentType differs. OpenAPI only allows one response object per status code, so
+        // merge their `content` maps into it instead of letting the later one silently
+        // clobber the earlier one.
+        const existing = responses[key];
+        if (existing) {
+          const hadContentBefore = !!existing.content;
+          if (r.contentType && content) existing.content = { ...(existing.content ?? {}), [r.contentType]: content };
+          if (headers) existing.headers = { ...(existing.headers ?? {}), ...headers };
+          // A content-bearing entry's description always wins over a contentless one's (e.g.
+          // an opaque `res.on(...) — not modeled by the generator` placeholder hit before the
+          // real `res.json(...)` call in source order) regardless of which came first; between
+          // two content-bearing entries, the later one wins, same as a plain overwrite would.
+          if (content || !hadContentBefore) {
+            existing.description = r.description ?? STATUS_DESCRIPTIONS[r.status as number] ?? "Response";
+          }
+          continue;
+        }
+        const body: JsonSchema = { description: r.description ?? STATUS_DESCRIPTIONS[r.status as number] ?? "Response" };
+        if (r.contentType && content) body.content = { [r.contentType]: content };
+        if (headers) body.headers = headers;
+        responses[key] = body;
+      }
+    } else {
+      responses.default = { description: "Response not analyzed" };
+    }
 
     // A test can confirm a status the static handler analysis never produced — e.g. it comes
     // from a middleware, or a code path the AST walk didn't reach. The test is right; add it.
