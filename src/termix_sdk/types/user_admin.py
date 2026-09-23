@@ -34,3 +34,8 @@ class UserAdminResetUserPasswordParams(TypedDict, total=False):
 
 class UserAdminDisableUserTotpParams(TypedDict, total=False):
     userId: str
+
+
+class UserAdminDeleteUserParams(TypedDict, total=False):
+    username: str
+    successorUserId: Any

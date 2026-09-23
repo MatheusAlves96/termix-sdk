@@ -28,6 +28,38 @@ class TunnelConnectParams(TypedDict, total=False):
     endpointKeyPassword: str
     endpointPort: float
     sourcePort: float
+    scope: Literal["s2s"] | Literal["c2s"]
+    mode: Literal["local"] | Literal["remote"] | Literal["dynamic"]
+    tunnelType: Literal["local"] | Literal["remote"]
+    localAddress: str
+    remoteAddress: str
+    bindHost: str
+    targetHost: str
+    sourceHostSyncId: str
+    hostName: str
+    sourceIP: str
+    sourceSSHPort: float
+    sourceUsername: str
+    sourcePassword: str
+    sourceAuthMethod: str
+    sourceSSHKey: str
+    sourceKeyPassword: str
+    sourceKeyType: str
+    sourceCredentialId: float
+    sourceUserId: str
+    maxRetries: float
+    retryInterval: float
+    autoStart: bool
+    isPinned: bool
+    useSocks5: bool
+    socks5Host: str
+    socks5Port: float
+    socks5Username: str
+    socks5Password: str
+    socks5ProxyChain: list[dict[str, Any]]
+    keepaliveInterval: float
+    keepaliveCountMax: float
+    idleTimeoutMs: float
 
 
 class TunnelDisconnectParams(TypedDict, total=False):

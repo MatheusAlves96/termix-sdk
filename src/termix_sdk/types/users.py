@@ -15,6 +15,10 @@ class UsersChangePasswordParams(TypedDict, total=False):
     newPassword: str
 
 
+class UsersDeleteAccountParams(TypedDict, total=False):
+    password: str
+
+
 class UsersUnlockDataParams(TypedDict, total=False):
     password: str
 

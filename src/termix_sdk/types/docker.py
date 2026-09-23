@@ -58,3 +58,4 @@ class DockerConnectParams(TypedDict, total=False):
     socks5Username: str
     socks5Password: str
     socks5ProxyChain: Any
+    forceKeyboardInteractive: bool

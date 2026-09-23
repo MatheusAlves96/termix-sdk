@@ -177,11 +177,17 @@ def test_share_contract(client, mock_http_client):
             "hostResults": [{"hostId": 1.0, "shared": True, "reason": "x"}],
         },
     )
-    result = client.fleets.share("x", durationHours="x", permissionLevel="x")
+    result = client.fleets.share(
+        "x", durationHours="x", permissionLevel="x", targets=[{"type": "role", "id": "x"}]
+    )
     sent = mock_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/fleets/x/share")
-    assert sent.json == {"durationHours": "x", "permissionLevel": "x"}
+    assert sent.json == {
+        "durationHours": "x",
+        "permissionLevel": "x",
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {
         "success": True,
         "permissionLevel": "manage",
@@ -421,11 +427,17 @@ async def test_async_share_contract(async_client, mock_async_http_client):
             "hostResults": [{"hostId": 1.0, "shared": True, "reason": "x"}],
         },
     )
-    result = await async_client.fleets.share("x", durationHours="x", permissionLevel="x")
+    result = await async_client.fleets.share(
+        "x", durationHours="x", permissionLevel="x", targets=[{"type": "role", "id": "x"}]
+    )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "POST"
     assert sent.url.endswith("/fleets/x/share")
-    assert sent.json == {"durationHours": "x", "permissionLevel": "x"}
+    assert sent.json == {
+        "durationHours": "x",
+        "permissionLevel": "x",
+        "targets": [{"type": "role", "id": "x"}],
+    }
     assert result.to_dict() == {
         "success": True,
         "permissionLevel": "manage",

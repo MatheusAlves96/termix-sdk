@@ -1,7 +1,7 @@
 /**
  * E4 (docs/spec-generation-strategy-v2.md): fills in what the backend-only Phases 2-4
  * analysis left as a request-body gap, using Phase 7's frontend cross-check — necessarily a
- * post-process step, since frontendCrossChecks is itself computed from `analyses`. Two parts:
+ * post-process step, since frontendCrossChecks is itself computed from `analyses`. Three parts:
  *
  * 1. A route where the backend analysis found NO body field at all (`requestBody: []`) but a
  *    matched frontend call's own body type has real properties -> use that whole body. This
@@ -12,6 +12,15 @@
  * 2. Any field still `unknown` after E0-E3/E5, in a route that does have a JSON variant,
  *    inherits the type of the same-named property in a matched frontend call's body type,
  *    when that property itself has a concrete type.
+ * 3. A field the frontend body type has that the backend walk never found AT ALL — not even
+ *    as an `unknown`-typed placeholder — because the field is read off the body from inside a
+ *    helper function the backend walk (extractBodyFields in handler-analysis.ts) doesn't
+ *    follow into. Confirmed real case: `POST /rbac/host/{id}/share` and its three siblings
+ *    all validate their `targets` array by calling `parseShareTargets(req.body ?? {})`, which
+ *    reads `body.targets` from inside its own function body rather than the route handler
+ *    destructuring or `.`-accessing it directly — so `targets`, the one field that actually
+ *    names who a share goes to, never made it into the schema at all, even though the
+ *    frontend's own `ShareTarget[]` typing for it (src/ui/api/rbac-api.ts) was right there.
  *
  * Confidence for everything filled in here is already "frontend-type" — schemaFromFrontendType
  * (frontend-client.ts) stamps that recursively when it builds a call's bodyType, so this
@@ -38,6 +47,8 @@ export interface FrontendEnrichmentStats {
   wholeBodyRoutes: number;
   /** Individual fields that were `unknown` and now carry the frontend's own type. */
   mergedFields: number;
+  /** Fields the backend walk never found at all, added wholesale from the frontend's body type. */
+  newFields: number;
 }
 
 export function enrichRequestBodiesFromFrontend(
@@ -46,11 +57,11 @@ export function enrichRequestBodiesFromFrontend(
   frontendCrossChecks: FrontendCrossCheck[],
 ): FrontendEnrichmentStats {
   const routesById = new Map(routesIr.routes.map((r) => [r.id, r]));
-  const stats: FrontendEnrichmentStats = { wholeBodyRoutes: 0, mergedFields: 0 };
+  const stats: FrontendEnrichmentStats = { wholeBodyRoutes: 0, mergedFields: 0, newFields: 0 };
 
   for (const analysis of analyses) {
     const route = routesById.get(analysis.routeId);
-    if (!route || route.anyMethod || !["POST", "PUT", "PATCH"].includes(route.method)) continue;
+    if (!route || route.anyMethod || !["POST", "PUT", "PATCH", "DELETE"].includes(route.method)) continue;
 
     const frontendBody = frontendBodyForRoute(analysis.routeId, frontendCrossChecks);
     if (!frontendBody) continue;
@@ -69,6 +80,19 @@ export function enrichRequestBodiesFromFrontend(
       if (!frontendProp?.type || frontendProp.type === "unknown") continue;
       jsonVariant.schema.properties[name] = frontendProp;
       stats.mergedFields++;
+    }
+
+    // 3: a field the frontend body has that isn't in the backend-derived property set at all
+    // (not even as an `unknown` placeholder) — see part 3 of the module doc above.
+    const frontendRequired = new Set(frontendBody.required ?? []);
+    for (const [name, frontendProp] of Object.entries(frontendBody.properties ?? {})) {
+      if (name in jsonVariant.schema.properties) continue;
+      if (!frontendProp.type || frontendProp.type === "unknown") continue;
+      jsonVariant.schema.properties[name] = frontendProp;
+      if (frontendRequired.has(name)) {
+        jsonVariant.schema.required = [...new Set([...(jsonVariant.schema.required ?? []), name])];
+      }
+      stats.newFields++;
     }
   }
 

@@ -169,6 +169,13 @@ class FileManagerCreateFolderParams(TypedDict, total=False):
     folderName: Any
 
 
+class FileManagerDeleteItemParams(TypedDict, total=False):
+    sessionId: Any
+    path: Any
+    isDirectory: Any
+    permanent: Any
+
+
 class FileManagerRenameItemParams(TypedDict, total=False):
     sessionId: Any
     oldPath: Any

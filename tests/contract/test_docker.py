@@ -290,6 +290,7 @@ def test_connect_contract(client, mock_http_client):
         socks5Username="x",
         socks5Password="x",
         socks5ProxyChain="x",
+        forceKeyboardInteractive=True,
     )
     sent = mock_http_client.requests[0]
     assert sent.method == "POST"
@@ -306,6 +307,7 @@ def test_connect_contract(client, mock_http_client):
         "socks5Username": "x",
         "socks5Password": "x",
         "socks5ProxyChain": "x",
+        "forceKeyboardInteractive": True,
     }
     assert result.to_dict() == {
         "success": True,
@@ -616,6 +618,7 @@ async def test_async_connect_contract(async_client, mock_async_http_client):
         socks5Username="x",
         socks5Password="x",
         socks5ProxyChain="x",
+        forceKeyboardInteractive=True,
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "POST"
@@ -632,6 +635,7 @@ async def test_async_connect_contract(async_client, mock_async_http_client):
         "socks5Username": "x",
         "socks5Password": "x",
         "socks5ProxyChain": "x",
+        "forceKeyboardInteractive": True,
     }
     assert result.to_dict() == {
         "success": True,

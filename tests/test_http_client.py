@@ -1,10 +1,63 @@
 from __future__ import annotations
 
+import httpx
 import pytest
 
 from termix_sdk._error import APIConnectionError
+from termix_sdk._http_client import AsyncHTTPXClient, HTTPXClient
 
 from .http_client_mock import MockAsyncHTTPClient, MockHTTPClient
+
+
+def _redirect_once_handler(request: httpx.Request) -> httpx.Response:
+    """Mimics nginx's trailing-slash redirect in front of the real Termix
+    image (see CONTRIBUTING.md "Live smoke"): the bare path 301s, the
+    trailing-slash path is where the real JSON lives.
+    """
+    if request.url.path == "/session_logs":
+        return httpx.Response(301, headers={"location": "/session_logs/"})
+    return httpx.Response(200, json={"logs": []})
+
+
+def test_httpx_client_follows_redirects(monkeypatch: pytest.MonkeyPatch):
+    """Regression test: httpx.Client defaults `follow_redirects` to False,
+    so without passing it explicitly a 3xx response's tiny HTML/redirect
+    body is returned as-is, which `_api_requestor.py` then can't parse as
+    JSON and silently turns into `data=None` instead of an error or the
+    real payload. See _http_client.py's HTTPXClient.__init__.
+    """
+    real_client_cls = httpx.Client
+
+    def spy_client_cls(*args, **kwargs):
+        assert kwargs.get("follow_redirects") is True
+        transport = httpx.MockTransport(_redirect_once_handler)
+        return real_client_cls(*args, **{**kwargs, "transport": transport})
+
+    monkeypatch.setattr("termix_sdk._http_client.httpx.Client", spy_client_cls)
+
+    client = HTTPXClient()
+    content, status_code, _ = client.request("GET", "http://x/session_logs", headers={})
+
+    assert status_code == 200
+    assert content == b'{"logs":[]}'
+
+
+@pytest.mark.asyncio
+async def test_async_httpx_client_follows_redirects(monkeypatch: pytest.MonkeyPatch):
+    real_client_cls = httpx.AsyncClient
+
+    def spy_client_cls(*args, **kwargs):
+        assert kwargs.get("follow_redirects") is True
+        transport = httpx.MockTransport(_redirect_once_handler)
+        return real_client_cls(*args, **{**kwargs, "transport": transport})
+
+    monkeypatch.setattr("termix_sdk._http_client.httpx.AsyncClient", spy_client_cls)
+
+    client = AsyncHTTPXClient()
+    content, status_code, _ = await client.request("GET", "http://x/session_logs", headers={})
+
+    assert status_code == 200
+    assert content == b'{"logs":[]}'
 
 
 def test_no_retry_when_should_retry_returns_false(mock_http_client: MockHTTPClient):

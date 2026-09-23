@@ -25,6 +25,7 @@ from ..models.user_admin import (
 )
 from ..types.user_admin import (
     UserAdminCreateUserParams,
+    UserAdminDeleteUserParams,
     UserAdminDisableUserTotpParams,
     UserAdminMakeAdminParams,
     UserAdminRemoveAdminParams,
@@ -182,13 +183,16 @@ class UserAdminService(TermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[UserAdminDeleteUserParams],
     ) -> UserAdminDeleteUserResult:
         """Delete user (admin only)
 
         DELETE /users/delete-user
         Source: src/backend/database/routes/users.ts:2955
         """
-        response = self._request("DELETE", "/users/delete-user", options=options)
+        response = self._request(
+            "DELETE", "/users/delete-user", json_body=dict(params) or None, options=options
+        )
         return UserAdminDeleteUserResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -344,13 +348,16 @@ class AsyncUserAdminService(AsyncTermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[UserAdminDeleteUserParams],
     ) -> UserAdminDeleteUserResult:
         """Delete user (admin only)
 
         DELETE /users/delete-user
         Source: src/backend/database/routes/users.ts:2955
         """
-        response = await self._request("DELETE", "/users/delete-user", options=options)
+        response = await self._request(
+            "DELETE", "/users/delete-user", json_body=dict(params) or None, options=options
+        )
         return UserAdminDeleteUserResult.construct_from(
             response.data if response else None, last_response=response
         )

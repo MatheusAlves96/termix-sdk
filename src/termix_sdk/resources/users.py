@@ -40,6 +40,7 @@ from ..models.users import (
 from ..types.users import (
     UsersChangePasswordParams,
     UsersCompleteResetParams,
+    UsersDeleteAccountParams,
     UsersDisableTotpParams,
     UsersEnableTotpParams,
     UsersGetTotpBackupCodesParams,
@@ -129,13 +130,16 @@ class UsersService(TermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[UsersDeleteAccountParams],
     ) -> UsersDeleteAccountResult:
         """Delete user account
 
         DELETE /users/delete-account
         Source: src/backend/database/routes/users.ts:2761
         """
-        response = self._request("DELETE", "/users/delete-account", options=options)
+        response = self._request(
+            "DELETE", "/users/delete-account", json_body=dict(params) or None, options=options
+        )
         return UsersDeleteAccountResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -547,13 +551,16 @@ class AsyncUsersService(AsyncTermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[UsersDeleteAccountParams],
     ) -> UsersDeleteAccountResult:
         """Delete user account
 
         DELETE /users/delete-account
         Source: src/backend/database/routes/users.ts:2761
         """
-        response = await self._request("DELETE", "/users/delete-account", options=options)
+        response = await self._request(
+            "DELETE", "/users/delete-account", json_body=dict(params) or None, options=options
+        )
         return UsersDeleteAccountResult.construct_from(
             response.data if response else None, last_response=response
         )

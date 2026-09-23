@@ -10,6 +10,11 @@ from typing import Any, Dict, List, Literal  # noqa: F401, UP035
 from typing_extensions import TypedDict
 
 
+class HostFileManagerClearRecentParams(TypedDict, total=False):
+    hostId: int
+    path: str
+
+
 class HostFileManagerListRecentParams(TypedDict, total=False):
     hostId: str
 
@@ -30,6 +35,11 @@ class HostFileManagerAddPinnedParams(TypedDict, total=False):
     name: str
 
 
+class HostFileManagerRemovePinnedParams(TypedDict, total=False):
+    hostId: int
+    path: str
+
+
 class HostFileManagerListShortcutsParams(TypedDict, total=False):
     hostId: str
 
@@ -38,3 +48,8 @@ class HostFileManagerAddShortcutParams(TypedDict, total=False):
     hostId: int
     path: str
     name: str
+
+
+class HostFileManagerRemoveShortcutParams(TypedDict, total=False):
+    hostId: int
+    path: str
