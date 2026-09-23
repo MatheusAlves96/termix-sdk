@@ -14,12 +14,23 @@ class PreferencesSetCredentialSidebarParams(TypedDict, total=False):
     display: dict[str, Any]
     sort: dict[str, Any]
     filters: dict[str, Any]
+    version: float
+    openFolders: list[str]
 
 
 class PreferencesSetHostSidebarParams(TypedDict, total=False):
     display: dict[str, Any]
     sort: dict[str, Any]
     filters: dict[str, Any]
+    version: float
+    groupKey: (
+        Literal["folder"]
+        | Literal["tag"]
+        | Literal["status"]
+        | Literal["protocol"]
+        | Literal["auth"]
+    )
+    openFolders: list[str]
 
 
 class PreferencesSetUiPreferencesParams(TypedDict, total=False):
@@ -50,6 +61,11 @@ class PreferencesSetUserPreferencesParams(TypedDict, total=False):
     terminalDefaults: str
     rdpDefaults: str
     terminalMacros: str
+    showHostTags: bool
+    hostTrayOnClick: bool
+    foldersCollapsed: bool
+    compactHostView: bool
+    statusColorScheme: str
 
 
 class PreferencesUpdateTouchInputSettingsParams(TypedDict, total=False):

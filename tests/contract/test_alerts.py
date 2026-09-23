@@ -107,7 +107,7 @@ def test_create_rule_contract(client, mock_http_client):
         thresholdValue=1.0,
         thresholdDurationSeconds=1.0,
         cooldownMinutes=1.0,
-        channels=[],
+        channels=[1.0],
     )
     sent = mock_http_client.requests[0]
     assert sent.method == "POST"
@@ -120,7 +120,7 @@ def test_create_rule_contract(client, mock_http_client):
         "thresholdValue": 1.0,
         "thresholdDurationSeconds": 1.0,
         "cooldownMinutes": 1.0,
-        "channels": [],
+        "channels": [1.0],
     }
     assert result.to_dict() == {
         "channels": [1.0],
@@ -166,7 +166,7 @@ def test_update_rule_contract(client, mock_http_client):
         thresholdValue=1.0,
         thresholdDurationSeconds=1.0,
         cooldownMinutes=1.0,
-        channels=[],
+        channels=[1.0],
     )
     sent = mock_http_client.requests[0]
     assert sent.method == "PUT"
@@ -179,7 +179,7 @@ def test_update_rule_contract(client, mock_http_client):
         "thresholdValue": 1.0,
         "thresholdDurationSeconds": 1.0,
         "cooldownMinutes": 1.0,
-        "channels": [],
+        "channels": [1.0],
     }
     assert result.to_dict() == {
         "channels": [1.0],
@@ -496,7 +496,7 @@ async def test_async_create_rule_contract(async_client, mock_async_http_client):
         thresholdValue=1.0,
         thresholdDurationSeconds=1.0,
         cooldownMinutes=1.0,
-        channels=[],
+        channels=[1.0],
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "POST"
@@ -509,7 +509,7 @@ async def test_async_create_rule_contract(async_client, mock_async_http_client):
         "thresholdValue": 1.0,
         "thresholdDurationSeconds": 1.0,
         "cooldownMinutes": 1.0,
-        "channels": [],
+        "channels": [1.0],
     }
     assert result.to_dict() == {
         "channels": [1.0],
@@ -556,7 +556,7 @@ async def test_async_update_rule_contract(async_client, mock_async_http_client):
         thresholdValue=1.0,
         thresholdDurationSeconds=1.0,
         cooldownMinutes=1.0,
-        channels=[],
+        channels=[1.0],
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "PUT"
@@ -569,7 +569,7 @@ async def test_async_update_rule_contract(async_client, mock_async_http_client):
         "thresholdValue": 1.0,
         "thresholdDurationSeconds": 1.0,
         "cooldownMinutes": 1.0,
-        "channels": [],
+        "channels": [1.0],
     }
     assert result.to_dict() == {
         "channels": [1.0],

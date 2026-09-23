@@ -3782,7 +3782,11 @@
             "channels": {
               "type": "array",
               "confidence": "handler-literal",
-              "note": "declared via `req.body as {...}`"
+              "note": "declared via `req.body as {...}`",
+              "items": {
+                "type": "number",
+                "confidence": "handler-literal"
+              }
             }
           },
           "required": [
@@ -3969,7 +3973,11 @@
             "channels": {
               "type": "array",
               "confidence": "handler-literal",
-              "note": "declared via `req.body as {...}`"
+              "note": "declared via `req.body as {...}`",
+              "items": {
+                "type": "number",
+                "confidence": "handler-literal"
+              }
             }
           },
           "required": [],
@@ -8306,9 +8314,24 @@
                 "tags"
               ],
               "confidence": "frontend-type"
+            },
+            "version": {
+              "type": "number",
+              "confidence": "frontend-type"
+            },
+            "openFolders": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "confidence": "frontend-type"
+              },
+              "confidence": "frontend-type"
             }
           },
-          "required": [],
+          "required": [
+            "version",
+            "openFolders"
+          ],
           "confidence": "inferred"
         }
       }
@@ -10910,10 +10933,39 @@
               "type": "string",
               "confidence": "inferred",
               "default": "connect"
+            },
+            "targets": {
+              "type": "array",
+              "confidence": "matched-type",
+              "note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enumValues": [
+                      "role",
+                      "user"
+                    ],
+                    "confidence": "matched-type"
+                  },
+                  "id": {
+                    "type": "unknown",
+                    "confidence": "inferred",
+                    "note": "union type, not expanded"
+                  }
+                },
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "confidence": "matched-type"
+              }
             }
           },
           "required": [
-            "permissionLevel"
+            "permissionLevel",
+            "targets"
           ],
           "confidence": "inferred"
         }
@@ -15422,9 +15474,36 @@
                 "tags"
               ],
               "confidence": "frontend-type"
+            },
+            "version": {
+              "type": "number",
+              "confidence": "frontend-type"
+            },
+            "groupKey": {
+              "type": "string",
+              "enumValues": [
+                "folder",
+                "tag",
+                "status",
+                "protocol",
+                "auth"
+              ],
+              "confidence": "frontend-type"
+            },
+            "openFolders": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "confidence": "frontend-type"
+              },
+              "confidence": "frontend-type"
             }
           },
-          "required": [],
+          "required": [
+            "version",
+            "groupKey",
+            "openFolders"
+          ],
           "confidence": "inferred"
         }
       }
@@ -25342,10 +25421,39 @@
               "type": "string",
               "confidence": "inferred",
               "default": "connect"
+            },
+            "targets": {
+              "type": "array",
+              "confidence": "matched-type",
+              "note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enumValues": [
+                      "role",
+                      "user"
+                    ],
+                    "confidence": "matched-type"
+                  },
+                  "id": {
+                    "type": "unknown",
+                    "confidence": "inferred",
+                    "note": "union type, not expanded"
+                  }
+                },
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "confidence": "matched-type"
+              }
             }
           },
           "required": [
-            "permissionLevel"
+            "permissionLevel",
+            "targets"
           ],
           "confidence": "inferred"
         }
@@ -25955,10 +26063,39 @@
               "type": "string",
               "confidence": "inferred",
               "default": "use"
+            },
+            "targets": {
+              "type": "array",
+              "confidence": "matched-type",
+              "note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enumValues": [
+                      "role",
+                      "user"
+                    ],
+                    "confidence": "matched-type"
+                  },
+                  "id": {
+                    "type": "unknown",
+                    "confidence": "inferred",
+                    "note": "union type, not expanded"
+                  }
+                },
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "confidence": "matched-type"
+              }
             }
           },
           "required": [
-            "permissionLevel"
+            "permissionLevel",
+            "targets"
           ],
           "confidence": "inferred"
         }
@@ -26712,10 +26849,39 @@
             "durationHours": {
               "type": "number",
               "confidence": "frontend-type"
+            },
+            "targets": {
+              "type": "array",
+              "confidence": "matched-type",
+              "note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enumValues": [
+                      "role",
+                      "user"
+                    ],
+                    "confidence": "matched-type"
+                  },
+                  "id": {
+                    "type": "unknown",
+                    "confidence": "inferred",
+                    "note": "union type, not expanded"
+                  }
+                },
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "confidence": "matched-type"
+              }
             }
           },
           "required": [
-            "folder"
+            "folder",
+            "targets"
           ],
           "confidence": "inferred"
         }
@@ -27444,11 +27610,40 @@
               "type": "string",
               "confidence": "inferred",
               "default": "connect"
+            },
+            "targets": {
+              "type": "array",
+              "confidence": "matched-type",
+              "note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enumValues": [
+                      "role",
+                      "user"
+                    ],
+                    "confidence": "matched-type"
+                  },
+                  "id": {
+                    "type": "unknown",
+                    "confidence": "inferred",
+                    "note": "union type, not expanded"
+                  }
+                },
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "confidence": "matched-type"
+              }
             }
           },
           "required": [
             "folder",
-            "permissionLevel"
+            "permissionLevel",
+            "targets"
           ],
           "confidence": "inferred"
         }
@@ -29233,6 +29428,10 @@
             "shared": {
               "type": "boolean",
               "confidence": "inferred"
+            },
+            "kind": {
+              "type": "string",
+              "confidence": "frontend-type"
             }
           },
           "required": [
@@ -38240,6 +38439,26 @@
             "terminalMacros": {
               "type": "string",
               "confidence": "inferred"
+            },
+            "showHostTags": {
+              "type": "boolean",
+              "confidence": "frontend-type"
+            },
+            "hostTrayOnClick": {
+              "type": "boolean",
+              "confidence": "frontend-type"
+            },
+            "foldersCollapsed": {
+              "type": "boolean",
+              "confidence": "frontend-type"
+            },
+            "compactHostView": {
+              "type": "boolean",
+              "confidence": "frontend-type"
+            },
+            "statusColorScheme": {
+              "type": "string",
+              "confidence": "frontend-type"
             }
           },
           "required": [],
@@ -51377,6 +51596,10 @@
             "socks5ProxyChain": {
               "type": "unknown",
               "confidence": "unknown"
+            },
+            "forceKeyboardInteractive": {
+              "type": "boolean",
+              "confidence": "frontend-type"
             }
           },
           "required": [],
@@ -71194,10 +71417,192 @@
               "type": "number",
               "confidence": "matched-type",
               "note": "matched `src/types/index.ts`'s `TunnelConfig` interface"
+            },
+            "scope": {
+              "type": "string",
+              "enumValues": [
+                "s2s",
+                "c2s"
+              ],
+              "confidence": "frontend-type"
+            },
+            "mode": {
+              "type": "string",
+              "enumValues": [
+                "local",
+                "remote",
+                "dynamic"
+              ],
+              "confidence": "frontend-type"
+            },
+            "tunnelType": {
+              "type": "string",
+              "enumValues": [
+                "local",
+                "remote"
+              ],
+              "confidence": "frontend-type"
+            },
+            "localAddress": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "remoteAddress": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "bindHost": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "targetHost": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "sourceHostSyncId": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "hostName": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "sourceIP": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "sourceSSHPort": {
+              "type": "number",
+              "confidence": "frontend-type"
+            },
+            "sourceUsername": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "sourcePassword": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "sourceAuthMethod": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "sourceSSHKey": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "sourceKeyPassword": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "sourceKeyType": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "sourceCredentialId": {
+              "type": "number",
+              "confidence": "frontend-type"
+            },
+            "sourceUserId": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "maxRetries": {
+              "type": "number",
+              "confidence": "frontend-type"
+            },
+            "retryInterval": {
+              "type": "number",
+              "confidence": "frontend-type"
+            },
+            "autoStart": {
+              "type": "boolean",
+              "confidence": "frontend-type"
+            },
+            "isPinned": {
+              "type": "boolean",
+              "confidence": "frontend-type"
+            },
+            "useSocks5": {
+              "type": "boolean",
+              "confidence": "frontend-type"
+            },
+            "socks5Host": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "socks5Port": {
+              "type": "number",
+              "confidence": "frontend-type"
+            },
+            "socks5Username": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "socks5Password": {
+              "type": "string",
+              "confidence": "frontend-type"
+            },
+            "socks5ProxyChain": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "string",
+                    "confidence": "frontend-type"
+                  },
+                  "port": {
+                    "type": "number",
+                    "confidence": "frontend-type"
+                  },
+                  "type": {
+                    "type": "unknown",
+                    "confidence": "frontend-type",
+                    "note": "union type, not expanded"
+                  },
+                  "username": {
+                    "type": "string",
+                    "confidence": "frontend-type"
+                  },
+                  "password": {
+                    "type": "string",
+                    "confidence": "frontend-type"
+                  }
+                },
+                "required": [
+                  "host",
+                  "port",
+                  "type"
+                ],
+                "confidence": "frontend-type"
+              },
+              "confidence": "frontend-type"
+            },
+            "keepaliveInterval": {
+              "type": "number",
+              "confidence": "frontend-type"
+            },
+            "keepaliveCountMax": {
+              "type": "number",
+              "confidence": "frontend-type"
+            },
+            "idleTimeoutMs": {
+              "type": "number",
+              "confidence": "frontend-type"
             }
           },
           "required": [
-            "endpointHost"
+            "endpointHost",
+            "hostName",
+            "sourceIP",
+            "sourceSSHPort",
+            "sourceUsername",
+            "sourceAuthMethod",
+            "maxRetries",
+            "retryInterval",
+            "autoStart",
+            "isPinned"
           ],
           "confidence": "inferred"
         }

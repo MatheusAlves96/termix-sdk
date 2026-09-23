@@ -843,6 +843,73 @@ function forwardedBodyDeclaredFields(
   return null;
 }
 
+/**
+ * E7: unlike E6 (whole body forwarded, nothing else in the handler touches it), a route can
+ * destructure some fields directly off req.body AND separately forward the whole body into a
+ * locally-defined helper that itself reads exactly one property off it and returns that
+ * property's validated value (or null/undefined when validation fails) — confirmed real case:
+ * all four `/rbac/*\/share` routes destructure `durationHours`/`permissionLevel` directly but
+ * get `targets` — the one field that actually names who a share goes to — only via `const
+ * targets = parseShareTargets(req.body ?? {})`, which reads `body.targets` from inside its own
+ * function body. E6's own gate (`fields.size === 0`) means it never even looks once another
+ * field was already found this way, so this runs unconditionally instead and only ever adds a
+ * field name neither the passes above nor an earlier E7 match in the same handler found yet —
+ * it can never overwrite one.
+ *
+ * The signal: the callee's own return type, with `| null`/`| undefined` stripped, is what a
+ * "read one field, validate it, return the validated value or null" helper's plucked-out field
+ * actually is — the same class of real dataflow edge E6 already trusts (a callee's declared
+ * type, checked by tsc on every build), just read off the *return* side instead of the
+ * *parameter* side. Deliberately narrow: skipped when the callee reads more than one property
+ * off its body parameter (ambiguous — which field does the return type belong to?) or when the
+ * callee isn't a single, locally-resolvable, non-overloaded function.
+ */
+function forwardedBodySingleFieldsFromHelperReturns(
+  fnNode: Node,
+  bodyAliases: Set<string>,
+  existingFieldNames: Set<string>,
+  ctx: AnalysisContext,
+): Map<string, DeclaredField> {
+  const out = new Map<string, DeclaredField>();
+  for (const call of fnNode.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    const argIndex = call.getArguments().findIndex((a) => isForwardedBodyArg(a, bodyAliases));
+    if (argIndex < 0) continue;
+
+    const callee = call.getExpression();
+    if (!Node.isIdentifier(callee)) continue;
+    const calleeFn = resolveFunctionNode(callee);
+    if (!calleeFn) continue;
+    const params = getFunctionParams(calleeFn);
+    const paramName = params[argIndex]?.getName();
+    if (!paramName) continue;
+
+    const propNames = new Set<string>();
+    for (const pae of calleeFn.getDescendantsOfKind(SyntaxKind.PropertyAccessExpression)) {
+      const obj = pae.getExpression();
+      if (Node.isIdentifier(obj) && obj.getText() === paramName) propNames.add(pae.getName());
+    }
+    if (propNames.size !== 1) continue;
+    const [fieldName] = [...propNames];
+    if (existingFieldNames.has(fieldName) || out.has(fieldName)) continue;
+
+    const signatures = call.getExpression().getType().getCallSignatures();
+    if (signatures.length !== 1) continue;
+    const returnType = signatures[0].getReturnType();
+    const schema = schemaFromType(returnType, ctx, 0, "matched-type");
+    if (!schema.type || schema.type === "unknown") continue;
+
+    out.set(fieldName, {
+      schema,
+      required: false,
+      confidence: "matched-type",
+      note:
+        `body forwarded whole to \`${callee.getText()}()\`, which reads \`body.${fieldName}\` and ` +
+        `returns its validated value (or null/undefined on failure); typed from that return type`,
+    });
+  }
+  return out;
+}
+
 function extractBodyFields(
   fnNode: Node,
   ctx: AnalysisContext,
@@ -919,6 +986,13 @@ function extractBodyFields(
   if (fields.size === 0) {
     const forwarded = forwardedBodyDeclaredFields(fnNode, bodyAliases, ctx);
     if (forwarded) for (const [name, declared] of forwarded) fields.set(name, { name, declared });
+  }
+
+  // E7: on top of everything above (not gated on emptiness — see its own doc), a field read
+  // out of the body by a locally-defined single-property helper, alongside whatever fields
+  // were already found directly.
+  for (const [name, declared] of forwardedBodySingleFieldsFromHelperReturns(fnNode, bodyAliases, new Set(fields.keys()), ctx)) {
+    fields.set(name, { name, declared });
   }
 
   for (const field of fields.values()) {
@@ -1066,6 +1140,12 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
     // True once the declared type (E0's cast or E6's callee parameter) is what typed this
     // field — which is also what makes that declaration's own optionality meaningful below.
     let typedFromDeclared = false;
+    // An array/object declared type carries shape (`items`/`properties`/`required`) that the
+    // scalar fields below don't capture — confirmed real case: E7's `targets` field (an array
+    // of `{type, id}` objects) was coming out as a bare `array` with no `items` at all before
+    // this, because nothing downstream of the `type`/`confidence`/`enumValues`/`nullable`/
+    // `note` fields ever copied it over.
+    let declaredStructural: Pick<SchemaNode, "items" | "properties" | "required"> | undefined;
 
     // E0: an explicit validator in the handler's own control flow is still the strongest
     // signal (it's what the server actually enforces at runtime) — only fall back to the
@@ -1077,6 +1157,13 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
       if (f.declared.schema.enumValues) enumValues = f.declared.schema.enumValues.map(String);
       note = f.declared.note ?? "declared via `req.body as {...}`";
       typedFromDeclared = true;
+      if (type === "array" || type === "object") {
+        declaredStructural = {
+          ...(f.declared.schema.items ? { items: f.declared.schema.items } : {}),
+          ...(f.declared.schema.properties ? { properties: f.declared.schema.properties } : {}),
+          ...(f.declared.schema.required ? { required: f.declared.schema.required } : {}),
+        };
+      }
     }
 
     // E1: no explicit validator and no declared cast — the destructuring default's own
@@ -1125,6 +1212,7 @@ function analyzeRequestBody(fnNode: Node, fnText: string, middlewares: string[],
       ...(enumValues && enumValues.length > 0 ? { enumValues } : {}),
       ...(nullable ? { nullable } : {}),
       ...(note ? { note } : {}),
+      ...(declaredStructural ?? {}),
     };
     if (req || f.default !== undefined || (f.declared?.required && typedFromDeclared)) required.push(f.name);
   }

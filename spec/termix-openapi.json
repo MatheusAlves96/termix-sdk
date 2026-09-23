@@ -8,7 +8,7 @@
   "x-termix-source": {
     "tag": "release-2.8.0-tag",
     "commit": "fef8a5f28a5a6023ff10832acb65cbdfea81b777",
-    "generatedAt": "2026-09-22T07:26:39.670Z"
+    "generatedAt": "2026-09-23T08:54:18.367Z"
   },
   "servers": [
     {
@@ -4866,7 +4866,10 @@
                   },
                   "channels": {
                     "type": "array",
-                    "items": {},
+                    "items": {
+                      "type": "number",
+                      "x-confidence": "handler-literal"
+                    },
                     "x-note": "declared via `req.body as {...}`",
                     "x-confidence": "handler-literal"
                   }
@@ -5083,7 +5086,10 @@
                   },
                   "channels": {
                     "type": "array",
-                    "items": {},
+                    "items": {
+                      "type": "number",
+                      "x-confidence": "handler-literal"
+                    },
                     "x-note": "declared via `req.body as {...}`",
                     "x-confidence": "handler-literal"
                   }
@@ -10800,8 +10806,24 @@
                       "tags"
                     ],
                     "x-confidence": "frontend-type"
+                  },
+                  "version": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
+                  },
+                  "openFolders": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "x-confidence": "frontend-type"
+                    },
+                    "x-confidence": "frontend-type"
                   }
                 },
+                "required": [
+                  "version",
+                  "openFolders"
+                ],
                 "x-confidence": "inferred"
               }
             }
@@ -14572,10 +14594,38 @@
                     "type": "string",
                     "default": "connect",
                     "x-confidence": "inferred"
+                  },
+                  "targets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "role",
+                            "user"
+                          ],
+                          "type": "string",
+                          "x-confidence": "matched-type"
+                        },
+                        "id": {
+                          "x-note": "union type, not expanded",
+                          "x-confidence": "inferred"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "x-confidence": "matched-type"
+                    },
+                    "x-note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+                    "x-confidence": "matched-type"
                   }
                 },
                 "required": [
-                  "permissionLevel"
+                  "permissionLevel",
+                  "targets"
                 ],
                 "x-confidence": "inferred"
               }
@@ -20357,8 +20407,36 @@
                       "tags"
                     ],
                     "x-confidence": "frontend-type"
+                  },
+                  "version": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
+                  },
+                  "groupKey": {
+                    "enum": [
+                      "folder",
+                      "tag",
+                      "status",
+                      "protocol",
+                      "auth"
+                    ],
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "openFolders": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "x-confidence": "frontend-type"
+                    },
+                    "x-confidence": "frontend-type"
                   }
                 },
+                "required": [
+                  "version",
+                  "groupKey",
+                  "openFolders"
+                ],
                 "x-confidence": "inferred"
               }
             }
@@ -32692,10 +32770,38 @@
                     "type": "string",
                     "default": "connect",
                     "x-confidence": "inferred"
+                  },
+                  "targets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "role",
+                            "user"
+                          ],
+                          "type": "string",
+                          "x-confidence": "matched-type"
+                        },
+                        "id": {
+                          "x-note": "union type, not expanded",
+                          "x-confidence": "inferred"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "x-confidence": "matched-type"
+                    },
+                    "x-note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+                    "x-confidence": "matched-type"
                   }
                 },
                 "required": [
-                  "permissionLevel"
+                  "permissionLevel",
+                  "targets"
                 ],
                 "x-confidence": "inferred"
               }
@@ -33260,10 +33366,38 @@
                     "type": "string",
                     "default": "use",
                     "x-confidence": "inferred"
+                  },
+                  "targets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "role",
+                            "user"
+                          ],
+                          "type": "string",
+                          "x-confidence": "matched-type"
+                        },
+                        "id": {
+                          "x-note": "union type, not expanded",
+                          "x-confidence": "inferred"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "x-confidence": "matched-type"
+                    },
+                    "x-note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+                    "x-confidence": "matched-type"
                   }
                 },
                 "required": [
-                  "permissionLevel"
+                  "permissionLevel",
+                  "targets"
                 ],
                 "x-confidence": "inferred"
               }
@@ -34186,10 +34320,38 @@
                   "durationHours": {
                     "type": "number",
                     "x-confidence": "frontend-type"
+                  },
+                  "targets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "role",
+                            "user"
+                          ],
+                          "type": "string",
+                          "x-confidence": "matched-type"
+                        },
+                        "id": {
+                          "x-note": "union type, not expanded",
+                          "x-confidence": "inferred"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "x-confidence": "matched-type"
+                    },
+                    "x-note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+                    "x-confidence": "matched-type"
                   }
                 },
                 "required": [
-                  "folder"
+                  "folder",
+                  "targets"
                 ],
                 "x-confidence": "inferred"
               }
@@ -35135,11 +35297,39 @@
                     "type": "string",
                     "default": "connect",
                     "x-confidence": "inferred"
+                  },
+                  "targets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "role",
+                            "user"
+                          ],
+                          "type": "string",
+                          "x-confidence": "matched-type"
+                        },
+                        "id": {
+                          "x-note": "union type, not expanded",
+                          "x-confidence": "inferred"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "x-confidence": "matched-type"
+                    },
+                    "x-note": "body forwarded whole to `parseShareTargets()`, which reads `body.targets` and returns its validated value (or null/undefined on failure); typed from that return type",
+                    "x-confidence": "matched-type"
                   }
                 },
                 "required": [
                   "folder",
-                  "permissionLevel"
+                  "permissionLevel",
+                  "targets"
                 ],
                 "x-confidence": "inferred"
               }
@@ -37193,6 +37383,10 @@
                   "shared": {
                     "type": "boolean",
                     "x-confidence": "inferred"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
                   }
                 },
                 "required": [
@@ -49152,6 +49346,26 @@
                   "terminalMacros": {
                     "type": "string",
                     "x-confidence": "inferred"
+                  },
+                  "showHostTags": {
+                    "type": "boolean",
+                    "x-confidence": "frontend-type"
+                  },
+                  "hostTrayOnClick": {
+                    "type": "boolean",
+                    "x-confidence": "frontend-type"
+                  },
+                  "foldersCollapsed": {
+                    "type": "boolean",
+                    "x-confidence": "frontend-type"
+                  },
+                  "compactHostView": {
+                    "type": "boolean",
+                    "x-confidence": "frontend-type"
+                  },
+                  "statusColorScheme": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
                   }
                 },
                 "x-confidence": "inferred"
@@ -66816,6 +67030,10 @@
                   },
                   "socks5ProxyChain": {
                     "x-confidence": "unknown"
+                  },
+                  "forceKeyboardInteractive": {
+                    "type": "boolean",
+                    "x-confidence": "frontend-type"
                   }
                 },
                 "x-confidence": "inferred"
@@ -90523,10 +90741,191 @@
                     "type": "number",
                     "x-note": "matched `src/types/index.ts`'s `TunnelConfig` interface",
                     "x-confidence": "matched-type"
+                  },
+                  "scope": {
+                    "enum": [
+                      "s2s",
+                      "c2s"
+                    ],
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "mode": {
+                    "enum": [
+                      "local",
+                      "remote",
+                      "dynamic"
+                    ],
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "tunnelType": {
+                    "enum": [
+                      "local",
+                      "remote"
+                    ],
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "localAddress": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "remoteAddress": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "bindHost": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "targetHost": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceHostSyncId": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "hostName": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceIP": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceSSHPort": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceUsername": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourcePassword": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceAuthMethod": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceSSHKey": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceKeyPassword": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceKeyType": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceCredentialId": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
+                  },
+                  "sourceUserId": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "maxRetries": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
+                  },
+                  "retryInterval": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
+                  },
+                  "autoStart": {
+                    "type": "boolean",
+                    "x-confidence": "frontend-type"
+                  },
+                  "isPinned": {
+                    "type": "boolean",
+                    "x-confidence": "frontend-type"
+                  },
+                  "useSocks5": {
+                    "type": "boolean",
+                    "x-confidence": "frontend-type"
+                  },
+                  "socks5Host": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "socks5Port": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
+                  },
+                  "socks5Username": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "socks5Password": {
+                    "type": "string",
+                    "x-confidence": "frontend-type"
+                  },
+                  "socks5ProxyChain": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "host": {
+                          "type": "string",
+                          "x-confidence": "frontend-type"
+                        },
+                        "port": {
+                          "type": "number",
+                          "x-confidence": "frontend-type"
+                        },
+                        "type": {
+                          "x-note": "union type, not expanded",
+                          "x-confidence": "frontend-type"
+                        },
+                        "username": {
+                          "type": "string",
+                          "x-confidence": "frontend-type"
+                        },
+                        "password": {
+                          "type": "string",
+                          "x-confidence": "frontend-type"
+                        }
+                      },
+                      "required": [
+                        "host",
+                        "port",
+                        "type"
+                      ],
+                      "x-confidence": "frontend-type"
+                    },
+                    "x-confidence": "frontend-type"
+                  },
+                  "keepaliveInterval": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
+                  },
+                  "keepaliveCountMax": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
+                  },
+                  "idleTimeoutMs": {
+                    "type": "number",
+                    "x-confidence": "frontend-type"
                   }
                 },
                 "required": [
-                  "endpointHost"
+                  "endpointHost",
+                  "hostName",
+                  "sourceIP",
+                  "sourceSSHPort",
+                  "sourceUsername",
+                  "sourceAuthMethod",
+                  "maxRetries",
+                  "retryInterval",
+                  "autoStart",
+                  "isPinned"
                 ],
                 "x-confidence": "inferred"
               }

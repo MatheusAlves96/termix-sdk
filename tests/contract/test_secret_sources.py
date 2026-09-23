@@ -31,11 +31,13 @@ def test_create_contract(client, mock_http_client):
 def test_update_contract(client, mock_http_client):
     """Generated from PUT /secret-sources/{id} in spec/termix-openapi.json."""
     mock_http_client.queue_response(status_code=200, body={"success": True})
-    result = client.secret_sources.update("x", name="x", baseUrl="x", token="x", shared=True)
+    result = client.secret_sources.update(
+        "x", name="x", baseUrl="x", token="x", shared=True, kind="x"
+    )
     sent = mock_http_client.requests[0]
     assert sent.method == "PUT"
     assert sent.url.endswith("/secret-sources/x")
-    assert sent.json == {"name": "x", "baseUrl": "x", "token": "x", "shared": True}
+    assert sent.json == {"name": "x", "baseUrl": "x", "token": "x", "shared": True, "kind": "x"}
     assert result.to_dict() == {"success": True}
 
 
@@ -89,12 +91,12 @@ async def test_async_update_contract(async_client, mock_async_http_client):
     """Generated from PUT /secret-sources/{id} in spec/termix-openapi.json."""
     mock_async_http_client.queue_response(status_code=200, body={"success": True})
     result = await async_client.secret_sources.update(
-        "x", name="x", baseUrl="x", token="x", shared=True
+        "x", name="x", baseUrl="x", token="x", shared=True, kind="x"
     )
     sent = mock_async_http_client.requests[0]
     assert sent.method == "PUT"
     assert sent.url.endswith("/secret-sources/x")
-    assert sent.json == {"name": "x", "baseUrl": "x", "token": "x", "shared": True}
+    assert sent.json == {"name": "x", "baseUrl": "x", "token": "x", "shared": True, "kind": "x"}
     assert result.to_dict() == {"success": True}
 
 

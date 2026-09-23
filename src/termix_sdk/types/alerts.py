@@ -25,7 +25,7 @@ class AlertsCreateRuleParams(TypedDict, total=False):
     thresholdValue: float
     thresholdDurationSeconds: float
     cooldownMinutes: float
-    channels: list[Any]
+    channels: list[float]
 
 
 class AlertsUpdateRuleParams(TypedDict, total=False):
@@ -36,7 +36,7 @@ class AlertsUpdateRuleParams(TypedDict, total=False):
     thresholdValue: float
     thresholdDurationSeconds: float
     cooldownMinutes: float
-    channels: list[Any]
+    channels: list[float]
 
 
 class AlertsCreateChannelParams(TypedDict, total=False):

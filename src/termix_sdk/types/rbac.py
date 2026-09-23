@@ -36,6 +36,7 @@ class RbacShareSnippetParams(TypedDict, total=False):
 class RbacShareHostParams(TypedDict, total=False):
     durationHours: Any
     permissionLevel: str
+    targets: list[dict[str, Any]]
 
 
 class RbacSetHostAccessAuthParams(TypedDict, total=False):
@@ -46,6 +47,7 @@ class RbacShareFolderParams(TypedDict, total=False):
     folder: str
     durationHours: Any
     permissionLevel: str
+    targets: list[dict[str, Any]]
 
 
 class RbacUpdateHostAccessParams(TypedDict, total=False):
@@ -56,11 +58,13 @@ class RbacUpdateHostAccessParams(TypedDict, total=False):
 class RbacShareCredentialParams(TypedDict, total=False):
     durationHours: float
     permissionLevel: str
+    targets: list[dict[str, Any]]
 
 
 class RbacShareSnippetFolderParams(TypedDict, total=False):
     folder: str
     durationHours: float
+    targets: list[dict[str, Any]]
 
 
 class RbacListFolderAccessParams(TypedDict, total=False):
