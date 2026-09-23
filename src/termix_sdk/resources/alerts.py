@@ -30,6 +30,7 @@ from ..models.alerts import (
     AlertsUpdateRuleResult,
 )
 from ..types.alerts import (
+    AlertsClearDismissedParams,
     AlertsCreateChannelParams,
     AlertsCreateRuleParams,
     AlertsDismissParams,
@@ -271,13 +272,16 @@ class AlertsService(TermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[AlertsClearDismissedParams],
     ) -> AlertsClearDismissedResult:
         """Undismiss an alert
 
         DELETE /alerts/dismiss
         Source: src/backend/database/routes/alerts.ts:258
         """
-        response = self._request("DELETE", "/alerts/dismiss", options=options)
+        response = self._request(
+            "DELETE", "/alerts/dismiss", json_body=dict(params) or None, options=options
+        )
         return AlertsClearDismissedResult.construct_from(
             response.data if response else None, last_response=response
         )
@@ -535,13 +539,16 @@ class AsyncAlertsService(AsyncTermixService):
         self,
         *,
         options: RequestOptions | None = None,
+        **params: Unpack[AlertsClearDismissedParams],
     ) -> AlertsClearDismissedResult:
         """Undismiss an alert
 
         DELETE /alerts/dismiss
         Source: src/backend/database/routes/alerts.ts:258
         """
-        response = await self._request("DELETE", "/alerts/dismiss", options=options)
+        response = await self._request(
+            "DELETE", "/alerts/dismiss", json_body=dict(params) or None, options=options
+        )
         return AlertsClearDismissedResult.construct_from(
             response.data if response else None, last_response=response
         )

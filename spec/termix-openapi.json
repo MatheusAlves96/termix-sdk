@@ -8,7 +8,7 @@
   "x-termix-source": {
     "tag": "release-2.8.0-tag",
     "commit": "fef8a5f28a5a6023ff10832acb65cbdfea81b777",
-    "generatedAt": "2026-09-22T08:02:15.321Z"
+    "generatedAt": "2026-09-23T08:54:18.367Z"
   },
   "servers": [
     {
@@ -6123,6 +6123,26 @@
         "tags": [
           "Alerts"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "alertId": {
+                    "type": "string",
+                    "x-note": "matched column `dismissed_alerts.alertId`",
+                    "x-confidence": "matched-type"
+                  }
+                },
+                "required": [
+                  "alertId"
+                ],
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -16433,6 +16453,22 @@
         "tags": [
           "SSH"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sshConfigId": {
+                    "type": "number",
+                    "x-confidence": "inferred"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -17365,6 +17401,28 @@
         "tags": [
           "SSH"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hostId": {
+                    "type": "integer",
+                    "x-note": "matched column `command_history.hostId`",
+                    "x-confidence": "matched-type"
+                  },
+                  "command": {
+                    "type": "string",
+                    "x-note": "matched column `command_history.command`",
+                    "x-confidence": "matched-type"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -17697,6 +17755,28 @@
         "tags": [
           "SSH"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hostId": {
+                    "type": "integer",
+                    "x-note": "matched column `file_manager_pinned.hostId`",
+                    "x-confidence": "matched-type"
+                  },
+                  "path": {
+                    "type": "string",
+                    "x-note": "matched column `file_manager_pinned.path`",
+                    "x-confidence": "matched-type"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -18175,6 +18255,28 @@
         "tags": [
           "SSH"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hostId": {
+                    "type": "integer",
+                    "x-note": "matched column `file_manager_pinned.hostId`",
+                    "x-confidence": "matched-type"
+                  },
+                  "path": {
+                    "type": "string",
+                    "x-note": "matched column `file_manager_pinned.path`",
+                    "x-confidence": "matched-type"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -18546,6 +18648,28 @@
         "tags": [
           "SSH"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hostId": {
+                    "type": "integer",
+                    "x-note": "matched column `file_manager_pinned.hostId`",
+                    "x-confidence": "matched-type"
+                  },
+                  "path": {
+                    "type": "string",
+                    "x-note": "matched column `file_manager_pinned.path`",
+                    "x-confidence": "matched-type"
+                  }
+                },
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -57430,6 +57554,25 @@
         "tags": [
           "Users"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "x-confidence": "inferred"
+                  }
+                },
+                "required": [
+                  "password"
+                ],
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -57761,6 +57904,28 @@
         "tags": [
           "Users"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "x-confidence": "inferred"
+                  },
+                  "successorUserId": {
+                    "x-confidence": "unknown"
+                  }
+                },
+                "required": [
+                  "username"
+                ],
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -75298,6 +75463,34 @@
         "tags": [
           "File Manager"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sessionId": {
+                    "x-confidence": "unknown"
+                  },
+                  "path": {
+                    "x-confidence": "unknown"
+                  },
+                  "isDirectory": {
+                    "x-confidence": "unknown"
+                  },
+                  "permanent": {
+                    "x-confidence": "unknown"
+                  }
+                },
+                "required": [
+                  "sessionId",
+                  "permanent"
+                ],
+                "x-confidence": "inferred"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",

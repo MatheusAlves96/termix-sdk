@@ -61,7 +61,7 @@ export function enrichRequestBodiesFromFrontend(
 
   for (const analysis of analyses) {
     const route = routesById.get(analysis.routeId);
-    if (!route || route.anyMethod || !["POST", "PUT", "PATCH"].includes(route.method)) continue;
+    if (!route || route.anyMethod || !["POST", "PUT", "PATCH", "DELETE"].includes(route.method)) continue;
 
     const frontendBody = frontendBodyForRoute(analysis.routeId, frontendCrossChecks);
     if (!frontendBody) continue;

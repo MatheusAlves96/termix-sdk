@@ -162,6 +162,60 @@ def _cleanup(live: TermixClient, run_prefix: str) -> None:
         data = snippet if isinstance(snippet, dict) else snippet.to_dict()
         if str(data.get("name", "")).startswith(run_prefix):
             _ignore_missing(lambda: live.snippets.delete(str(data["id"])))
+    for workspace in live.workspaces.list():
+        if str(workspace.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.workspaces.delete(str(workspace["id"])))
+    for preset in live.tunnel_presets.list():
+        if str(preset.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.tunnel_presets.delete(str(preset["id"])))
+    for credential in live.credentials.list():
+        if str(credential.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.credentials.delete(str(credential["id"])))
+    for channel in live.alerts.list_channels():
+        data = channel.to_dict()
+        if str(data.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.alerts.delete_channel(str(data["id"])))
+    for tab in live.open_tabs.list():
+        data = tab.to_dict()
+        if str(data.get("id", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.open_tabs.delete(str(data["id"])))
+    for link in live.dashboard.list_service_links():
+        if str(link.get("label", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.dashboard.delete_service_link(str(link["id"])))
+    for item in live.homepage.list_items():
+        if str(item.get("title", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.homepage.delete_item(str(item["id"])))
+    for profile in live.vault.list_profiles():
+        if str(profile.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.vault.delete_profile(str(profile["id"])))
+    for role in live.rbac.list_roles().to_dict()["roles"]:
+        if str(role.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.rbac.delete_role(str(role["id"])))
+    for automation in live.automations.list():
+        if str(automation.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.automations.delete(str(automation["id"])))
+    me = live.termix_id.get_me().to_dict()
+    identity = me.get("identity")
+    if identity and str(identity.get("handle", "")).startswith(run_prefix):
+        _ignore_missing(live.termix_id.delete)
+    for provider in live.sso.list_providers_admin():
+        data = provider.to_dict()
+        if str(data.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.sso.delete_provider(str(data["id"])))
+    for room in live.collab.list_rooms().to_dict()["rooms"]:
+        if str(room.get("name", "")).startswith(run_prefix):
+            _ignore_missing(lambda: live.collab.delete_room(str(room["id"])))
+    for user in live.user_admin.list().to_dict()["users"]:
+        username = str(user.get("username", ""))
+        if username.startswith(run_prefix):
+            # user_admin.delete_user() can't specify a target yet (see
+            # tests/live/test_smoke.py's test_user_admin_lifecycle) — the
+            # low-level escape hatch sends the real body.
+            _ignore_missing(
+                lambda: live.request(
+                    "DELETE", "/users/delete-user", json_body={"username": username}
+                )
+            )
 
 
 def _ignore_missing(call: Any) -> None:

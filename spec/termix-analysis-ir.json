@@ -4849,7 +4849,25 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "alertId": {
+              "type": "string",
+              "confidence": "matched-type",
+              "note": "matched column `dismissed_alerts.alertId`"
+            }
+          },
+          "required": [
+            "alertId"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -12366,7 +12384,22 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "sshConfigId": {
+              "type": "number",
+              "confidence": "inferred"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -13056,7 +13089,28 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "hostId": {
+              "type": "integer",
+              "confidence": "matched-type",
+              "note": "matched column `command_history.hostId`"
+            },
+            "command": {
+              "type": "string",
+              "confidence": "matched-type",
+              "note": "matched column `command_history.command`"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -13291,7 +13345,28 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "hostId": {
+              "type": "integer",
+              "confidence": "matched-type",
+              "note": "matched column `file_manager_pinned.hostId`"
+            },
+            "path": {
+              "type": "string",
+              "confidence": "matched-type",
+              "note": "matched column `file_manager_pinned.path`"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -13547,7 +13622,28 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "hostId": {
+              "type": "integer",
+              "confidence": "matched-type",
+              "note": "matched column `file_manager_pinned.hostId`"
+            },
+            "path": {
+              "type": "string",
+              "confidence": "matched-type",
+              "note": "matched column `file_manager_pinned.path`"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -13875,7 +13971,28 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "hostId": {
+              "type": "integer",
+              "confidence": "matched-type",
+              "note": "matched column `file_manager_pinned.hostId`"
+            },
+            "path": {
+              "type": "string",
+              "confidence": "matched-type",
+              "note": "matched column `file_manager_pinned.path`"
+            }
+          },
+          "required": [],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -44561,7 +44678,24 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "password": {
+              "type": "string",
+              "confidence": "inferred"
+            }
+          },
+          "required": [
+            "password"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -44810,7 +44944,28 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string",
+              "confidence": "inferred"
+            },
+            "successorUserId": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [
+            "username"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,
@@ -58729,7 +58884,37 @@
     "pathParams": [],
     "queryParams": [],
     "headers": [],
-    "requestBody": [],
+    "requestBody": [
+      {
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "path": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "isDirectory": {
+              "type": "unknown",
+              "confidence": "unknown"
+            },
+            "permanent": {
+              "type": "unknown",
+              "confidence": "unknown"
+            }
+          },
+          "required": [
+            "sessionId",
+            "permanent"
+          ],
+          "confidence": "inferred"
+        }
+      }
+    ],
     "responses": [
       {
         "status": 200,

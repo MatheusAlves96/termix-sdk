@@ -10,6 +10,10 @@ from typing import Any, Dict, List, Literal  # noqa: F401, UP035
 from typing_extensions import TypedDict
 
 
+class HostsDisableAutostartParams(TypedDict, total=False):
+    sshConfigId: float
+
+
 class HostsEnableAutostartParams(TypedDict, total=False):
     sshConfigId: float
 
@@ -32,6 +36,11 @@ class HostsBulkImportParams(TypedDict, total=False):
 class HostsSshConfigImportParams(TypedDict, total=False):
     content: str
     overwrite: bool
+
+
+class HostsClearCommandHistoryParams(TypedDict, total=False):
+    hostId: int
+    command: str
 
 
 class HostsUpdateFolderMetadataParams(TypedDict, total=False):

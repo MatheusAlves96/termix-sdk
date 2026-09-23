@@ -12,10 +12,11 @@ def test_disable_autostart_contract(client, mock_http_client):
     mock_http_client.queue_response(
         status_code=200, body={"message": "AutoStart disabled successfully", "sshConfigId": 1.0}
     )
-    result = client.hosts.disable_autostart()
+    result = client.hosts.disable_autostart(sshConfigId=1.0)
     sent = mock_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/autostart/disable")
+    assert sent.json == {"sshConfigId": 1.0}
     assert result.to_dict() == {"message": "AutoStart disabled successfully", "sshConfigId": 1.0}
 
 
@@ -150,10 +151,11 @@ def test_clear_command_history_contract(client, mock_http_client):
     mock_http_client.queue_response(
         status_code=200, body={"message": "Command deleted from history"}
     )
-    result = client.hosts.clear_command_history()
+    result = client.hosts.clear_command_history(hostId=1, command="x")
     sent = mock_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/command-history")
+    assert sent.json == {"hostId": 1, "command": "x"}
     assert result.to_dict() == {"message": "Command deleted from history"}
 
 
@@ -2258,10 +2260,11 @@ async def test_async_disable_autostart_contract(async_client, mock_async_http_cl
     mock_async_http_client.queue_response(
         status_code=200, body={"message": "AutoStart disabled successfully", "sshConfigId": 1.0}
     )
-    result = await async_client.hosts.disable_autostart()
+    result = await async_client.hosts.disable_autostart(sshConfigId=1.0)
     sent = mock_async_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/autostart/disable")
+    assert sent.json == {"sshConfigId": 1.0}
     assert result.to_dict() == {"message": "AutoStart disabled successfully", "sshConfigId": 1.0}
 
 
@@ -2404,10 +2407,11 @@ async def test_async_clear_command_history_contract(async_client, mock_async_htt
     mock_async_http_client.queue_response(
         status_code=200, body={"message": "Command deleted from history"}
     )
-    result = await async_client.hosts.clear_command_history()
+    result = await async_client.hosts.clear_command_history(hostId=1, command="x")
     sent = mock_async_http_client.requests[0]
     assert sent.method == "DELETE"
     assert sent.url.endswith("/host/command-history")
+    assert sent.json == {"hostId": 1, "command": "x"}
     assert result.to_dict() == {"message": "Command deleted from history"}
 
 
